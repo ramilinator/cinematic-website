@@ -1628,7 +1628,19 @@ export default function CinematicHero() {
       /*
        * ===========================================================
        * SCENE 8
-       * DEPARTURE
+       * SMOOTH SKY LAUNCH
+       * ===========================================================
+       *
+       * The spacecraft:
+       *
+       * 1. Lifts gently from the landing area
+       * 2. Builds thrust
+       * 3. Accelerates upward
+       * 4. Continues climbing into the sky
+       * 5. Gradually moves farther away
+       * 6. Eventually becomes small naturally
+       *
+       * The terrain reacts underneath the ship as one group.
        * ===========================================================
        */
 
@@ -1636,10 +1648,11 @@ export default function CinematicHero() {
         .addLabel("scene8")
 
         /*
-         * -----------------------------------------------------------
+         * ===========================================================
          * LAUNCH AUDIO
-         * -----------------------------------------------------------
+         * ===========================================================
          */
+
         .call(() => {
           if (engineHum.current) {
             engineHum.current.pause();
@@ -1650,77 +1663,503 @@ export default function CinematicHero() {
         })
 
         /*
-         * -----------------------------------------------------------
-         * SHIP LAUNCHES
+         * ===========================================================
+         * 1. GENTLE LIFT-OFF
+         * ===========================================================
          *
-         * Start from the highest floating position.
-         * -----------------------------------------------------------
+         * The ship slowly separates from the landing surface.
+         * ===========================================================
          */
+
         .to(spaceship.current, {
-          y: -100,
-          duration: 3,
-          ease: "power3.in",
+          y: -60,
+          z: 20,
+          scale: 1,
+          rotateX: -2,
+          duration: 1.2,
+          ease: "power1.out",
         })
 
         /*
-         * -----------------------------------------------------------
-         * LAUNCH GLOW
-         * -----------------------------------------------------------
+         * ===========================================================
+         * TERRAIN — INITIAL REACTION
+         * ===========================================================
          */
+
+        .to(
+          horizonAtmosphere.current,
+          {
+            y: 50,
+            scale: 1.01,
+            duration: 1.2,
+            ease: "power1.out",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * LAUNCH GLOW
+         * ===========================================================
+         */
+
         .to(
           launchGlow.current,
           {
             autoAlpha: 0,
-            scale: 0.8,
-            duration: 0.8,
+            scale: 0.85,
+            duration: 1,
             ease: "power2.in",
           },
           "<",
         )
 
         /*
-         * -----------------------------------------------------------
-         * ENGINE BURST
-         *
-         * Explosive thrust happens first.
-         * -----------------------------------------------------------
+         * ===========================================================
+         * ENGINE IGNITION
+         * ===========================================================
          */
+
         .call(() => {
           engineBurst.restart();
         })
 
         /*
-         * -----------------------------------------------------------
-         * DEEP-SPACE DEPARTURE
-         * -----------------------------------------------------------
+         * ===========================================================
+         * 2. BUILDING THRUST
+         * ===========================================================
+         *
+         * The spacecraft begins accelerating upward.
+         * ===========================================================
          */
+
         .to(spaceship.current, {
-          y: -100,
-          z: -1200,
-          scale: 0.025,
-          autoAlpha: 0,
-          duration: 4,
-          ease: "power3.in",
+          y: -180,
+          z: 60,
+          scale: 0.97,
+          rotateX: -4,
+          duration: 1.4,
+          ease: "power2.in",
         })
 
         /*
-         * -----------------------------------------------------------
-         * STAR FIELD REACTION
-         * -----------------------------------------------------------
+         * ===========================================================
+         * TERRAIN — LIFTING AWAY
+         * ===========================================================
          */
+
         .to(
-          ".hero-star-layer",
+          horizonAtmosphere.current,
           {
-            scale: 2,
-            opacity: 0.65,
-            duration: 4,
-            ease: "power2.inOut",
+            y: 150,
+            scale: 1.035,
+            duration: 1.4,
+            ease: "power2.in",
           },
           "<",
         )
 
+        /*
+         * ===========================================================
+         * STAR FIELD — BEGIN MOVING
+         * ===========================================================
+         */
+
+        .to(
+          ".hero-star-layer",
+          {
+            y: 80,
+            scale: 1.06,
+            opacity: 0.78,
+            duration: 1.4,
+            ease: "power1.inOut",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * 3. STRONGER ASCENT
+         * ===========================================================
+         *
+         * Now the ship clearly begins climbing into the sky.
+         * ===========================================================
+         */
+
+        .to(spaceship.current, {
+          y: -180,
+          z: -120,
+          scale: 0.88,
+          rotateX: -6,
+          duration: 2.2,
+          ease: "power2.in",
+        })
+
+        /*
+         * ===========================================================
+         * TERRAIN — FALLING AWAY
+         * ===========================================================
+         */
+
+        .to(
+          horizonAtmosphere.current,
+          {
+            y: 320,
+            scale: 1.08,
+            duration: 2.2,
+            ease: "power2.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * STAR FIELD — CAMERA ACCELERATION
+         * ===========================================================
+         */
+
+        .to(
+          ".hero-star-layer",
+          {
+            y: 220,
+            scale: 1.18,
+            opacity: 0.72,
+            duration: 2.2,
+            ease: "power2.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * 4. HIGH-ALTITUDE ASCENT
+         * ===========================================================
+         *
+         * The ship continues climbing rather than disappearing.
+         * ===========================================================
+         */
+
+        .to(spaceship.current, {
+          y: -200,
+          z: -500,
+          scale: 0.65,
+          rotateX: -7,
+          duration: 3,
+          ease: "power3.in",
+        })
+
+        /*
+         * ===========================================================
+         * TERRAIN — RAPIDLY FALLING AWAY
+         * ===========================================================
+         */
+
+        .to(
+          horizonAtmosphere.current,
+          {
+            y: 650,
+            scale: 1.18,
+            autoAlpha: 0.7,
+            duration: 3,
+            ease: "power3.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * STAR FIELD — SKY TRANSITION
+         * ===========================================================
+         */
+
+        .to(
+          ".hero-star-layer",
+          {
+            y: 450,
+            scale: 1.4,
+            opacity: 0.68,
+            duration: 3,
+            ease: "power3.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * 5. FINAL SKY CLIMB
+         * ===========================================================
+         *
+         * The ship remains visible while climbing toward the
+         * upper part of the scene.
+         * ===========================================================
+         */
+
+        .to(spaceship.current, {
+          y: -250,
+          z: -1000,
+          scale: 0.42,
+          rotateX: -8,
+          duration: 3.5,
+          ease: "power3.inOut",
+        })
+
+        /*
+         * ===========================================================
+         * TERRAIN — LEAVING THE SURFACE
+         * ===========================================================
+         */
+
+        .to(
+          horizonAtmosphere.current,
+          {
+            y: 1000,
+            scale: 1.3,
+            autoAlpha: 0.25,
+            duration: 3.5,
+            ease: "power3.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * STAR FIELD — FINAL ACCELERATION
+         * ===========================================================
+         */
+
+        .to(
+          ".hero-star-layer",
+          {
+            y: 700,
+            scale: 1.8,
+            opacity: 0.65,
+            duration: 3.5,
+            ease: "power3.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * WHOOSH
+         * ===========================================================
+         */
+
         .call(() => {
           playSound(whooshAudio.current);
+        })
+
+        /*
+         * ===========================================================
+         * 6. FINAL DEPARTURE
+         * ===========================================================
+         *
+         * Only now does the ship leave the visible frame.
+         *
+         * IMPORTANT:
+         * No autoAlpha: 0.
+         *
+         * The ship disappears naturally because it travels
+         * beyond the camera view.
+         * ===========================================================
+         */
+
+        .to(spaceship.current, {
+          y: -300,
+          z: -1800,
+          scale: 0.012,
+          rotateX: -10,
+          duration: 3,
+          ease: "power4.in",
+        })
+
+        /*
+         * ===========================================================
+         * TERRAIN — COMPLETE DEPARTURE
+         * ===========================================================
+         */
+
+        .to(
+          horizonAtmosphere.current,
+          {
+            y: 1400,
+            scale: 1.45,
+            autoAlpha: 0,
+            duration: 3,
+            ease: "power4.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * STAR FIELD — DEEP SPACE
+         * ===========================================================
+         */
+
+        .to(
+          ".hero-star-layer",
+          {
+            y: 1000,
+            scale: 2.2,
+            opacity: 0.6,
+            duration: 3,
+            ease: "power4.in",
+          },
+          "<",
+        )
+
+        /*
+         * ===========================================================
+         * ATMOSPHERIC BURST / CYAN STAR
+         * ===========================================================
+         *
+         * The spacecraft compresses into a tiny cyan point,
+         * bursts with energy, then settles into a distant star.
+         * ===========================================================
+         */
+
+        /*
+         * -----------------------------------------------------------
+         * TINY DISTANT POINT
+         * -----------------------------------------------------------
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 0.2,
+          scale: 0.35,
+          duration: 0.2,
+          ease: "power2.out",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * ENERGY CHARGE
+         * -----------------------------------------------------------
+         *
+         * The cyan point begins building energy.
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 1,
+          scale: 1.2,
+          duration: 0.35,
+          ease: "power2.out",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * MASSIVE CYAN BURST
+         * -----------------------------------------------------------
+         *
+         * This is the main "space jump" / atmospheric burst.
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 1,
+          scale: 5,
+          duration: 0.18,
+          ease: "expo.out",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * COLLAPSE
+         * -----------------------------------------------------------
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 0.25,
+          scale: 0.45,
+          duration: 0.55,
+          ease: "power3.inOut",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * SECONDARY CYAN PULSE
+         * -----------------------------------------------------------
+         *
+         * A smaller aftershock makes the burst feel energetic.
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 0.9,
+          scale: 2.8,
+          duration: 0.2,
+          ease: "power3.out",
+        })
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 0.3,
+          scale: 0.7,
+          duration: 0.5,
+          ease: "power2.inOut",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * FINAL STAR
+         * -----------------------------------------------------------
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 1,
+          scale: 1.15,
+          duration: 0.3,
+          ease: "power2.out",
+        })
+
+        .to(launchFlash.current, {
+          autoAlpha: 1,
+          scale: 2,
+          duration: 0.08,
+          ease: "expo.out",
+        })
+
+        .to(launchFlash.current, {
+          autoAlpha: 0,
+          scale: 12,
+          duration: 0.7,
+          ease: "expo.out",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * SPACECRAFT DISAPPEARS
+         * -----------------------------------------------------------
+         */
+
+        .to(spaceship.current, {
+          autoAlpha: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * DISTANT CYAN STAR
+         * -----------------------------------------------------------
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 0.75,
+          scale: 0.8,
+          duration: 1.2,
+          ease: "power2.inOut",
+        })
+
+        /*
+         * -----------------------------------------------------------
+         * FINAL FADE INTO STAR FIELD
+         * -----------------------------------------------------------
+         */
+
+        .to(q(".ship-departure-star"), {
+          autoAlpha: 0,
+          scale: 0.25,
+          duration: 1.8,
+          ease: "power2.out",
         });
 
       /*
@@ -1753,7 +2192,7 @@ export default function CinematicHero() {
       ScrollTrigger.create({
         trigger: root.current,
         start: "top top",
-        end: "+=9000",
+        end: "+=12000",
 
         onUpdate: (self) => {
           if (self.progress <= 0.001) {
@@ -1912,10 +2351,6 @@ export default function CinematicHero() {
             SHIP CAMERA
         ====================================================== */}
         <div ref={shipCamera} className="absolute inset-0 z-10">
-          {/* ===================================================
-              SPACESHIP
-          ==================================================== */}
-
           {/* =========================================================
               CINEMATIC EXPLORATION SPACECRAFT
           ========================================================= */}
@@ -1923,6 +2358,12 @@ export default function CinematicHero() {
             ref={spaceship}
             className="spaceship pointer-events-none absolute left-1/2 top-[85%] z-[5] -translate-x-1/2 -translate-y-1/2"
           >
+            {/* ===================================================
+              DEPARTURE STAR 
+          ==================================================== */}
+
+            <div className="ship-departure-star pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100 opacity-0 shadow-[0_0_8px_rgba(165,243,252,1),0_0_20px_rgba(34,211,238,1),0_0_45px_rgba(6,182,212,0.9),0_0_80px_rgba(6,182,212,0.55)]" />
+
             {/* =======================================================
 SHIP AURA
 Hidden initially by GSAP.
@@ -3113,7 +3554,7 @@ text-cyan-300 opacity-0"
         ====================================================== */}
         <div
           ref={launchFlash}
-          className="launch-flash pointer-events-none absolute inset-0 z-[100] bg-white"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-[50] h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-200 opacity-0 shadow-[0_0_30px_rgba(34,211,238,1),0_0_80px_rgba(6,182,212,0.9),0_0_150px_rgba(6,182,212,0.6)]"
         />
         {/* =====================================================
             LAUNCH STATUS
