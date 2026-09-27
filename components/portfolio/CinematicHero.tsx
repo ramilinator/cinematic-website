@@ -2011,117 +2011,136 @@ export default function CinematicHero() {
 
         /*
          * ===========================================================
-         * ATMOSPHERIC BURST / CYAN STAR
-         * ===========================================================
-         *
-         * The spacecraft compresses into a tiny cyan point,
-         * bursts with energy, then settles into a distant star.
+         * FINAL CYAN ATMOSPHERIC BURST
          * ===========================================================
          */
 
-        /*
-         * -----------------------------------------------------------
-         * TINY DISTANT POINT
-         * -----------------------------------------------------------
-         */
+        /* Tiny point appears exactly where the ship ends */
+        .set(q(".ship-departure-star"), {
+          autoAlpha: 0,
+          scale: 0.15,
+        })
 
+        .set(q(".ship-departure-burst"), {
+          autoAlpha: 0,
+          scale: 0.1,
+        })
+
+        /* Ship has become extremely distant */
+        .to(spaceship.current, {
+          scale: 0.012,
+          y: -5200,
+          z: -6500,
+          duration: 2.5,
+          ease: "expo.in",
+        })
+
+        /* Tiny cyan point appears */
         .to(q(".ship-departure-star"), {
-          autoAlpha: 0.2,
-          scale: 0.35,
+          autoAlpha: 1,
+          scale: 0.8,
           duration: 0.2,
           ease: "power2.out",
         })
 
-        /*
-         * -----------------------------------------------------------
-         * ENERGY CHARGE
-         * -----------------------------------------------------------
-         *
-         * The cyan point begins building energy.
-         */
-
+        /* CHARGE */
         .to(q(".ship-departure-star"), {
-          autoAlpha: 1,
-          scale: 1.2,
-          duration: 0.35,
+          scale: 2,
+          duration: 0.25,
           ease: "power2.out",
         })
 
-        /*
-         * -----------------------------------------------------------
-         * MASSIVE CYAN BURST
-         * -----------------------------------------------------------
-         *
-         * This is the main "space jump" / atmospheric burst.
-         */
+        /* =========================================================
+   MASSIVE CYAN BURST
+   ========================================================= */
+
+        .to(q(".ship-departure-burst"), {
+          autoAlpha: 1,
+          scale: 0.2,
+          duration: 0.05,
+          ease: "power4.out",
+        })
 
         .to(q(".ship-departure-star"), {
-          autoAlpha: 1,
           scale: 5,
-          duration: 0.18,
+          autoAlpha: 1,
+          duration: 0.12,
           ease: "expo.out",
         })
 
-        /*
-         * -----------------------------------------------------------
-         * COLLAPSE
-         * -----------------------------------------------------------
-         */
+        .to(
+          q(".ship-departure-burst"),
+          {
+            scale: 18,
+            autoAlpha: 0,
+            duration: 0.65,
+            ease: "expo.out",
+          },
+          "<",
+        )
 
+        /* Bright core */
         .to(q(".ship-departure-star"), {
-          autoAlpha: 0.25,
-          scale: 0.45,
-          duration: 0.55,
-          ease: "power3.inOut",
+          scale: 2,
+          duration: 0.12,
+          ease: "expo.inOut",
         })
 
-        /*
-         * -----------------------------------------------------------
-         * SECONDARY CYAN PULSE
-         * -----------------------------------------------------------
-         *
-         * A smaller aftershock makes the burst feel energetic.
-         */
-
-        .to(q(".ship-departure-star"), {
-          autoAlpha: 0.9,
-          scale: 2.8,
-          duration: 0.2,
+        /* SECOND ENERGY PULSE */
+        .to(q(".ship-departure-burst"), {
+          autoAlpha: 0.8,
+          scale: 0.4,
+          duration: 0.08,
           ease: "power3.out",
         })
 
+        .to(
+          q(".ship-departure-burst"),
+          {
+            scale: 10,
+            autoAlpha: 0,
+            duration: 0.45,
+            ease: "expo.out",
+          },
+          "<",
+        )
+
+        /* Collapse into distant cyan star */
         .to(q(".ship-departure-star"), {
-          autoAlpha: 0.3,
           scale: 0.7,
+          autoAlpha: 0.95,
           duration: 0.5,
+          ease: "power3.inOut",
+        })
+
+        /* Tiny star twinkle */
+        .to(q(".ship-departure-star"), {
+          scale: 1.4,
+          autoAlpha: 1,
+          duration: 0.18,
+          ease: "power2.out",
+        })
+        .to(q(".ship-departure-star"), {
+          scale: 0.55,
+          autoAlpha: 0.7,
+          duration: 0.25,
           ease: "power2.inOut",
         })
 
-        /*
-         * -----------------------------------------------------------
-         * FINAL STAR
-         * -----------------------------------------------------------
-         */
-
+        /* Final distant star */
         .to(q(".ship-departure-star"), {
-          autoAlpha: 1,
-          scale: 1.15,
-          duration: 0.3,
+          scale: 0.25,
+          autoAlpha: 0.85,
+          duration: 1.2,
           ease: "power2.out",
         })
 
-        .to(launchFlash.current, {
-          autoAlpha: 1,
-          scale: 2,
-          duration: 0.08,
-          ease: "expo.out",
-        })
-
-        .to(launchFlash.current, {
+        /* Slowly disappear */
+        .to(q(".ship-departure-star"), {
+          scale: 0.1,
           autoAlpha: 0,
-          scale: 12,
-          duration: 0.7,
-          ease: "expo.out",
+          duration: 1.8,
+          ease: "power2.out",
         })
 
         /*
@@ -2361,8 +2380,6 @@ export default function CinematicHero() {
             {/* ===================================================
               DEPARTURE STAR 
           ==================================================== */}
-
-            <div className="ship-departure-star pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100 opacity-0 shadow-[0_0_8px_rgba(165,243,252,1),0_0_20px_rgba(34,211,238,1),0_0_45px_rgba(6,182,212,0.9),0_0_80px_rgba(6,182,212,0.55)]" />
 
             {/* =======================================================
 SHIP AURA
@@ -2923,6 +2940,26 @@ text-cyan-300 opacity-0"
               </div>
             </div>
           </div>
+
+          <div
+            className="ship-departure-star pointer-events-none absolute left-1/2 top-1/2 z-[60]
+    h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full
+    bg-cyan-100 opacity-0
+    shadow-[0_0_12px_rgba(207,250,254,1),
+            0_0_30px_rgba(34,211,238,1),
+            0_0_70px_rgba(6,182,212,1),
+            0_0_140px_rgba(6,182,212,0.8),
+            0_0_220px_rgba(6,182,212,0.5)]"
+          />
+
+          <div
+            className="ship-departure-burst pointer-events-none absolute left-1/2 top-1/2 z-[59]
+    h-8 w-8 -translate-x-1/2 -translate-y-1/2
+    rounded-full border-2 border-cyan-300 opacity-0
+    shadow-[0_0_30px_rgba(34,211,238,0.9),
+            0_0_70px_rgba(6,182,212,0.7),
+            0_0_130px_rgba(6,182,212,0.4)]"
+          />
 
           {/* =========================================================
     ALIEN LANDING ZONE
