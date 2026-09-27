@@ -52,15 +52,6 @@ const normalStars = Array.from({ length: 150 }, (_, index) => {
   };
 });
 
-const shootingStars = Array.from({ length: 12 }, (_, index) => ({
-  top: 5 + ((index * 17.37) % 58),
-  left: -18 + ((index * 31.17) % 118),
-  delay: index * 4.8 + ((index * 7) % 6),
-  duration: 0.9 + ((index * 11) % 9) / 10,
-  length: 70 + ((index * 37) % 120),
-  angle: 22 + ((index * 13) % 16),
-}));
-
 /* ============================================================
    SHARED HUD COMPONENTS
 ============================================================ */
@@ -142,6 +133,10 @@ export default function CinematicHero() {
   const system = useRef<HTMLDivElement>(null);
   const countdown = useRef<HTMLDivElement>(null);
 
+  const starLayer = useRef<HTMLDivElement | null>(null);
+  const starRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const shootingCursor = useRef(0);
+
   /*
    * =============================================================
    * SHIP / CAMERA REFS
@@ -154,7 +149,7 @@ export default function CinematicHero() {
 
   const launchGlow = useRef<HTMLDivElement>(null);
   const launchFlash = useRef<HTMLDivElement>(null);
-  const shootingStarLayer = useRef<HTMLDivElement>(null);
+
   const horizonAtmosphere = useRef<HTMLDivElement>(null);
 
   const shipFloat = useRef<gsap.core.Tween | null>(null);
@@ -254,6 +249,198 @@ export default function CinematicHero() {
 
     /*
      * ===========================================================
+     * NORMAL STARS → SHOOTING STARS
+     * ===========================================================
+     */
+
+    let shootingTimer: ReturnType<typeof setTimeout> | null = null;
+    let doubleShotTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const shootStar = () => {
+      const stars = starRefs.current;
+
+      if (!stars.length) return;
+
+      /*
+       * Select an existing normal star.
+       * No second star system is created.
+       */
+      const selectedIndex = shootingCursor.current % stars.length;
+
+      shootingCursor.current++;
+
+      const star = stars[selectedIndex];
+      const original = normalStars[selectedIndex];
+
+      if (!star || !original) return;
+
+      /*
+       * Prevent CSS twinkle animation from fighting GSAP.
+       */
+      const wasTwinkling = original.twinkle;
+
+      star.classList.remove("star-twinkle");
+
+      gsap.killTweensOf(star);
+
+      /*
+       * Slightly different trajectory every time.
+       * Everything remains deterministic — no Math.random()
+       * during render.
+       */
+      const sequence = shootingCursor.current;
+
+      const angle = 18 + ((sequence * 17) % 28);
+
+      const distance = 220 + ((sequence * 47) % 220);
+
+      const duration = 0.38 + ((sequence * 13) % 30) / 100;
+
+      /*
+       * Mostly travel downward/right,
+       * occasionally slightly upward/right.
+       */
+      const direction = sequence % 4 === 0 ? -0.45 : 0.55;
+
+      const travelY = distance * direction;
+
+      /*
+       * Convert the tiny star into a long streak.
+       */
+      gsap.set(star, {
+        width: 110,
+        height: 1.5,
+        borderRadius: 999,
+
+        background:
+          "linear-gradient(90deg, transparent 0%, rgba(150,210,255,.15) 25%, rgba(190,225,255,.55) 65%, rgba(255,255,255,1) 100%)",
+
+        boxShadow:
+          "0 0 4px rgba(255,255,255,.95), 0 0 10px rgba(100,180,255,.8), 0 0 22px rgba(80,130,255,.35)",
+
+        transformOrigin: "right center",
+
+        rotation: angle,
+
+        scaleX: 0.05,
+
+        opacity: 0,
+
+        x: 0,
+        y: 0,
+      });
+
+      const timeline = gsap.timeline({
+        onComplete: () => {
+          /*
+           * Restore this EXACT star's original properties.
+           */
+          gsap.set(star, {
+            width: original.size,
+            height: original.size,
+
+            left: original.left,
+            top: original.top,
+
+            opacity: original.opacity,
+
+            background: "",
+            boxShadow: "none",
+
+            borderRadius: 999,
+
+            x: 0,
+            y: 0,
+
+            rotation: 0,
+            scaleX: 1,
+
+            clearProps: "transform,background,boxShadow",
+          });
+
+          /*
+           * Restore normal twinkle behavior.
+           */
+          if (wasTwinkling) {
+            star.classList.add("star-twinkle");
+          }
+        },
+      });
+
+      /*
+       * 1. Star appears
+       */
+      timeline.to(star, {
+        duration: 0.05,
+
+        opacity: 1,
+        scaleX: 0.2,
+
+        ease: "power2.out",
+      });
+
+      /*
+       * 2. FAST SHOOT
+       */
+      timeline.to(star, {
+        duration,
+
+        x: distance,
+        y: travelY,
+
+        scaleX: 1,
+
+        opacity: 1,
+
+        ease: "power3.in",
+      });
+
+      /*
+       * 3. Fade the tail at the end
+       */
+      timeline.to(star, {
+        duration: 0.14,
+
+        x: distance * 1.15,
+        y: travelY * 1.15,
+
+        opacity: 0,
+
+        scaleX: 0.35,
+
+        ease: "power2.out",
+      });
+    };
+
+    const scheduleNextShootingStar = () => {
+      /*
+       * 1.8–6 seconds between shooting stars.
+       */
+      const sequence = shootingCursor.current;
+
+      const delay = 1800 + ((sequence * 137) % 4200);
+
+      shootingTimer = setTimeout(() => {
+        shootStar();
+
+        /*
+         * Occasionally create a second star shortly
+         * after the first one.
+         */
+        if (shootingCursor.current % 5 === 0) {
+          doubleShotTimer = setTimeout(() => {
+            shootStar();
+          }, 350);
+        }
+
+        scheduleNextShootingStar();
+      }, delay);
+    };
+
+    scheduleNextShootingStar();
+
+    /*
+     * ===========================================================
      * AUDIO INITIALIZATION
      * ===========================================================
      */
@@ -346,7 +533,7 @@ export default function CinematicHero() {
 
       gsap.set(spaceship.current, {
         y: 0,
-        scale: 1,
+        scale: 0.5,
         opacity: 0,
         rotateX: 0,
         rotateY: 10,
@@ -403,7 +590,7 @@ export default function CinematicHero() {
        */
 
       gsap.set(shipCamera.current, {
-        scale: 1,
+        scale: 0.25,
         y: 0,
       });
 
@@ -1005,7 +1192,7 @@ export default function CinematicHero() {
         // -----------------------------------------------------------
         .set(spaceship.current, {
           autoAlpha: 1,
-          scale: 1,
+          scale: 0.5,
           y: 0,
           rotateX: 0,
           rotateY: 10,
@@ -1615,6 +1802,26 @@ export default function CinematicHero() {
 
       launchAudio.current = null;
       whooshAudio.current = null;
+
+      return () => {
+        if (shootingTimer) {
+          clearTimeout(shootingTimer);
+        }
+
+        if (doubleShotTimer) {
+          clearTimeout(doubleShotTimer);
+        }
+
+        starRefs.current.forEach((star) => {
+          if (!star) return;
+
+          gsap.killTweensOf(star);
+
+          gsap.set(star, {
+            clearProps: "transform,background,boxShadow",
+          });
+        });
+      };
     };
   }, []);
 
@@ -1628,7 +1835,6 @@ export default function CinematicHero() {
         {/* =====================================================
             SPACE BACKGROUND
         ====================================================== */}
-
         <div className="hero-background absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(70,50,180,0.22),transparent_40%),linear-gradient(180deg,#02030a_0%,#050719_50%,#010208_100%)]" />
 
@@ -1636,15 +1842,16 @@ export default function CinematicHero() {
 
           <div className="absolute left-[70%] top-[35%] h-[35vw] w-[35vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
         </div>
-
         {/* =====================================================
             NORMAL STARS
         ====================================================== */}
-
         <div className="hero-star-layer pointer-events-none absolute inset-0 overflow-hidden">
           {normalStars.map((star, index) => (
             <span
               key={index}
+              ref={(el) => {
+                starRefs.current[index] = el;
+              }}
               className={`star absolute rounded-full bg-white ${
                 star.twinkle ? "star-twinkle" : ""
               }`}
@@ -1662,50 +1869,8 @@ export default function CinematicHero() {
         </div>
 
         {/* =====================================================
-            SHOOTING STARS
-        ====================================================== */}
-
-        <div
-          ref={shootingStarLayer}
-          className="shooting-star-layer pointer-events-none absolute inset-0 z-[2] overflow-hidden"
-        >
-          {shootingStars.map((star, index) => (
-            <span
-              key={index}
-              className="shooting-star"
-              style={{
-                top: `${star.top}%`,
-                left: `${star.left}%`,
-                width: `${star.length}px`,
-                animationDelay: `${star.delay}s`,
-                animationDuration: `${star.duration}s`,
-                transform: `rotate(${star.angle}deg)`,
-              }}
-            >
-              <span className="shooting-star-head" />
-            </span>
-          ))}
-        </div>
-
-        {/* =========================================================
-    HORIZON ATMOSPHERE
-    Visible only while the spaceship is parked
-========================================================= */}
-        <div
-          ref={horizonAtmosphere}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[40%] opacity-0"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#010208] via-[#010208]/90 to-transparent" />
-
-          <div className="absolute bottom-[18%] left-1/2 h-[18vh] w-[85vw] -translate-x-1/2 rounded-[50%] bg-cyan-500/[0.025] blur-[80px]" />
-
-          <div className="absolute bottom-0 left-1/2 h-[12vh] w-[75vw] -translate-x-1/2 rounded-[50%] bg-blue-900/20 blur-[70px]" />
-        </div>
-
-        {/* =====================================================
             TOP HUD
         ====================================================== */}
-
         <button
           type="button"
           onClick={() => {
@@ -1724,7 +1889,6 @@ export default function CinematicHero() {
         >
           AUDIO SYSTEM // {audioOn ? "ONLINE" : "OFFLINE"}
         </button>
-
         <div className="pointer-events-none absolute left-0 right-0 top-0 z-40 flex items-center justify-between px-6 py-6 font-mono text-[10px] tracking-[0.3em] text-white/40 md:px-12">
           <span>RAMIL / EXPLORATION SYSTEM</span>
 
@@ -1732,11 +1896,9 @@ export default function CinematicHero() {
 
           <span>ONLINE</span>
         </div>
-
         {/* =====================================================
             SIDE PROGRESS
         ====================================================== */}
-
         <div className="pointer-events-none absolute right-5 top-1/2 z-40 hidden h-32 w-px -translate-y-1/2 bg-white/10 md:block">
           <div
             ref={progressBar}
@@ -1746,11 +1908,9 @@ export default function CinematicHero() {
             }}
           />
         </div>
-
         {/* =====================================================
             SHIP CAMERA
         ====================================================== */}
-
         <div ref={shipCamera} className="absolute inset-0 z-10">
           {/* ===================================================
               SPACESHIP
@@ -1761,545 +1921,545 @@ export default function CinematicHero() {
           ========================================================= */}
           <div
             ref={spaceship}
-            className="spaceship pointer-events-none absolute left-1/2 top-[70%] -translate-x-1/2 -translate-y-1/2"
+            className="spaceship pointer-events-none absolute left-1/2 top-[85%] z-[5] -translate-x-1/2 -translate-y-1/2"
           >
             {/* =======================================================
-      SHIP AURA
-      Hidden initially by GSAP.
-  ======================================================== */}
+SHIP AURA
+Hidden initially by GSAP.
+======================================================== */}
 
             <div
               className="ship-aura absolute left-1/2 top-1/2 h-[500px] w-[500px]
-      -translate-x-1/2 -translate-y-1/2 rounded-full
-      bg-cyan-500/10 blur-[120px]"
+-translate-x-1/2 -translate-y-1/2 rounded-full
+bg-cyan-500/10 blur-[120px]"
             />
 
             {/* =======================================================
-      GROUND / ENGINE AMBIENT GLOW
-      Hidden initially by GSAP.
-  ======================================================== */}
+GROUND / ENGINE AMBIENT GLOW
+Hidden initially by GSAP.
+======================================================== */}
 
             <div
               className="ship-ground-glow absolute left-1/2 top-[79%]
-      h-10 w-[470px] -translate-x-1/2 rounded-[50%]
-      bg-cyan-400/20 blur-3xl"
+h-10 w-[470px] -translate-x-1/2 rounded-[50%]
+bg-cyan-400/20 blur-3xl"
             />
 
             {/* =======================================================
-      SHIP BODY
-  ======================================================== */}
+SHIP BODY
+======================================================== */}
 
             <div className="relative h-[340px] w-[620px]">
               {/* =====================================================
-        REAR SHADOW / SILHOUETTE
-    ====================================================== */}
+REAR SHADOW / SILHOUETTE
+====================================================== */}
 
               <div
                 className="absolute left-1/2 top-[42%]
-        h-[115px] w-[480px]
-        -translate-x-1/2
-        rounded-[50%]
-        bg-black/80
-        blur-2xl"
+h-[115px] w-[480px]
+-translate-x-1/2
+rounded-[50%]
+bg-black/80
+blur-2xl"
               />
 
               {/* =====================================================
-        LEFT OUTER WING
-    ====================================================== */}
+LEFT OUTER WING
+====================================================== */}
 
               <div
                 className="absolute left-[8px] top-[126px]
-        h-[90px] w-[245px]
-        origin-right
-        -skew-x-[25deg]
-        rounded-[30px_8px_8px_45px]
-        border border-white/[0.08]
-        bg-gradient-to-br
-        from-slate-700/80
-        via-slate-900
-        to-black"
+h-[90px] w-[245px]
+origin-right
+-skew-x-[25deg]
+rounded-[30px_8px_8px_45px]
+border border-white/[0.08]
+bg-gradient-to-br
+from-slate-700/80
+via-slate-900
+to-black"
               >
                 {/* Wing armor panel */}
 
                 <div
                   className="absolute left-[35px] top-[15px]
-          h-px w-[150px]
-          rotate-[-8deg]
-          bg-white/[0.12]"
+h-px w-[150px]
+rotate-[-8deg]
+bg-white/[0.12]"
                 />
 
                 <div
                   className="absolute left-[55px] top-[42px]
-          h-px w-[110px]
-          rotate-[-8deg]
-          bg-white/[0.06]"
+h-px w-[110px]
+rotate-[-8deg]
+bg-white/[0.06]"
                 />
 
                 {/* Wing edge */}
 
                 <div
                   className="absolute bottom-[12px] left-[25px]
-          h-px w-[170px]
-          rotate-[-7deg]
-          bg-slate-400/20"
+h-px w-[170px]
+rotate-[-7deg]
+bg-slate-400/20"
                 />
 
                 {/* Navigation light */}
 
                 <div
                   className="ship-nav-light absolute left-[46px] bottom-[24px]
-          h-1.5 w-7 rounded-full
-          bg-cyan-300
-          opacity-0
-          shadow-[0_0_15px_rgba(34,211,238,1)]"
+h-1.5 w-7 rounded-full
+bg-cyan-300
+opacity-0
+shadow-[0_0_15px_rgba(34,211,238,1)]"
                 />
               </div>
 
               {/* =====================================================
-        RIGHT OUTER WING
-    ====================================================== */}
+RIGHT OUTER WING
+====================================================== */}
 
               <div
                 className="absolute right-[8px] top-[126px]
-        h-[90px] w-[245px]
-        origin-left
-        skew-x-[25deg]
-        rounded-[8px_30px_45px_8px]
-        border border-white/[0.08]
-        bg-gradient-to-bl
-        from-slate-700/80
-        via-slate-900
-        to-black"
+h-[90px] w-[245px]
+origin-left
+skew-x-[25deg]
+rounded-[8px_30px_45px_8px]
+border border-white/[0.08]
+bg-gradient-to-bl
+from-slate-700/80
+via-slate-900
+to-black"
               >
                 {/* Wing armor panel */}
 
                 <div
                   className="absolute right-[35px] top-[15px]
-          h-px w-[150px]
-          rotate-[8deg]
-          bg-white/[0.12]"
+h-px w-[150px]
+rotate-[8deg]
+bg-white/[0.12]"
                 />
 
                 <div
                   className="absolute right-[55px] top-[42px]
-          h-px w-[110px]
-          rotate-[8deg]
-          bg-white/[0.06]"
+h-px w-[110px]
+rotate-[8deg]
+bg-white/[0.06]"
                 />
 
                 {/* Wing edge */}
 
                 <div
                   className="absolute bottom-[12px] right-[25px]
-          h-px w-[170px]
-          rotate-[7deg]
-          bg-slate-400/20"
+h-px w-[170px]
+rotate-[7deg]
+bg-slate-400/20"
                 />
 
                 {/* Navigation light */}
 
                 <div
                   className="ship-nav-light absolute right-[46px] bottom-[24px]
-          h-1.5 w-7 rounded-full
-          bg-cyan-300
-          opacity-0
-          shadow-[0_0_15px_rgba(34,211,238,1)]"
+h-1.5 w-7 rounded-full
+bg-cyan-300
+opacity-0
+shadow-[0_0_15px_rgba(34,211,238,1)]"
                 />
               </div>
 
               {/* =====================================================
-        MAIN FUSELAGE
-    ====================================================== */}
+MAIN FUSELAGE
+====================================================== */}
 
               <div
                 className="absolute left-1/2 top-[72px]
-        h-[170px] w-[410px]
-        -translate-x-1/2
-        overflow-visible
-        rounded-[46%_46%_24%_24%]
-        border border-white/[0.13]
-        bg-gradient-to-b
-        from-slate-600
-        via-slate-800
-        to-[#05070b]
-        shadow-[0_35px_80px_rgba(0,0,0,0.9)]"
+h-[170px] w-[410px]
+-translate-x-1/2
+overflow-visible
+rounded-[46%_46%_24%_24%]
+border border-white/[0.13]
+bg-gradient-to-b
+from-slate-600
+via-slate-800
+to-[#05070b]
+shadow-[0_35px_80px_rgba(0,0,0,0.9)]"
               >
                 {/* ===================================================
-          TOP ARMOR PLATE
-      ==================================================== */}
+TOP ARMOR PLATE
+==================================================== */}
 
                 <div
                   className="absolute left-1/2 top-[8px]
-          h-[42px] w-[270px]
-          -translate-x-1/2
-          rounded-[50%_50%_20%_20%]
-          border border-white/[0.10]
-          bg-gradient-to-b
-          from-slate-400/20
-          to-transparent"
+h-[42px] w-[270px]
+-translate-x-1/2
+rounded-[50%_50%_20%_20%]
+border border-white/[0.10]
+bg-gradient-to-b
+from-slate-400/20
+to-transparent"
                 />
 
                 {/* ===================================================
-          CENTER ARMOR RIDGE
-      ==================================================== */}
+CENTER ARMOR RIDGE
+==================================================== */}
 
                 <div
                   className="absolute left-1/2 top-[25px]
-          h-[110px] w-[2px]
-          -translate-x-1/2
-          bg-gradient-to-b
-          from-white/[0.18]
-          via-white/[0.04]
-          to-transparent"
+h-[110px] w-[2px]
+-translate-x-1/2
+bg-gradient-to-b
+from-white/[0.18]
+via-white/[0.04]
+to-transparent"
                 />
 
                 {/* ===================================================
-          LEFT ARMOR PANEL
-      ==================================================== */}
+LEFT ARMOR PANEL
+==================================================== */}
 
                 <div
                   className="absolute left-[28px] top-[70px]
-          h-[55px] w-[95px]
-          skew-x-[-12deg]
-          border border-white/[0.06]
-          bg-black/20"
+h-[55px] w-[95px]
+skew-x-[-12deg]
+border border-white/[0.06]
+bg-black/20"
                 />
 
                 {/* ===================================================
-          RIGHT ARMOR PANEL
-      ==================================================== */}
+RIGHT ARMOR PANEL
+==================================================== */}
 
                 <div
                   className="absolute right-[28px] top-[70px]
-          h-[55px] w-[95px]
-          skew-x-[12deg]
-          border border-white/[0.06]
-          bg-black/20"
+h-[55px] w-[95px]
+skew-x-[12deg]
+border border-white/[0.06]
+bg-black/20"
                 />
 
                 {/* ===================================================
-          LOWER ARMOR STRIP
-      ==================================================== */}
+LOWER ARMOR STRIP
+==================================================== */}
 
                 <div
                   className="absolute bottom-[23px] left-1/2
-          h-[18px] w-[290px]
-          -translate-x-1/2
-          rounded-full
-          border border-white/[0.07]
-          bg-black/30"
+h-[18px] w-[290px]
+-translate-x-1/2
+rounded-full
+border border-white/[0.07]
+bg-black/30"
                 />
 
                 {/* ===================================================
-          COCKPIT CANOPY
-      ==================================================== */}
+COCKPIT CANOPY
+==================================================== */}
 
                 <div
                   className="absolute left-1/2 top-[-46px]
-          h-[82px] w-[170px]
-          -translate-x-1/2
-          overflow-hidden
-          rounded-[70%_70%_28%_28%]
-          border border-slate-300/20
-          bg-gradient-to-b
-          from-slate-700/70
-          via-slate-950
-          to-black
-          shadow-[inset_0_8px_20px_rgba(255,255,255,0.05)]"
+h-[82px] w-[170px]
+-translate-x-1/2
+overflow-hidden
+rounded-[70%_70%_28%_28%]
+border border-slate-300/20
+bg-gradient-to-b
+from-slate-700/70
+via-slate-950
+to-black
+shadow-[inset_0_8px_20px_rgba(255,255,255,0.05)]"
                 >
                   {/* Canopy glass */}
 
                   <div
                     className="absolute inset-[7px]
-            rounded-[65%_65%_25%_25%]
-            border border-white/[0.07]
-            bg-gradient-to-br
-            from-slate-500/10
-            via-black/60
-            to-black"
+rounded-[65%_65%_25%_25%]
+border border-white/[0.07]
+bg-gradient-to-br
+from-slate-500/10
+via-black/60
+to-black"
                   />
 
                   {/* Canopy center division */}
 
                   <div
                     className="absolute left-1/2 top-[8px]
-            h-[58px] w-px
-            -translate-x-1/2
-            rotate-[2deg]
-            bg-white/[0.08]"
+h-[58px] w-px
+-translate-x-1/2
+rotate-[2deg]
+bg-white/[0.08]"
                   />
 
                   {/* Cockpit reflection */}
 
                   <div
                     className="absolute left-[25px] top-[14px]
-            h-px w-[55px]
-            rotate-[12deg]
-            bg-white/10"
+h-px w-[55px]
+rotate-[12deg]
+bg-white/10"
                   />
 
                   {/* =================================================
-            COCKPIT POWER INDICATOR
-            Hidden initially by GSAP.
-        ================================================== */}
+COCKPIT POWER INDICATOR
+Hidden initially by GSAP.
+================================================== */}
 
                   <div
                     className="ship-cockpit-light absolute bottom-[10px]
-            left-1/2 h-px w-12
-            -translate-x-1/2
-            bg-cyan-300
-            opacity-0
-            shadow-[0_0_12px_rgba(34,211,238,0.9)]"
+left-1/2 h-px w-12
+-translate-x-1/2
+bg-cyan-300
+opacity-0
+shadow-[0_0_12px_rgba(34,211,238,0.9)]"
                   />
                 </div>
 
                 {/* ===================================================
-          LEFT SIDE NAVIGATION STRIP
-      ==================================================== */}
+LEFT SIDE NAVIGATION STRIP
+==================================================== */}
 
                 <div
                   className="absolute left-[42px] top-[133px]
-          h-px w-[65px]
-          rotate-[-8deg]
-          bg-white/[0.08]"
+h-px w-[65px]
+rotate-[-8deg]
+bg-white/[0.08]"
                 />
 
                 {/* ===================================================
-          RIGHT SIDE NAVIGATION STRIP
-      ==================================================== */}
+RIGHT SIDE NAVIGATION STRIP
+==================================================== */}
 
                 <div
                   className="absolute right-[42px] top-[133px]
-          h-px w-[65px]
-          rotate-[8deg]
-          bg-white/[0.08]"
+h-px w-[65px]
+rotate-[8deg]
+bg-white/[0.08]"
                 />
 
                 {/* ===================================================
-          LEFT SIDE ENGINE POD
-      ==================================================== */}
+LEFT SIDE ENGINE POD
+==================================================== */}
 
                 <div
                   className="absolute left-[36px] bottom-[-24px]
-          h-[46px] w-[105px]
-          rotate-[5deg]
-          rounded-[40%_20%_20%_40%]
-          border border-white/[0.10]
-          bg-gradient-to-b
-          from-slate-700
-          via-slate-900
-          to-black"
+h-[46px] w-[105px]
+rotate-[5deg]
+rounded-[40%_20%_20%_40%]
+border border-white/[0.10]
+bg-gradient-to-b
+from-slate-700
+via-slate-900
+to-black"
                 >
                   {/* Mechanical seam */}
 
                   <div
                     className="absolute left-[16px] top-1/2
-            h-px w-[65px]
-            -translate-y-1/2
-            bg-white/[0.08]"
+h-px w-[65px]
+-translate-y-1/2
+bg-white/[0.08]"
                   />
 
                   {/* Engine opening */}
 
                   <div
                     className="absolute right-[10px] top-1/2
-            h-5 w-8
-            -translate-y-1/2
-            rounded-full
-            border border-slate-400/20
-            bg-black"
+h-5 w-8
+-translate-y-1/2
+rounded-full
+border border-slate-400/20
+bg-black"
                   />
 
                   {/* Side engine light */}
 
                   <div
                     className="ship-side-light absolute right-[13px] top-1/2
-            h-2 w-5
-            -translate-y-1/2
-            rounded-full
-            bg-cyan-200
-            opacity-0
-            shadow-[0_0_12px_rgba(34,211,238,1)]"
+h-2 w-5
+-translate-y-1/2
+rounded-full
+bg-cyan-200
+opacity-0
+shadow-[0_0_12px_rgba(34,211,238,1)]"
                   />
                 </div>
 
                 {/* ===================================================
-          RIGHT SIDE ENGINE POD
-      ==================================================== */}
+RIGHT SIDE ENGINE POD
+==================================================== */}
 
                 <div
                   className="absolute right-[36px] bottom-[-24px]
-          h-[46px] w-[105px]
-          -rotate-[5deg]
-          rounded-[20%_40%_40%_20%]
-          border border-white/[0.10]
-          bg-gradient-to-b
-          from-slate-700
-          via-slate-900
-          to-black"
+h-[46px] w-[105px]
+-rotate-[5deg]
+rounded-[20%_40%_40%_20%]
+border border-white/[0.10]
+bg-gradient-to-b
+from-slate-700
+via-slate-900
+to-black"
                 >
                   {/* Mechanical seam */}
 
                   <div
                     className="absolute right-[16px] top-1/2
-            h-px w-[65px]
-            -translate-y-1/2
-            bg-white/[0.08]"
+h-px w-[65px]
+-translate-y-1/2
+bg-white/[0.08]"
                   />
 
                   {/* Engine opening */}
 
                   <div
                     className="absolute left-[10px] top-1/2
-            h-5 w-8
-            -translate-y-1/2
-            rounded-full
-            border border-slate-400/20
-            bg-black"
+h-5 w-8
+-translate-y-1/2
+rounded-full
+border border-slate-400/20
+bg-black"
                   />
 
                   {/* Side engine light */}
 
                   <div
                     className="ship-side-light absolute left-[13px] top-1/2
-            h-2 w-5
-            -translate-y-1/2
-            rounded-full
-            bg-cyan-200
-            opacity-0
-            shadow-[0_0_12px_rgba(34,211,238,1)]"
+h-2 w-5
+-translate-y-1/2
+rounded-full
+bg-cyan-200
+opacity-0
+shadow-[0_0_12px_rgba(34,211,238,1)]"
                   />
                 </div>
 
                 {/* ===================================================
-          MAIN REAR ENGINE HOUSING
-      ==================================================== */}
+MAIN REAR ENGINE HOUSING
+==================================================== */}
 
                 <div
                   className="absolute bottom-[-12px] left-1/2
-          h-[34px] w-[135px]
-          -translate-x-1/2
-          rounded-[50%]
-          border border-white/[0.12]
-          bg-gradient-to-b
-          from-slate-700
-          to-black"
+h-[34px] w-[135px]
+-translate-x-1/2
+rounded-[50%]
+border border-white/[0.12]
+bg-gradient-to-b
+from-slate-700
+to-black"
                 >
                   {/* Engine chamber */}
 
                   <div
                     className="absolute left-1/2 top-1/2
-            h-[20px] w-[85px]
-            -translate-x-1/2
-            -translate-y-1/2
-            rounded-full
-            border border-white/[0.08]
-            bg-black"
+h-[20px] w-[85px]
+-translate-x-1/2
+-translate-y-1/2
+rounded-full
+border border-white/[0.08]
+bg-black"
                   />
 
                   {/* Engine glow */}
 
                   <div
                     className="ship-engine-glow absolute left-1/2 top-1/2
-            h-[12px] w-[70px]
-            -translate-x-1/2
-            -translate-y-1/2
-            rounded-full
-            bg-cyan-300/70
-            opacity-0
-            blur-md"
+h-[12px] w-[70px]
+-translate-x-1/2
+-translate-y-1/2
+rounded-full
+bg-cyan-300/70
+opacity-0
+blur-md"
                   />
 
                   {/* Engine flame */}
                   <div
                     className="
-    engine-flame
-    absolute bottom-[-18px] left-1/2
-    h-[42px] w-[76px]
-    -translate-x-1/2
-    origin-top
-    rounded-[9px]
-    bg-white
-    opacity-0
-    shadow-[0_0_12px_rgba(255,255,255,0.95),0_0_30px_rgba(34,211,238,0.95),0_0_55px_rgba(34,211,238,0.45)]
-  "
+engine-flame
+absolute bottom-[-18px] left-1/2
+h-[42px] w-[76px]
+-translate-x-1/2
+origin-top
+rounded-[9px]
+bg-white
+opacity-0
+shadow-[0_0_12px_rgba(255,255,255,0.95),0_0_30px_rgba(34,211,238,0.95),0_0_55px_rgba(34,211,238,0.45)]
+"
                   />
                 </div>
 
                 {/* ===================================================
-          LOWER REACTOR / STRUCTURAL DETAILS
-      ==================================================== */}
+LOWER REACTOR / STRUCTURAL DETAILS
+==================================================== */}
 
                 <div
                   className="absolute bottom-[28px] left-1/2
-          h-[8px] w-[240px]
-          -translate-x-1/2
-          rounded-full
-          bg-black/70"
+h-[8px] w-[240px]
+-translate-x-1/2
+rounded-full
+bg-black/70"
                 />
 
                 <div
                   className="absolute bottom-[2px] left-[82px]
-          h-1 w-12
-          bg-slate-500/20"
+h-1 w-12
+bg-slate-500/20"
                 />
 
                 <div
                   className="absolute bottom-[2px] right-[82px]
-          h-1 w-12
-          bg-slate-500/20"
+h-1 w-12
+bg-slate-500/20"
                 />
               </div>
 
               {/* =====================================================
-        TOP FIN / SENSOR ARRAY
-    ====================================================== */}
+TOP FIN / SENSOR ARRAY
+====================================================== */}
 
               <div
                 className="absolute left-1/2 top-[38px]
-        h-[55px] w-[42px]
-        -translate-x-1/2
-        border-x border-t border-white/[0.10]
-        bg-gradient-to-b from-slate-700/50 to-black/60
-        [clip-path:polygon(50%_0%,100%_100%,0%_100%)]"
+h-[55px] w-[42px]
+-translate-x-1/2
+border-x border-t border-white/[0.10]
+bg-gradient-to-b from-slate-700/50 to-black/60
+[clip-path:polygon(50%_0%,100%_100%,0%_100%)]"
               />
 
               {/* =====================================================
-        LEFT REAR FIN
-    ====================================================== */}
+LEFT REAR FIN
+====================================================== */}
 
               <div
                 className="absolute left-[125px] top-[105px]
-        h-[55px] w-[35px]
-        rotate-[-25deg]
-        border border-white/[0.08]
-        bg-slate-900"
+h-[55px] w-[35px]
+rotate-[-25deg]
+border border-white/[0.08]
+bg-slate-900"
               />
 
               {/* =====================================================
-        RIGHT REAR FIN
-    ====================================================== */}
+RIGHT REAR FIN
+====================================================== */}
 
               <div
                 className="absolute right-[125px] top-[105px]
-        h-[55px] w-[35px]
-        rotate-[25deg]
-        border border-white/[0.08]
-        bg-slate-900"
+h-[55px] w-[35px]
+rotate-[25deg]
+border border-white/[0.08]
+bg-slate-900"
               />
 
               {/* =====================================================
-        SHIP TELEMETRY
-    ====================================================== */}
+SHIP TELEMETRY
+====================================================== */}
 
               <div
                 className="absolute left-1/2 top-[calc(100%+18px)]
-        -translate-x-1/2
-        whitespace-nowrap
-        text-center
-        font-mono text-[8px]
-        uppercase tracking-[0.35em]
-        text-white/30"
+-translate-x-1/2
+whitespace-nowrap
+text-center
+font-mono text-[8px]
+uppercase tracking-[0.35em]
+text-white/30"
               >
                 <div>VESSEL // RA-01</div>
 
@@ -2314,7 +2474,7 @@ export default function CinematicHero() {
 
                   <span
                     className="ship-awake-status absolute left-0 top-0
-            text-cyan-300 opacity-0"
+text-cyan-300 opacity-0"
                   >
                     AWAKE • FLIGHT SYSTEMS ONLINE
                   </span>
@@ -2322,13 +2482,112 @@ export default function CinematicHero() {
               </div>
             </div>
           </div>
-        </div>
 
+          {/* =========================================================
+    ALIEN LANDING ZONE
+    Cinematic extraterrestrial parking environment
+========================================================= */}
+          <div
+            ref={horizonAtmosphere}
+            className="pointer-events-none absolute inset-x-0 bottom-[0] z-[3] h-[60%] overflow-hidden opacity-0"
+          >
+            {/* =======================================================
+      DISTANT ALIEN ATMOSPHERE
+  ======================================================== */}
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#010208] via-[#030817]/100 to-transparent" />
+
+            {/* Distant atmospheric haze */}
+
+            <div className="absolute bottom-[35%] left-1/2 h-[35%] w-[120%] -translate-x-1/2 rounded-[50%] bg-violet-700/[0.08] blur-[100px]" />
+
+            <div className="absolute bottom-[28%] left-[35%] h-[20%] w-[45%] rounded-[50%] bg-cyan-500/[0.06] blur-[90px]" />
+
+            {/* =======================================================
+      DISTANT ALIEN MOUNTAINS
+  ======================================================== */}
+
+            <div className="absolute bottom-[30%] inset-x-0 h-[180px] w-[100%] bg-gradient-to-t from-[#050713] via-[#0a1020] to-transparent opacity-90 [clip-path:polygon(0%_100%,8%_72%,18%_82%,31%_42%,42%_68%,54%_32%,65%_65%,76%_48%,88%_76%,100%_55%,100%_100%)]" />
+
+            {/* Far mountain glow */}
+
+            <div className="absolute bottom-[37%] inset-x-0 h-px w-[28%] rotate-[-8deg] bg-violet-300/10 blur-[2px]" />
+
+            {/* =======================================================
+      ALIEN ROCK FORMATIONS
+  ======================================================== */}
+
+            <div className="absolute bottom-[18%] left-[5%] h-[100px] w-[190px] rotate-[-8deg] rounded-[45%_55%_20%_15%] bg-gradient-to-t from-[#010208] via-[#090e19] to-[#101a2b] shadow-[inset_20px_10px_30px_rgba(80,120,180,0.05)]" />
+
+            <div className="absolute bottom-[16%] right-[4%] h-[120px] w-[220px] rotate-[7deg] rounded-[55%_45%_15%_20%] bg-gradient-to-t from-[#010208] via-[#080d18] to-[#111a2a] shadow-[inset_-20px_10px_30px_rgba(80,120,180,0.05)]" />
+
+            <div className="absolute bottom-[14%] left-[26%] h-[65px] w-[110px] rotate-[12deg] rounded-[60%_40%_20%_30%] bg-gradient-to-t from-[#010208] to-[#0b1320]" />
+
+            <div className="absolute bottom-[15%] right-[27%] h-[80px] w-[130px] rotate-[-10deg] rounded-[40%_60%_25%_15%] bg-gradient-to-t from-[#010208] to-[#0c1422]" />
+
+            {/* =======================================================
+      ALIEN GROUND
+  ======================================================== */}
+
+            <div className="absolute bottom-[-18%] left-1/2 h-[50%] w-[125%] -translate-x-1/2 rounded-[50%_50%_0_0] bg-gradient-to-t from-[#000105] via-[#030712] to-[#07101c] shadow-[inset_0_20px_60px_rgba(80,140,200,0.04)]" />
+
+            {/* Ground contour */}
+
+            <div className="absolute bottom-[24%] left-1/2 h-px w-[85%] -translate-x-1/2 bg-gradient-to-r from-transparent via-cyan-300/[0.12] to-transparent blur-[1px]" />
+
+            {/* =======================================================
+      LANDING PAD / SHIP CONTACT AREA
+  ======================================================== */}
+
+            <div className="absolute bottom-[7%] left-1/2 h-[95px] w-[520px] -translate-x-1/2 rounded-[50%] border border-cyan-300/[0.07] bg-cyan-400/[0.015] shadow-[inset_0_0_50px_rgba(34,211,238,0.025)]" />
+
+            <div className="absolute bottom-[10%] left-1/2 h-px w-[390px] -translate-x-1/2 bg-gradient-to-r from-transparent via-cyan-300/15 to-transparent" />
+
+            {/* Landing pad markings */}
+
+            <div className="absolute bottom-[11%] left-1/2 h-[60px] w-[310px] -translate-x-1/2 rounded-[50%] border border-white/[0.035]" />
+
+            <div className="absolute bottom-[11%] left-1/2 h-[35px] w-[190px] -translate-x-1/2 rounded-[50%] border border-cyan-300/[0.05]" />
+
+            {/* =======================================================
+      GROUND LIGHT POOLS
+  ======================================================== */}
+
+            <div className="absolute bottom-[8%] left-1/2 h-[80px] w-[430px] -translate-x-1/2 rounded-[50%] bg-cyan-400/[0.035] blur-[45px]" />
+
+            <div className="absolute bottom-[17%] left-[15%] h-[50px] w-[120px] rounded-full bg-violet-500/[0.035] blur-[35px]" />
+
+            <div className="absolute bottom-[16%] right-[14%] h-[50px] w-[140px] rounded-full bg-cyan-500/[0.035] blur-[35px]" />
+
+            {/* =======================================================
+      LOW ALIEN MIST
+  ======================================================== */}
+
+            <div className="absolute bottom-[18%] left-1/2 h-[55px] w-[90%] -translate-x-1/2 rounded-[50%] bg-cyan-200/[0.025] blur-[25px]" />
+
+            <div className="absolute bottom-[23%] left-[12%] h-[35px] w-[30%] rounded-[50%] bg-violet-300/[0.025] blur-[25px]" />
+
+            <div className="absolute bottom-[20%] right-[8%] h-[40px] w-[32%] rounded-[50%] bg-cyan-300/[0.025] blur-[28px]" />
+
+            {/* =======================================================
+      ATMOSPHERIC PARTICLES / DISTANT LIGHTS
+  ======================================================== */}
+
+            <div className="absolute bottom-[27%] left-[22%] h-1 w-1 rounded-full bg-cyan-300/30 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+
+            <div className="absolute bottom-[34%] left-[61%] h-1 w-1 rounded-full bg-violet-300/30 shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
+
+            <div className="absolute bottom-[29%] right-[25%] h-1 w-1 rounded-full bg-cyan-300/25 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+
+            {/* =======================================================
+      FINAL ATMOSPHERIC VIGNETTE
+  ======================================================== */}
+          </div>
+        </div>
         {/* =====================================================
             SCENE 1
             COCKPIT
         ====================================================== */}
-
         <div
           ref={cockpit}
           className="cockpit-frame pointer-events-none absolute inset-0 z-30"
@@ -2350,11 +2609,9 @@ export default function CinematicHero() {
             <span className="h-1 w-1 rounded-full bg-cyan-400" />
           </div>
         </div>
-
         {/* =====================================================
             WELCOME SCENE
         ===================================================== */}
-
         <div
           ref={welcome}
           className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
@@ -2404,11 +2661,9 @@ export default function CinematicHero() {
             </div>
           </div>
         </div>
-
         {/* =====================================================
             PILOT SCENE
         ===================================================== */}
-
         <div
           ref={pilot}
           className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
@@ -2515,11 +2770,9 @@ export default function CinematicHero() {
             </div>
           </div>
         </div>
-
         {/* =====================================================
     DESTINATION SCENE — COMPACT HUD
 ===================================================== */}
-
         <div
           ref={destination}
           className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
@@ -2746,11 +2999,9 @@ export default function CinematicHero() {
             </div>
           </div>
         </div>
-
         {/* =====================================================
             SYSTEM CHECK
         ===================================================== */}
-
         <div
           ref={system}
           className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
@@ -2825,12 +3076,10 @@ export default function CinematicHero() {
             </div>
           </div>
         </div>
-
         {/* =====================================================
             SCENE 8
             COUNTDOWN
         ====================================================== */}
-
         <div
           ref={countdown}
           className="hero-scene absolute inset-0 z-50 flex items-center justify-center"
@@ -2852,38 +3101,30 @@ export default function CinematicHero() {
             </div>
           </div>
         </div>
-
         {/* =====================================================
             ENGINE / LAUNCH GLOW
         ====================================================== */}
-
         <div
           ref={launchGlow}
           className="launch-glow pointer-events-none absolute left-1/2 top-[70%] z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/50 blur-[70px]"
         />
-
         {/* =====================================================
             LAUNCH FLASH
         ====================================================== */}
-
         <div
           ref={launchFlash}
           className="launch-flash pointer-events-none absolute inset-0 z-[100] bg-white"
         />
-
         {/* =====================================================
             LAUNCH STATUS
         ====================================================== */}
-
         <div className="launch-status pointer-events-none absolute bottom-20 left-1/2 z-[80] -translate-x-1/2 opacity-0 font-mono text-[8px] uppercase tracking-[0.4em] text-cyan-300">
           <span className="mr-3 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,1)]" />
           LAUNCHING
         </div>
-
         {/* =====================================================
             BOTTOM HUD
         ====================================================== */}
-
         <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-50 flex items-center justify-between px-6 font-mono text-[8px] uppercase tracking-[0.3em] text-white/20 md:px-12">
           <span>LAT 14.5995°</span>
 
