@@ -2226,6 +2226,38 @@ export default function CinematicHero() {
 
       /*
        * -----------------------------------------------------------
+       * STOP SHOOTING STAR TIMERS
+       * -----------------------------------------------------------
+       */
+
+      if (shootingTimer) {
+        clearTimeout(shootingTimer);
+        shootingTimer = null;
+      }
+
+      if (doubleShotTimer) {
+        clearTimeout(doubleShotTimer);
+        doubleShotTimer = null;
+      }
+
+      /*
+       * -----------------------------------------------------------
+       * CLEAN UP SHOOTING STAR TWEENS
+       * -----------------------------------------------------------
+       */
+
+      starRefs.current.forEach((star) => {
+        if (!star) return;
+
+        gsap.killTweensOf(star);
+
+        gsap.set(star, {
+          clearProps: "transform,background,boxShadow",
+        });
+      });
+
+      /*
+       * -----------------------------------------------------------
        * STOP ALL AUDIO
        * -----------------------------------------------------------
        */
@@ -2260,26 +2292,6 @@ export default function CinematicHero() {
 
       launchAudio.current = null;
       whooshAudio.current = null;
-
-      return () => {
-        if (shootingTimer) {
-          clearTimeout(shootingTimer);
-        }
-
-        if (doubleShotTimer) {
-          clearTimeout(doubleShotTimer);
-        }
-
-        starRefs.current.forEach((star) => {
-          if (!star) return;
-
-          gsap.killTweensOf(star);
-
-          gsap.set(star, {
-            clearProps: "transform,background,boxShadow",
-          });
-        });
-      };
     };
   }, []);
 
