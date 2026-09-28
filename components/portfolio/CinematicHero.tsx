@@ -116,6 +116,8 @@ function HudCorners() {
   );
 }
 
+type ShipPowerState = "off" | "system" | "engine" | "launch";
+
 export default function CinematicHero() {
   const root = useRef<HTMLDivElement>(null);
 
@@ -249,12 +251,26 @@ export default function CinematicHero() {
 
     /*
      * ===========================================================
-     * NORMAL STARS → SHOOTING STARS
+     * CINEMATIC CONFIGURATION
+     * ===========================================================
+     */
+
+    const TIMELINE_DISTANCE = 9000;
+
+    /*
+     * ===========================================================
+     * LOCAL TIMERS
      * ===========================================================
      */
 
     let shootingTimer: ReturnType<typeof setTimeout> | null = null;
     let doubleShotTimer: ReturnType<typeof setTimeout> | null = null;
+
+    /*
+     * ===========================================================
+     * 01. SHOOTING STAR SYSTEM
+     * ===========================================================
+     */
 
     const shootStar = () => {
       const stars = starRefs.current;
@@ -263,7 +279,9 @@ export default function CinematicHero() {
 
       /*
        * Select an existing normal star.
-       * No second star system is created.
+       *
+       * We reuse the existing star elements instead of creating
+       * a second star system.
        */
       const selectedIndex = shootingCursor.current % stars.length;
 
@@ -275,18 +293,21 @@ export default function CinematicHero() {
       if (!star || !original) return;
 
       /*
-       * Prevent CSS twinkle animation from fighting GSAP.
+       * Remember whether this star originally had twinkle.
        */
       const wasTwinkling = original.twinkle;
 
+      /*
+       * Prevent CSS animation from fighting GSAP.
+       */
       star.classList.remove("star-twinkle");
 
       gsap.killTweensOf(star);
 
       /*
-       * Slightly different trajectory every time.
-       * Everything remains deterministic — no Math.random()
-       * during render.
+       * Deterministic sequence.
+       *
+       * No Math.random() is used here.
        */
       const sequence = shootingCursor.current;
 
@@ -297,19 +318,21 @@ export default function CinematicHero() {
       const duration = 0.38 + ((sequence * 13) % 30) / 100;
 
       /*
-       * Mostly travel downward/right,
-       * occasionally slightly upward/right.
+       * Mostly downward/right.
+       *
+       * Occasionally slightly upward/right.
        */
       const direction = sequence % 4 === 0 ? -0.45 : 0.55;
 
       const travelY = distance * direction;
 
       /*
-       * Convert the tiny star into a long streak.
+       * Convert the normal star into a shooting-star streak.
        */
       gsap.set(star, {
         width: 110,
         height: 1.5,
+
         borderRadius: 999,
 
         background:
@@ -333,7 +356,7 @@ export default function CinematicHero() {
       const timeline = gsap.timeline({
         onComplete: () => {
           /*
-           * Restore this EXACT star's original properties.
+           * Restore this exact star.
            */
           gsap.set(star, {
             width: original.size,
@@ -359,7 +382,7 @@ export default function CinematicHero() {
           });
 
           /*
-           * Restore normal twinkle behavior.
+           * Restore CSS twinkle.
            */
           if (wasTwinkling) {
             star.classList.add("star-twinkle");
@@ -368,20 +391,24 @@ export default function CinematicHero() {
       });
 
       /*
-       * 1. Star appears
+       * -----------------------------------------------------------
+       * STAR APPEARS
+       * -----------------------------------------------------------
        */
+
       timeline.to(star, {
         duration: 0.05,
-
         opacity: 1,
         scaleX: 0.2,
-
         ease: "power2.out",
       });
 
       /*
-       * 2. FAST SHOOT
+       * -----------------------------------------------------------
+       * FAST SHOOT
+       * -----------------------------------------------------------
        */
+
       timeline.to(star, {
         duration,
 
@@ -396,8 +423,11 @@ export default function CinematicHero() {
       });
 
       /*
-       * 3. Fade the tail at the end
+       * -----------------------------------------------------------
+       * FADE TAIL
+       * -----------------------------------------------------------
        */
+
       timeline.to(star, {
         duration: 0.14,
 
@@ -414,7 +444,7 @@ export default function CinematicHero() {
 
     const scheduleNextShootingStar = () => {
       /*
-       * 1.8–6 seconds between shooting stars.
+       * Deterministic 1.8–6 second interval.
        */
       const sequence = shootingCursor.current;
 
@@ -424,8 +454,7 @@ export default function CinematicHero() {
         shootStar();
 
         /*
-         * Occasionally create a second star shortly
-         * after the first one.
+         * Occasionally create a second shooting star.
          */
         if (shootingCursor.current % 5 === 0) {
           doubleShotTimer = setTimeout(() => {
@@ -441,68 +470,82 @@ export default function CinematicHero() {
 
     /*
      * ===========================================================
-     * AUDIO INITIALIZATION
+     * 02. AUDIO SYSTEM
      * ===========================================================
      */
 
-    engineHum.current = new Audio("/sounds/engine-on.mp3");
-    engineFlickerAudio.current = new Audio("/sounds/engine-rev.mp3");
+    const initializeAudio = () => {
+      /*
+       * ---------------------------------------------------------
+       * Create audio instances
+       * ---------------------------------------------------------
+       */
 
-    ambientAudio.current = new Audio("/sounds/space-atmosphere.mp3");
-    scanAudio.current = new Audio("/sounds/scan.mp3");
-    navigationAudio.current = new Audio("/sounds/navigation.mp3");
-    systemAudio.current = new Audio("/sounds/system-beep.mp3");
-    countdownAudio.current = new Audio("/sounds/countdown.mp3");
-    launchAudio.current = new Audio("/sounds/launch.mp3");
-    whooshAudio.current = new Audio("/sounds/whoosh.mp3");
+      engineHum.current = new Audio("/sounds/engine-on.mp3");
 
-    /*
-     * -----------------------------------------------------------
-     * AMBIENT SPACE
-     * -----------------------------------------------------------
-     */
+      engineFlickerAudio.current = new Audio("/sounds/engine-rev.mp3");
 
-    ambientAudio.current.loop = true;
-    ambientAudio.current.volume = 0.18;
+      ambientAudio.current = new Audio("/sounds/space-atmosphere.mp3");
 
-    /*
-     * -----------------------------------------------------------
-     * STEADY ENGINE HUM
-     *
-     * Runs continuously once the spacecraft powers up.
-     * -----------------------------------------------------------
-     */
+      scanAudio.current = new Audio("/sounds/scan.mp3");
 
-    engineHum.current.loop = true;
-    engineHum.current.volume = 0.55;
+      navigationAudio.current = new Audio("/sounds/navigation.mp3");
 
-    /*
-     * -----------------------------------------------------------
-     * RAPID ENGINE FLICKER
-     *
-     * Runs continuously during the rapid engine ignition phase.
-     * -----------------------------------------------------------
-     */
+      systemAudio.current = new Audio("/sounds/system-beep.mp3");
 
-    engineFlickerAudio.current.loop = true;
-    engineFlickerAudio.current.volume = 0.45;
+      countdownAudio.current = new Audio("/sounds/countdown.mp3");
 
-    /*
-     * -----------------------------------------------------------
-     * OTHER AUDIO LEVELS
-     * -----------------------------------------------------------
-     */
+      launchAudio.current = new Audio("/sounds/launch.mp3");
 
-    scanAudio.current.volume = 0.45;
-    navigationAudio.current.volume = 0.4;
-    systemAudio.current.volume = 0.3;
-    countdownAudio.current.volume = 0.42;
-    launchAudio.current.volume = 0.8;
-    whooshAudio.current.volume = 0.75;
+      whooshAudio.current = new Audio("/sounds/whoosh.mp3");
+
+      /*
+       * ---------------------------------------------------------
+       * Ambient
+       * ---------------------------------------------------------
+       */
+
+      ambientAudio.current.loop = true;
+      ambientAudio.current.volume = 0.18;
+
+      /*
+       * ---------------------------------------------------------
+       * Steady engine hum
+       * ---------------------------------------------------------
+       */
+
+      engineHum.current.loop = true;
+      engineHum.current.volume = 0.55;
+
+      /*
+       * ---------------------------------------------------------
+       * Rapid engine flicker
+       * ---------------------------------------------------------
+       */
+
+      engineFlickerAudio.current.loop = true;
+      engineFlickerAudio.current.volume = 0.45;
+
+      /*
+       * ---------------------------------------------------------
+       * Other audio levels
+       * ---------------------------------------------------------
+       */
+
+      scanAudio.current.volume = 0.45;
+      navigationAudio.current.volume = 0.4;
+      systemAudio.current.volume = 0.3;
+      countdownAudio.current.volume = 0.42;
+
+      launchAudio.current.volume = 0.8;
+      whooshAudio.current.volume = 0.75;
+    };
+
+    initializeAudio();
 
     /*
      * ===========================================================
-     * RANDOM DESTINATION
+     * 03. MISSION SELECTION
      * ===========================================================
      */
 
@@ -513,7 +556,7 @@ export default function CinematicHero() {
 
     /*
      * ===========================================================
-     * GSAP CONTEXT
+     * 04. GSAP CONTEXT
      * ===========================================================
      */
 
@@ -521,262 +564,333 @@ export default function CinematicHero() {
       const q = gsap.utils.selector(root);
 
       /*
-       * ===========================================================
-       * INITIAL SHIP STATE
-       *
-       * The ship starts completely dormant.
-       * Nothing moves.
-       * Nothing glows.
-       * The spacecraft is parked.
-       * ===========================================================
+       * =========================================================
+       * 04.1 SHIP ANIMATION SYSTEM
+       * =========================================================
        */
 
-      gsap.set(spaceship.current, {
-        y: 0,
-        scale: 0.5,
-        opacity: 0,
-        rotateX: 0,
-        rotateY: 10,
-      });
-
-      gsap.set(q(".ship-aura"), {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".ship-ground-glow"), {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".ship-cockpit-light"), {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".ship-side-light"), {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".ship-nav-light"), {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".ship-engine-glow"), {
-        autoAlpha: 0,
-        scale: 1,
-      });
-
-      gsap.set(q(".engine-flame"), {
-        scaleY: 0,
-        scaleX: 0.5,
-        autoAlpha: 0,
-        transformOrigin: "50% 0%",
-      });
-
-      gsap.set(q(".ship-awake-status"), {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".ship-docked-status"), {
-        autoAlpha: 1,
-      });
-
       /*
-       * ===========================================================
-       * CAMERA
-       *
-       * Start far away.
-       * The first cinematic movement is a slow push toward
-       * the spacecraft.
-       * ===========================================================
-       */
-
-      gsap.set(shipCamera.current, {
-        scale: 0.25,
-        y: 0,
-      });
-
-      /*
-       * ===========================================================
-       * WELCOME
-       * ===========================================================
-       */
-
-      gsap.set(welcome.current, {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".welcome-modal"), {
-        autoAlpha: 0,
-        scale: 0.94,
-        y: 25,
-      });
-
-      gsap.set(q(".welcome-line"), {
-        y: 22,
-        autoAlpha: 0,
-      });
-
-      /*
-       * ===========================================================
-       * PILOT
-       * ===========================================================
-       */
-
-      gsap.set(pilot.current, {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".pilot-line"), {
-        y: 25,
-        autoAlpha: 0,
-      });
-
-      /*
-       * ===========================================================
-       * DESTINATION
-       * ===========================================================
-       */
-
-      gsap.set(destination.current, {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".destination-line"), {
-        y: 20,
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".map-grid"), {
-        scale: 1.15,
-        opacity: 0,
-      });
-
-      gsap.set(q(".map-target"), {
-        scale: 0.7,
-        opacity: 0,
-      });
-
-      /*
-       * ===========================================================
-       * SYSTEM
-       * ===========================================================
-       */
-
-      gsap.set(system.current, {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".system-line"), {
-        x: -25,
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".system-progress"), {
-        width: "0%",
-      });
-
-      /*
-       * ===========================================================
-       * COUNTDOWN
-       * ===========================================================
-       */
-
-      gsap.set(countdown.current, {
-        autoAlpha: 0,
-      });
-
-      gsap.set(q(".countdown-line"), {
-        y: 20,
-        autoAlpha: 0,
-      });
-
-      /*
-       * ===========================================================
-       * LAUNCH EFFECTS
-       * ===========================================================
-       */
-
-      gsap.set(launchGlow.current, {
-        scale: 0.25,
-        autoAlpha: 0,
-      });
-
-      gsap.set(launchFlash.current, {
-        opacity: 0,
-      });
-
-      /*
-       * ===========================================================
-       * PILOT SCANNER
-       *
-       * Runs continuously but is only visible when pilot UI exists.
-       * ===========================================================
-       */
-
-      gsap.to(q(".pilot-scan-line"), {
-        top: "100%",
-        duration: 2.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      /*
-       * ===========================================================
-       * STAR LAYER
-       *
-       * ===========================================================
-       */
-
-      gsap.set(".hero-star-layer", {
-        width: "100vw",
-        height: "200vh",
-
-        left: "50%",
-        top: "50%",
-
-        xPercent: -50,
-        yPercent: -50,
-
-        // Show the TOP portion of the enlarged star field
-        y: "50vh",
-
-        x: 0,
-        scale: 0.8,
-
-        opacity: 0.82,
-      });
-
-      /*
-       * ===========================================================
+       * ---------------------------------------------------------
        * ENGINE IDLE
        *
-       * Created paused.
-       * It will only begin after ignition.
-       * ===========================================================
+       * Persistent looping animation.
+       *
+       * IMPORTANT:
+       * This animation does NOT decide when the engine is active.
+       *
+       * setShipPowerState() controls it.
+       * ---------------------------------------------------------
        */
 
       const engineIdle = gsap.to(q(".engine-flame"), {
         scaleY: 0.86,
         scaleX: 0.94,
+
         duration: 0.14,
+
         repeat: -1,
         yoyo: true,
+
         ease: "sine.inOut",
+
         paused: true,
       });
 
       /*
-       * ===========================================================
-       * ENGINE BURST
+       * ---------------------------------------------------------
+       * SHIP POWER STATE
+       * ---------------------------------------------------------
        *
-       * A short explosive thrust burst used only when the ship
-       * actually launches.
-       *
-       * It does NOT loop.
-       * ===========================================================
+       * OFF
+       * SYSTEM
+       * ENGINE
+       * LAUNCH
+       * ---------------------------------------------------------
        */
 
-      const engineBurst = gsap.timeline({ paused: true });
+      let currentShipState: ShipPowerState = "off";
+
+      const setShipPowerState = (state: ShipPowerState, immediate = false) => {
+        currentShipState = state;
+
+        const duration = immediate ? 0 : 0.5;
+
+        /*
+         * Stop any previous transition.
+         */
+        gsap.killTweensOf([
+          q(".ship-cockpit-light"),
+          q(".ship-side-light"),
+          q(".ship-nav-light"),
+          q(".ship-aura"),
+          q(".ship-ground-glow"),
+          q(".ship-engine-glow"),
+          q(".engine-flame"),
+        ]);
+
+        /*
+         * =======================================================
+         * OFF
+         * =======================================================
+         */
+
+        if (state === "off") {
+          engineIdle.pause();
+
+          gsap.to(q(".ship-cockpit-light"), {
+            autoAlpha: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-side-light"), {
+            autoAlpha: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-nav-light"), {
+            autoAlpha: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-aura"), {
+            autoAlpha: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-ground-glow"), {
+            autoAlpha: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-engine-glow"), {
+            autoAlpha: 0,
+            scale: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".engine-flame"), {
+            autoAlpha: 0,
+            scaleX: 0.5,
+            scaleY: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          return;
+        }
+
+        /*
+         * =======================================================
+         * SYSTEM
+         * =======================================================
+         *
+         * Ship is powered.
+         * Engine remains dormant.
+         * =======================================================
+         */
+
+        if (state === "system") {
+          engineIdle.pause();
+
+          gsap.to(q(".ship-cockpit-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-side-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-nav-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-aura"), {
+            autoAlpha: 0.35,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-ground-glow"), {
+            autoAlpha: 0.3,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-engine-glow"), {
+            autoAlpha: 0.25,
+            scale: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".engine-flame"), {
+            autoAlpha: 0,
+            scaleX: 0.5,
+            scaleY: 0,
+            duration,
+            ease: "power2.out",
+          });
+
+          return;
+        }
+
+        /*
+         * =======================================================
+         * ENGINE
+         * =======================================================
+         *
+         * Engine becomes active.
+         *
+         * Once the flame is visible, engineIdle begins looping.
+         * =======================================================
+         */
+
+        if (state === "engine") {
+          gsap.to(q(".ship-cockpit-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-side-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-nav-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-aura"), {
+            autoAlpha: 0.55,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-ground-glow"), {
+            autoAlpha: 0.6,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-engine-glow"), {
+            autoAlpha: 0.85,
+            scale: 1.15,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".engine-flame"), {
+            autoAlpha: 1,
+            scaleX: 0.65,
+            scaleY: 0.6,
+            duration,
+            ease: "power2.out",
+
+            onComplete: () => {
+              /*
+               * Prevent a stale callback from starting
+               * engineIdle after the state has changed.
+               */
+              if (currentShipState === "engine") {
+                engineIdle.play();
+              }
+            },
+          });
+
+          return;
+        }
+
+        /*
+         * =======================================================
+         * LAUNCH
+         * =======================================================
+         *
+         * Persistent idle animation stops.
+         *
+         * The launch sequence takes control of the flame.
+         * =======================================================
+         */
+
+        if (state === "launch") {
+          engineIdle.pause();
+
+          gsap.to(q(".ship-cockpit-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-side-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-nav-light"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-aura"), {
+            autoAlpha: 0.9,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-ground-glow"), {
+            autoAlpha: 1,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".ship-engine-glow"), {
+            autoAlpha: 1,
+            scale: 1.4,
+            duration,
+            ease: "power2.out",
+          });
+
+          gsap.to(q(".engine-flame"), {
+            autoAlpha: 1,
+            scaleX: 1,
+            scaleY: 1.3,
+            duration,
+            ease: "power2.out",
+          });
+        }
+      };
+
+      /*
+       * =========================================================
+       * 04.2 ENGINE BURST
+       * =========================================================
+       *
+       * One-shot cinematic thrust effect.
+       *
+       * This is intentionally NOT part of engineIdle.
+       * =========================================================
+       */
+
+      const engineBurst = gsap.timeline({
+        paused: true,
+      });
 
       engineBurst
         .set(q(".engine-flame"), {
@@ -784,18 +898,21 @@ export default function CinematicHero() {
           scaleX: 1,
           scaleY: 1,
         })
+
         .to(q(".engine-flame"), {
           scaleY: 2.8,
           scaleX: 1.12,
           duration: 0.12,
           ease: "power4.out",
         })
+
         .to(q(".engine-flame"), {
           scaleY: 4.5,
           scaleX: 1.25,
           duration: 0.16,
           ease: "power3.in",
         })
+
         .to(q(".engine-flame"), {
           scaleY: 1.4,
           scaleX: 1,
@@ -804,61 +921,854 @@ export default function CinematicHero() {
         });
 
       /*
-       * ===========================================================
-       * SHIP FLOAT
-       *
-       * Created paused.
-       *
-       * The ship does NOT float while parked.
-       * It also does NOT float immediately after moving upward.
-       *
-       * It will only begin when explicitly started later.
-       * ===========================================================
+       * =========================================================
+       * 04.3 INITIAL SCENE STATE
+       * =========================================================
        */
 
-      const shipFloat = gsap.to(spaceship.current, {
-        y: -1,
-        duration: 0.1,
-        ease: "sine.inOut",
-        paused: true,
-        repeat: -1,
-        yoyo: true,
-      });
+      const initializeScene = () => {
+        /*
+         * -------------------------------------------------------
+         * SPACECRAFT
+         * -------------------------------------------------------
+         */
 
-      const shipDrift = gsap.to(spaceship.current, {
-        rotation: 0.3,
-        duration: 6,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        paused: true,
-      });
+        gsap.set(spaceship.current, {
+          y: 0,
+          scale: 0.5,
+
+          opacity: 0,
+
+          rotateX: 0,
+          rotateY: 10,
+        });
+
+        /*
+         * Ship is completely dormant.
+         */
+        setShipPowerState("off", true);
+
+        /*
+         * -------------------------------------------------------
+         * STATUS UI
+         * -------------------------------------------------------
+         */
+
+        gsap.set(q(".ship-awake-status"), {
+          autoAlpha: 0,
+        });
+
+        gsap.set(q(".ship-docked-status"), {
+          autoAlpha: 1,
+        });
+
+        /*
+         * -------------------------------------------------------
+         * CAMERA
+         * -------------------------------------------------------
+         */
+
+        gsap.set(shipCamera.current, {
+          scale: 0.25,
+          y: 0,
+        });
+
+        /*
+         * -------------------------------------------------------
+         * STAR FIELD
+         * -------------------------------------------------------
+         */
+
+        gsap.set(".hero-star-layer", {
+          width: "100vw",
+          height: "200vh",
+
+          left: "50%",
+          top: "50%",
+
+          xPercent: -50,
+          yPercent: -50,
+
+          y: "50vh",
+
+          x: 0,
+
+          scale: 0.8,
+
+          opacity: 0.82,
+        });
+      };
+
+      initializeScene();
 
       /*
-       * ===========================================================
-       * MASTER CINEMATIC TIMELINE
+       * =========================================================
+       * 04.4 SCENE 1
+       * =========================================================
        *
-       * 9 SCENE STRUCTURE
+       * COCKPIT / VIEW DECK
+       * =========================================================
+       */
+
+      const addScene1 = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene1")
+
+          /*
+           * Cockpit establishing shot.
+           */
+          .to(cockpit.current, {
+            autoAlpha: 1,
+            duration: 1.2,
+            ease: "power2.out",
+          })
+
+          /*
+           * Scan sound.
+           */
+          .call(() => {
+            playSound(scanAudio.current, 0.45);
+          })
+
+          /*
+           * Small cinematic pause.
+           */
+          .to(
+            {},
+            {
+              duration: 0.5,
+            },
+          );
+      };
+
+      /*
+       * =========================================================
+       * 04.5 SCENE 2
+       * =========================================================
        *
-       * 01 — COCKPIT / VIEW DECK
-       * 02 — SHIP REVEAL / CAMERA APPROACH
-       * 03 — COUNTDOWN
-       * 04 — ENGINE PREPARATION
-       * 05 — ENGINE IGNITION
-       * 06 — ENGINE IDLE / FLICKER
-       * 07 — FINAL IGNITION
-       * 08 — DEPARTURE
-       * 09 — DEEP SPACE HOLD
-       * ===========================================================
+       * CINEMATIC CAMERA DESCENT
+       * =========================================================
+       */
+
+      const addScene2 = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene2")
+
+          /*
+           * -----------------------------------------------------
+           * Hide cockpit.
+           * -----------------------------------------------------
+           */
+
+          .to(cockpit.current, {
+            autoAlpha: 0,
+            scale: 1.02,
+            duration: 1.2,
+            ease: "power2.inOut",
+          })
+
+          /*
+           * -----------------------------------------------------
+           * Reveal parked spacecraft.
+           * -----------------------------------------------------
+           */
+
+          .set(spaceship.current, {
+            autoAlpha: 1,
+            scale: 0.5,
+            y: 0,
+            rotateX: 0,
+            rotateY: 10,
+          })
+
+          /*
+           * -----------------------------------------------------
+           * Camera begins high above the ship.
+           * -----------------------------------------------------
+           */
+
+          .set(shipCamera.current, {
+            y: 2200,
+            scale: 1.35,
+            transformOrigin: "50% 100%",
+          })
+
+          /*
+           * -----------------------------------------------------
+           * Establishing pause.
+           * -----------------------------------------------------
+           */
+
+          .to(
+            {},
+            {
+              duration: 0.8,
+            },
+          )
+
+          /*
+           * -----------------------------------------------------
+           * LONG CAMERA DESCENT
+           * -----------------------------------------------------
+           */
+
+          .to(shipCamera.current, {
+            y: -35,
+            scale: 1,
+            duration: 30,
+            ease: "power2.inOut",
+          })
+
+          /*
+           * -----------------------------------------------------
+           * STAR FIELD
+           * -----------------------------------------------------
+           */
+
+          .to(
+            ".hero-star-layer",
+            {
+              y: 0,
+              scale: 1,
+              opacity: 0.65,
+              duration: 30,
+              ease: "power1.inOut",
+            },
+            "<",
+          )
+
+          /*
+           * -----------------------------------------------------
+           * HORIZON
+           * -----------------------------------------------------
+           */
+
+          .to(
+            horizonAtmosphere.current,
+            {
+              opacity: 1,
+              autoAlpha: 1,
+              duration: 30,
+              ease: "power2.out",
+            },
+            "<",
+          )
+
+          /*
+           * -----------------------------------------------------
+           * SHIP SYSTEMS ONLINE
+           * -----------------------------------------------------
+           */
+
+          .call(() => {
+            setShipPowerState("system");
+          })
+
+          /*
+           * -----------------------------------------------------
+           * System hold.
+           * -----------------------------------------------------
+           */
+
+          .to(
+            {},
+            {
+              duration: 0.8,
+            },
+          );
+      };
+
+      /*
+       * =========================================================
+       * 04.6 SCENE 4
+       * =========================================================
+       *
+       * ENGINE PREPARATION
+       * =========================================================
+       */
+
+      const addScene4 = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene4")
+
+          /*
+           * Engine starts.
+           *
+           * This also starts engineIdle after the flame
+           * becomes visible.
+           */
+          .call(() => {
+            setShipPowerState("engine");
+          })
+
+          /*
+           * Engine preparation hold.
+           */
+          .to(
+            {},
+            {
+              duration: 1,
+            },
+          );
+      };
+
+      /*
+       * =========================================================
+       * 04.7 SCENE 5
+       * =========================================================
+       *
+       * ENGINE IGNITION / GENTLE LIFT-OFF
+       * =========================================================
+       */
+
+      const addScene5 = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene5")
+
+          /*
+           * -----------------------------------------------------
+           * Gentle lift-off.
+           * -----------------------------------------------------
+           */
+
+          .to(spaceship.current, {
+            y: -200,
+            z: 20,
+            duration: 4,
+            ease: "power1.out",
+          })
+
+          /*
+           * Brief ignition hold.
+           */
+          .to(
+            {},
+            {
+              duration: 0.6,
+            },
+          );
+      };
+
+      /*
+       * =========================================================
+       * 04.8 SCENE 6
+       * =========================================================
+       *
+       * ENGINE IDLE / FLICKER
+       * =========================================================
+       */
+
+      const addScene6 = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene6")
+
+          /*
+           * engineIdle is already running because
+           * the ship is in "engine" state.
+           *
+           * We simply hold this cinematic beat.
+           */
+          .to(
+            {},
+            {
+              duration: 1.8,
+            },
+          );
+      };
+
+      /*
+       * =========================================================
+       * 04.9 SCENE 7
+       * =========================================================
+       *
+       * FINAL IGNITION
+       * =========================================================
+       */
+
+      const addScene7 = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene7")
+
+          /*
+           * -----------------------------------------------------
+           * Switch ship to maximum power.
+           * -----------------------------------------------------
+           */
+
+          .call(() => {
+            setShipPowerState("launch");
+          })
+
+          /*
+           * -----------------------------------------------------
+           * Final ignition burst.
+           * -----------------------------------------------------
+           */
+
+          .call(() => {
+            engineBurst.restart();
+          })
+
+          /*
+           * Final tension hold.
+           */
+          .to(
+            {},
+            {
+              duration: 0.8,
+            },
+          );
+      };
+
+      /*
+       * =========================================================
+       * 04.10 SCENE 9
+       * =========================================================
+       *
+       * FINAL DEPARTURE
+       * =========================================================
+       */
+
+      const addScene9Departure = (tl: gsap.core.Timeline) => {
+        tl.addLabel("scene9")
+
+          /*
+           * -----------------------------------------------------
+           * Final engine tension.
+           * -----------------------------------------------------
+           */
+
+          .to(
+            {},
+            {
+              duration: 1.8,
+            },
+          )
+
+          /*
+           * -----------------------------------------------------
+           * SHUT DOWN PERSISTENT SHIP EFFECTS
+           *
+           * Important:
+           *
+           * The ship is now leaving the scene, so persistent
+           * lights/glows/flame must disappear.
+           * -----------------------------------------------------
+           */
+
+          .call(() => {
+            setShipPowerState("off");
+          })
+
+          /*
+           * =====================================================
+           * 1. INITIAL ASCENT
+           * =====================================================
+           */
+
+          .to(spaceship.current, {
+            y: -180,
+            z: 60,
+            scale: 0.97,
+            rotateX: -4,
+
+            duration: 1.4,
+
+            ease: "power2.in",
+          })
+
+          /*
+           * Terrain rises away.
+           */
+          .to(
+            horizonAtmosphere.current,
+            {
+              y: 150,
+              scale: 1.035,
+
+              duration: 1.4,
+
+              ease: "power2.in",
+            },
+            "<",
+          )
+
+          /*
+           * Stars begin moving.
+           */
+          .to(
+            ".hero-star-layer",
+            {
+              y: 80,
+              scale: 1.06,
+              opacity: 0.78,
+
+              duration: 1.4,
+
+              ease: "power1.inOut",
+            },
+            "<",
+          )
+
+          /*
+           * =====================================================
+           * 2. STRONGER ASCENT
+           * =====================================================
+           */
+
+          .to(spaceship.current, {
+            y: -180,
+            z: -120,
+            scale: 0.88,
+            rotateX: -6,
+
+            duration: 2.2,
+
+            ease: "power2.in",
+          })
+
+          .to(
+            horizonAtmosphere.current,
+            {
+              y: 320,
+              scale: 1.08,
+
+              duration: 2.2,
+
+              ease: "power2.in",
+            },
+            "<",
+          )
+
+          .to(
+            ".hero-star-layer",
+            {
+              y: 220,
+              scale: 1.18,
+              opacity: 0.72,
+
+              duration: 2.2,
+
+              ease: "power2.in",
+            },
+            "<",
+          )
+
+          /*
+           * =====================================================
+           * 3. HIGH ALTITUDE
+           * =====================================================
+           */
+
+          .to(spaceship.current, {
+            y: -200,
+            z: -500,
+            scale: 0.65,
+            rotateX: -7,
+
+            duration: 3,
+
+            ease: "power3.in",
+          })
+
+          .to(
+            horizonAtmosphere.current,
+            {
+              y: 650,
+              scale: 1.18,
+              autoAlpha: 0.7,
+
+              duration: 3,
+
+              ease: "power3.in",
+            },
+            "<",
+          )
+
+          .to(
+            ".hero-star-layer",
+            {
+              y: 450,
+              scale: 1.4,
+              opacity: 0.68,
+
+              duration: 3,
+
+              ease: "power3.in",
+            },
+            "<",
+          )
+
+          /*
+           * =====================================================
+           * 4. FINAL SKY CLIMB
+           * =====================================================
+           */
+
+          .to(spaceship.current, {
+            y: -250,
+            z: -1000,
+            scale: 0.42,
+            rotateX: -8,
+
+            duration: 3.5,
+
+            ease: "power3.inOut",
+          })
+
+          .to(
+            horizonAtmosphere.current,
+            {
+              y: 1000,
+              scale: 1.3,
+              autoAlpha: 0.25,
+
+              duration: 3.5,
+
+              ease: "power3.in",
+            },
+            "<",
+          )
+
+          .to(
+            ".hero-star-layer",
+            {
+              y: 700,
+              scale: 1.8,
+              opacity: 0.65,
+
+              duration: 3.5,
+
+              ease: "power3.in",
+            },
+            "<",
+          )
+
+          /*
+           * =====================================================
+           * WHOOSH
+           * =====================================================
+           */
+
+          .call(() => {
+            playSound(whooshAudio.current);
+          })
+
+          /*
+           * =====================================================
+           * 5. FINAL DEPARTURE
+           * =====================================================
+           */
+
+          .to(spaceship.current, {
+            y: -300,
+            z: -1800,
+            scale: 0.012,
+            rotateX: -10,
+
+            duration: 3,
+
+            ease: "power4.in",
+          })
+
+          .to(
+            horizonAtmosphere.current,
+            {
+              y: 1400,
+              scale: 1.45,
+              autoAlpha: 0,
+
+              duration: 3,
+
+              ease: "power4.in",
+            },
+            "<",
+          )
+
+          .to(
+            ".hero-star-layer",
+            {
+              y: 1000,
+              scale: 2.2,
+              opacity: 0.6,
+
+              duration: 3,
+
+              ease: "power4.in",
+            },
+            "<",
+          )
+
+          /*
+           * =====================================================
+           * SHIP LEAVES VIEW
+           * =====================================================
+           */
+
+          .to(spaceship.current, {
+            autoAlpha: 0,
+            duration: 0.5,
+            ease: "power2.out",
+          })
+
+          /*
+           * =====================================================
+           * DEPARTURE BURST
+           * =====================================================
+           */
+
+          .to(q(".ship-departure-burst"), {
+            autoAlpha: 1,
+            scale: 0.2,
+
+            duration: 0.05,
+
+            ease: "power4.out",
+          })
+
+          /*
+           * Bright central star.
+           */
+          .to(q(".ship-departure-star"), {
+            scale: 5,
+            autoAlpha: 1,
+
+            duration: 0.12,
+
+            ease: "expo.out",
+          })
+
+          /*
+           * First energy pulse.
+           */
+          .to(
+            q(".ship-departure-burst"),
+            {
+              scale: 18,
+              autoAlpha: 0,
+
+              duration: 0.65,
+
+              ease: "expo.out",
+            },
+            "<",
+          )
+
+          /*
+           * Bright core contraction.
+           */
+          .to(q(".ship-departure-star"), {
+            scale: 2,
+
+            duration: 0.12,
+
+            ease: "expo.inOut",
+          })
+
+          /*
+           * =====================================================
+           * SECOND ENERGY PULSE
+           * =====================================================
+           */
+
+          .to(q(".ship-departure-burst"), {
+            autoAlpha: 0.8,
+            scale: 0.4,
+
+            duration: 0.08,
+
+            ease: "power3.out",
+          })
+
+          .to(
+            q(".ship-departure-burst"),
+            {
+              scale: 10,
+              autoAlpha: 0,
+
+              duration: 0.45,
+
+              ease: "expo.out",
+            },
+            "<",
+          )
+
+          /*
+           * =====================================================
+           * DISTANT STAR
+           * =====================================================
+           */
+
+          .to(q(".ship-departure-star"), {
+            scale: 0.7,
+            autoAlpha: 0.95,
+
+            duration: 0.5,
+
+            ease: "power3.inOut",
+          })
+
+          /*
+           * Small twinkle.
+           */
+          .to(q(".ship-departure-star"), {
+            scale: 1.4,
+            autoAlpha: 1,
+
+            duration: 0.18,
+
+            ease: "power2.out",
+          })
+
+          .to(q(".ship-departure-star"), {
+            scale: 0.55,
+            autoAlpha: 0.7,
+
+            duration: 0.25,
+
+            ease: "power2.inOut",
+          })
+
+          /*
+           * Final distant star.
+           */
+          .to(q(".ship-departure-star"), {
+            scale: 0.25,
+            autoAlpha: 0.85,
+
+            duration: 1.2,
+
+            ease: "power2.out",
+          })
+
+          /*
+           * Slowly disappear.
+           */
+          .to(q(".ship-departure-star"), {
+            scale: 0.1,
+            autoAlpha: 0,
+
+            duration: 1.8,
+
+            ease: "power2.out",
+          });
+      };
+
+      /*
+       * =========================================================
+       * 05. MASTER CINEMATIC TIMELINE
+       * =========================================================
        */
 
       const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
+
           start: "top top",
-          end: "+=9000",
+
+          /*
+           * Single source of truth.
+           */
+          end: `+=${TIMELINE_DISTANCE}`,
+
           scrub: 2,
+
           pin: true,
+
           anticipatePin: 1,
 
           onUpdate: (self) => {
@@ -867,1353 +1777,56 @@ export default function CinematicHero() {
              */
             if (self.progress <= 0.001) {
               stopCinematicAudio();
-
-              /*
-               * Make absolutely sure the looping ship animations
-               * are disabled at the starting position.
-               */
-              shipFloat.pause();
-              shipDrift.pause();
-              engineIdle.pause();
-              engineBurst.pause();
             }
           },
         },
       });
 
       /*
-       * ===========================================================
-       * SCENE 1
-       * COCKPIT / VIEW DECK
-       *
-       * The viewer begins inside the spacecraft.
-       *
-       * The exterior ship is NOT the focus yet.
-       *
-       * Sequence:
-       *
-       *   cockpit
-       *      ↓
-       *   welcome
-       *      ↓
-       *   pilot identification
-       *      ↓
-       *   destination
-       *      ↓
-       *   system diagnostics
-       *      ↓
-       *   system complete
-       *
-       * The system check is the final event of Scene 1.
-       * ===========================================================
+       * =========================================================
+       * ADD CINEMATIC SCENES
+       * =========================================================
        */
 
-      timeline
-        .addLabel("scene1")
+      addScene1(timeline);
 
-        /*
-         * Make sure the ship itself remains parked and dormant
-         * while the viewer is inside the view deck.
-         */
-        .call(() => {
-          shipFloat.pause();
-          shipDrift.pause();
-          engineIdle.pause();
-          engineBurst.pause();
+      addScene2(timeline);
 
-          if (engineHum.current) {
-            engineHum.current.pause();
-            engineHum.current.currentTime = 0;
-          }
-        })
+      addScene4(timeline);
 
-        /*
-         * ---------------------------------------------------------
-         * COCKPIT ESTABLISHING SHOT
-         * ---------------------------------------------------------
-         */
+      addScene5(timeline);
 
-        .to(cockpit.current, {
-          autoAlpha: 1,
-          duration: 1.2,
-          ease: "power2.out",
-        })
+      addScene6(timeline);
 
-        .call(() => {
-          playSound(scanAudio.current, 0.45);
-        })
+      addScene7(timeline);
 
-        /*
-         * Small cinematic pause.
-         */
-        .to(
-          {},
-          {
-            duration: 0.5,
-          },
-        )
-
-        /*
-         * ---------------------------------------------------------
-         * WELCOME MESSAGE
-         * ---------------------------------------------------------
-         */
-
-        .set(welcome.current, {
-          autoAlpha: 1,
-        })
-
-        .call(() => {
-          playSound(navigationAudio.current, 0.4);
-        })
-
-        .to(q(".welcome-modal"), {
-          autoAlpha: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power3.out",
-        })
-
-        .to(
-          q(".welcome-line"),
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.55,
-            stagger: 0.18,
-            ease: "power3.out",
-          },
-          "-=0.3",
-        )
-
-        .to(
-          {},
-          {
-            duration: 1,
-          },
-        )
-
-        .to(welcome.current, {
-          autoAlpha: 0,
-          duration: 0.55,
-          ease: "power2.inOut",
-        })
-
-        /*
-         * ---------------------------------------------------------
-         * PILOT IDENTIFICATION
-         * ---------------------------------------------------------
-         */
-
-        .set(pilot.current, {
-          autoAlpha: 1,
-        })
-
-        .call(() => {
-          playSound(navigationAudio.current, 0.4);
-        })
-
-        .to(
-          {},
-          {
-            duration: 0.25,
-          },
-        )
-
-        .to(q(".pilot-line"), {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.6,
-          stagger: 0.16,
-          ease: "power3.out",
-        })
-
-        .to(
-          {},
-          {
-            duration: 1.2,
-          },
-        )
-
-        .to(pilot.current, {
-          autoAlpha: 0,
-          duration: 0.55,
-          ease: "power2.inOut",
-        })
-
-        /*
-         * ---------------------------------------------------------
-         * DESTINATION / NAVIGATION
-         * ---------------------------------------------------------
-         */
-
-        .set(destination.current, {
-          autoAlpha: 1,
-        })
-
-        .call(() => {
-          playSound(navigationAudio.current, 0.4);
-        })
-
-        .to(q(".map-grid"), {
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-        })
-
-        .to(
-          q(".destination-line"),
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.6,
-            stagger: 0.16,
-            ease: "power3.out",
-          },
-          "-=0.3",
-        )
-
-        .to(q(".map-target"), {
-          scale: 1,
-          opacity: 1,
-          duration: 0.7,
-          ease: "back.out(1.7)",
-        })
-
-        .to(q(".map-target"), {
-          scale: 1.12,
-          duration: 0.45,
-          repeat: 2,
-          yoyo: true,
-          ease: "sine.inOut",
-        })
-
-        .call(() => {
-          playSound(navigationAudio.current, 0.3);
-        })
-
-        .to(
-          {},
-          {
-            duration: 0.9,
-          },
-        )
-
-        .to(destination.current, {
-          autoAlpha: 0,
-          duration: 0.6,
-          ease: "power2.inOut",
-        })
-
-        /*
-         * ---------------------------------------------------------
-         * SYSTEM DIAGNOSTICS
-         * ---------------------------------------------------------
-         *
-         * This is intentionally the FINAL part of Scene 1.
-         */
-        .set(system.current, {
-          autoAlpha: 1,
-        })
-
-        .to(q(".system-line"), {
-          x: 0,
-          autoAlpha: 1,
-          duration: 0.45,
-          stagger: 0.22,
-          ease: "power2.out",
-        })
-
-        .call(() => {
-          playSound(systemAudio.current, 0.3);
-        })
-
-        .to(q(".system-progress"), {
-          width: "100%",
-          duration: 2.1,
-          ease: "power1.inOut",
-        })
-
-        .to(
-          {},
-          {
-            duration: 0.7,
-          },
-        )
-
-        /*
-         * System disappears.
-         *
-         * This is the transition point into Scene 2.
-         */
-        .to(system.current, {
-          autoAlpha: 0,
-          duration: 0.7,
-          ease: "power2.inOut",
-        })
-
-        .to(
-          {},
-          {
-            duration: 0.6,
-          },
-        );
+      addScene9Departure(timeline);
 
       /*
-       * ===========================================================
-       * SCENE 2
-       * CINEMATIC CAMERA DESCENT / PARKED SHIP REVEAL
+       * =========================================================
+       * 06. PROGRESS TRACKER
+       * =========================================================
        *
-       * The viewer starts high above the environment and gradually
-       * descends toward the parked spaceship.
-       *
-       * The stars move upward while the camera descends, creating
-       * the feeling of traveling from the sky toward the ground.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene2")
-
-        // -----------------------------------------------------------
-        // HIDE COCKPIT
-        // -----------------------------------------------------------
-        .to(cockpit.current, {
-          autoAlpha: 0,
-          scale: 1.02,
-          duration: 1.2,
-          ease: "power2.inOut",
-        })
-
-        // -----------------------------------------------------------
-        // PREPARE SHIP
-        // -----------------------------------------------------------
-        .set(spaceship.current, {
-          autoAlpha: 1,
-          scale: 0.5,
-          y: 0,
-          rotateX: 0,
-          rotateY: 10,
-        })
-
-        // -----------------------------------------------------------
-        // INITIAL CAMERA POSITION
-        //
-        // Start high above the parked spaceship.
-        // The ship is initially lower in the composition.
-        // -----------------------------------------------------------
-        .set(shipCamera.current, {
-          y: 2200,
-          scale: 1.35,
-          transformOrigin: "50% 100%",
-        })
-
-        // -----------------------------------------------------------
-        // SMALL PAUSE
-        //
-        // Gives the viewer a moment to see the environment
-        // before the descent begins.
-        // -----------------------------------------------------------
-        .to(
-          {},
-          {
-            duration: 0.8,
-          },
-        )
-
-        // ===========================================================
-        // LONG CINEMATIC CAMERA DESCENT
-        //
-        // Increased from 6.5s → 10s.
-        //
-        // This is now the main visual movement of Scene 2.
-        // ===========================================================
-        .to(shipCamera.current, {
-          y: -35,
-          scale: 1,
-          duration: 30,
-          ease: "power2.inOut",
-        })
-
-        // -----------------------------------------------------------
-        // STARS MOVE UPWARD WITH THE CAMERA
-        //
-        // Same duration keeps the star field synchronized with
-        // the camera descent.
-        // -----------------------------------------------------------
-        .to(
-          ".hero-star-layer",
-          {
-            y: 0,
-            scale: 1,
-            opacity: 0.65,
-            duration: 30,
-            ease: "power1.inOut",
-          },
-          "<",
-        )
-
-        // ===========================================================
-        // HORIZON ATMOSPHERE APPEARS
-        //
-        // Begin revealing the ground/horizon as the camera starts
-        // descending.
-        // ===========================================================
-        .to(
-          horizonAtmosphere.current,
-          {
-            opacity: 1,
-            autoAlpha: 1,
-            duration: 30,
-            ease: "power2.out",
-          },
-          "<",
-        )
-
-        // -----------------------------------------------------------
-        // COCKPIT POWER
-        // -----------------------------------------------------------
-        .to(q(".ship-cockpit-light"), {
-          autoAlpha: 1,
-          duration: 0.8,
-          ease: "power2.out",
-        })
-
-        // -----------------------------------------------------------
-        // SIDE ENGINE-POD LIGHTS
-        // -----------------------------------------------------------
-        .to(
-          q(".ship-side-light"),
-          {
-            autoAlpha: 1,
-            duration: 0.7,
-            ease: "power2.out",
-          },
-          "-=0.35",
-        )
-
-        // -----------------------------------------------------------
-        // NAVIGATION LIGHTS
-        // -----------------------------------------------------------
-        .to(
-          q(".ship-nav-light"),
-          {
-            autoAlpha: 1,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          "-=0.25",
-        )
-
-        // -----------------------------------------------------------
-        // SHIP AURA
-        // -----------------------------------------------------------
-        .to(
-          q(".ship-aura"),
-          {
-            autoAlpha: 0.35,
-            duration: 1,
-            ease: "power2.out",
-          },
-          "-=0.2",
-        )
-
-        // -----------------------------------------------------------
-        // INITIAL ENGINE POWER
-        //
-        // Internal glow only — NOT the engine flame.
-        // -----------------------------------------------------------
-        .to(
-          q(".ship-engine-glow"),
-          {
-            autoAlpha: 0.35,
-            scale: 1.03,
-            duration: 0.8,
-            ease: "power2.out",
-          },
-          "-=0.4",
-        )
-
-        .to(
-          {},
-          {
-            duration: 0.8,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * SCENE 3
-       * COUNTDOWN
-       *
-       * ONLY countdown.
-       *
-       * There is no second countdown later.
-       * ===========================================================
-       */
-
-      countdownState.current.value = 10;
-      lastCountdownValue.current = 10;
-
-      timeline
-        .addLabel("scene3")
-
-        .set(countdown.current, {
-          autoAlpha: 1,
-        })
-
-        .to(q(".countdown-line"), {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.55,
-          stagger: 0.14,
-          ease: "power3.out",
-        })
-
-        /*
-         * Brief anticipation.
-         */
-        .to(
-          {},
-          {
-            duration: 0.5,
-          },
-        )
-
-        .set(countNumber.current, {
-          textContent: "10",
-        })
-
-        /*
-         * 10 → 0
-         */
-        .to(countdownState.current, {
-          value: 0,
-          duration: 10,
-          ease: "none",
-
-          onUpdate: () => {
-            if (!countNumber.current) return;
-
-            const nextValue = Math.ceil(countdownState.current.value);
-
-            countNumber.current.textContent = String(nextValue);
-
-            if (
-              nextValue !== lastCountdownValue.current &&
-              nextValue < lastCountdownValue.current
-            ) {
-              playSound(countdownAudio.current, 0.42);
-
-              lastCountdownValue.current = nextValue;
-            }
-          },
-        })
-
-        /*
-         * Countdown disappears.
-         */
-        .to(countdown.current, {
-          autoAlpha: 0,
-          duration: 0.65,
-          ease: "power2.inOut",
-        })
-
-        .to(
-          {},
-          {
-            duration: 0.4,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * SCENE 4
-       * ENGINE PREPARATION
-       *
-       * No launch yet.
-       * No full flame yet.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene4")
-
-        /*
-         * Engine housing begins charging.
-         */
-        .to(q(".ship-engine-glow"), {
-          autoAlpha: 0.85,
-          scale: 1.1,
-          duration: 0.8,
-          ease: "power2.out",
-        })
-
-        /*
-         * Aura expands.
-         */
-        .to(
-          q(".ship-aura"),
-          {
-            autoAlpha: 0.5,
-            duration: 0.7,
-            ease: "power2.out",
-          },
-          "-=0.4",
-        )
-
-        /*
-         * Ground glow increases.
-         */
-        .to(
-          q(".ship-ground-glow"),
-          {
-            autoAlpha: 0.45,
-            duration: 0.7,
-            ease: "power2.out",
-          },
-          "-=0.4",
-        )
-
-        /*
-         * Engine preparation hold.
-         */
-        .to(
-          {},
-          {
-            duration: 1,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * SCENE 5
-       * ENGINE IGNITION
-       *
-       * Ignition starts.
-       * Launch energy begins building.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene5")
-
-        .call(() => {
-          playSound(engineFlickerAudio.current, 0.7);
-        })
-
-        /*
-         * Launch energy begins.
-         */
-        .to(launchGlow.current, {
-          autoAlpha: 0.45,
-          scale: 0.65,
-          duration: 0.9,
-          ease: "power2.out",
-        })
-
-        /*
-         * Engine flame begins to respond.
-         */
-        .to(q(".engine-flame"), {
-          autoAlpha: 1,
-          scaleY: 0.5,
-          scaleX: 0.82,
-          duration: 0.45,
-          ease: "power2.out",
-        })
-
-        /*
-         * Brief ignition hold.
-         */
-        .to(
-          {},
-          {
-            duration: 0.6,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * SCENE 6
-       * ENGINE IDLE / FLICKER
-       *
-       * Rapid visual engine flicker.
-       *
-       * This is deliberately separate from the actual full-thrust
-       * ignition in Scene 7.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene6")
-
-        /*
-         * Start the rapid visual flame flicker.
-         */
-        .call(() => {
-          engineIdle.play();
-        })
-        // Start gentle spacecraft floating
-
-        /*
-         * Hold the running engine.
-         */
-        .to(
-          {},
-          {
-            duration: 1.8,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * SCENE 7
-       * FINAL IGNITION
-       *
-       * The engine transitions from flickering idle to full thrust.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene7")
-
-        /*
-         * Full engine flame.
-         */
-        .to(q(".engine-flame"), {
-          autoAlpha: 1,
-          scaleY: 1,
-          scaleX: 1,
-          duration: 0.65,
-          ease: "power2.inOut",
-        })
-
-        /*
-         * Engine becomes extremely bright.
-         */
-        .to(q(".ship-engine-glow"), {
-          autoAlpha: 1,
-          scale: 1.3,
-          duration: 0.6,
-          ease: "power2.out",
-        })
-
-        /*
-         * Launch glow expands.
-         */
-        .to(
-          launchGlow.current,
-          {
-            autoAlpha: 0.8,
-            scale: 0.95,
-            duration: 0.8,
-            ease: "power2.out",
-          },
-          "-=0.3",
-        )
-
-        /*
-         * Final tension hold.
-         */
-        .to(
-          {},
-          {
-            duration: 0.8,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * SCENE 8
-       * SMOOTH SKY LAUNCH
-       * ===========================================================
-       *
-       * The spacecraft:
-       *
-       * 1. Lifts gently from the landing area
-       * 2. Builds thrust
-       * 3. Accelerates upward
-       * 4. Continues climbing into the sky
-       * 5. Gradually moves farther away
-       * 6. Eventually becomes small naturally
-       *
-       * The terrain reacts underneath the ship as one group.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene8")
-
-        /*
-         * ===========================================================
-         * LAUNCH AUDIO
-         * ===========================================================
-         */
-
-        .call(() => {
-          if (engineHum.current) {
-            engineHum.current.pause();
-            engineHum.current.currentTime = 0;
-          }
-
-          playSound(launchAudio.current);
-        })
-
-        /*
-         * ===========================================================
-         * 1. GENTLE LIFT-OFF
-         * ===========================================================
-         *
-         * The ship slowly separates from the landing surface.
-         * ===========================================================
-         */
-
-        .to(spaceship.current, {
-          y: -60,
-          z: 20,
-          scale: 1,
-          rotateX: -2,
-          duration: 1.2,
-          ease: "power1.out",
-        })
-
-        /*
-         * ===========================================================
-         * TERRAIN — INITIAL REACTION
-         * ===========================================================
-         */
-
-        .to(
-          horizonAtmosphere.current,
-          {
-            y: 50,
-            scale: 1.01,
-            duration: 1.2,
-            ease: "power1.out",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * LAUNCH GLOW
-         * ===========================================================
-         */
-
-        .to(
-          launchGlow.current,
-          {
-            autoAlpha: 0,
-            scale: 0.85,
-            duration: 1,
-            ease: "power2.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * ENGINE IGNITION
-         * ===========================================================
-         */
-
-        .call(() => {
-          engineBurst.restart();
-        })
-
-        /*
-         * ===========================================================
-         * 2. BUILDING THRUST
-         * ===========================================================
-         *
-         * The spacecraft begins accelerating upward.
-         * ===========================================================
-         */
-
-        .to(spaceship.current, {
-          y: -180,
-          z: 60,
-          scale: 0.97,
-          rotateX: -4,
-          duration: 1.4,
-          ease: "power2.in",
-        })
-
-        /*
-         * ===========================================================
-         * TERRAIN — LIFTING AWAY
-         * ===========================================================
-         */
-
-        .to(
-          horizonAtmosphere.current,
-          {
-            y: 150,
-            scale: 1.035,
-            duration: 1.4,
-            ease: "power2.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * STAR FIELD — BEGIN MOVING
-         * ===========================================================
-         */
-
-        .to(
-          ".hero-star-layer",
-          {
-            y: 80,
-            scale: 1.06,
-            opacity: 0.78,
-            duration: 1.4,
-            ease: "power1.inOut",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * 3. STRONGER ASCENT
-         * ===========================================================
-         *
-         * Now the ship clearly begins climbing into the sky.
-         * ===========================================================
-         */
-
-        .to(spaceship.current, {
-          y: -180,
-          z: -120,
-          scale: 0.88,
-          rotateX: -6,
-          duration: 2.2,
-          ease: "power2.in",
-        })
-
-        /*
-         * ===========================================================
-         * TERRAIN — FALLING AWAY
-         * ===========================================================
-         */
-
-        .to(
-          horizonAtmosphere.current,
-          {
-            y: 320,
-            scale: 1.08,
-            duration: 2.2,
-            ease: "power2.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * STAR FIELD — CAMERA ACCELERATION
-         * ===========================================================
-         */
-
-        .to(
-          ".hero-star-layer",
-          {
-            y: 220,
-            scale: 1.18,
-            opacity: 0.72,
-            duration: 2.2,
-            ease: "power2.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * 4. HIGH-ALTITUDE ASCENT
-         * ===========================================================
-         *
-         * The ship continues climbing rather than disappearing.
-         * ===========================================================
-         */
-
-        .to(spaceship.current, {
-          y: -200,
-          z: -500,
-          scale: 0.65,
-          rotateX: -7,
-          duration: 3,
-          ease: "power3.in",
-        })
-
-        /*
-         * ===========================================================
-         * TERRAIN — RAPIDLY FALLING AWAY
-         * ===========================================================
-         */
-
-        .to(
-          horizonAtmosphere.current,
-          {
-            y: 650,
-            scale: 1.18,
-            autoAlpha: 0.7,
-            duration: 3,
-            ease: "power3.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * STAR FIELD — SKY TRANSITION
-         * ===========================================================
-         */
-
-        .to(
-          ".hero-star-layer",
-          {
-            y: 450,
-            scale: 1.4,
-            opacity: 0.68,
-            duration: 3,
-            ease: "power3.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * 5. FINAL SKY CLIMB
-         * ===========================================================
-         *
-         * The ship remains visible while climbing toward the
-         * upper part of the scene.
-         * ===========================================================
-         */
-
-        .to(spaceship.current, {
-          y: -250,
-          z: -1000,
-          scale: 0.42,
-          rotateX: -8,
-          duration: 3.5,
-          ease: "power3.inOut",
-        })
-
-        /*
-         * ===========================================================
-         * TERRAIN — LEAVING THE SURFACE
-         * ===========================================================
-         */
-
-        .to(
-          horizonAtmosphere.current,
-          {
-            y: 1000,
-            scale: 1.3,
-            autoAlpha: 0.25,
-            duration: 3.5,
-            ease: "power3.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * STAR FIELD — FINAL ACCELERATION
-         * ===========================================================
-         */
-
-        .to(
-          ".hero-star-layer",
-          {
-            y: 700,
-            scale: 1.8,
-            opacity: 0.65,
-            duration: 3.5,
-            ease: "power3.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * WHOOSH
-         * ===========================================================
-         */
-
-        .call(() => {
-          playSound(whooshAudio.current);
-        })
-
-        /*
-         * ===========================================================
-         * 6. FINAL DEPARTURE
-         * ===========================================================
-         *
-         * Only now does the ship leave the visible frame.
-         *
-         * IMPORTANT:
-         * No autoAlpha: 0.
-         *
-         * The ship disappears naturally because it travels
-         * beyond the camera view.
-         * ===========================================================
-         */
-
-        .to(spaceship.current, {
-          y: -300,
-          z: -1800,
-          scale: 0.012,
-          rotateX: -10,
-          duration: 3,
-          ease: "power4.in",
-        })
-
-        /*
-         * ===========================================================
-         * TERRAIN — COMPLETE DEPARTURE
-         * ===========================================================
-         */
-
-        .to(
-          horizonAtmosphere.current,
-          {
-            y: 1400,
-            scale: 1.45,
-            autoAlpha: 0,
-            duration: 3,
-            ease: "power4.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * STAR FIELD — DEEP SPACE
-         * ===========================================================
-         */
-
-        .to(
-          ".hero-star-layer",
-          {
-            y: 1000,
-            scale: 2.2,
-            opacity: 0.6,
-            duration: 3,
-            ease: "power4.in",
-          },
-          "<",
-        )
-
-        /*
-         * ===========================================================
-         * FINAL CYAN ATMOSPHERIC BURST
-         * ===========================================================
-         */
-
-        /* Tiny point appears exactly where the ship ends */
-        .set(q(".ship-departure-star"), {
-          autoAlpha: 0,
-          scale: 0.15,
-        })
-
-        .set(q(".ship-departure-burst"), {
-          autoAlpha: 0,
-          scale: 0.1,
-        })
-
-        /* Ship has become extremely distant */
-        .to(spaceship.current, {
-          scale: 0.012,
-          y: -5200,
-          z: -6500,
-          duration: 2.5,
-          ease: "expo.in",
-        })
-
-        /* Tiny cyan point appears */
-        .to(q(".ship-departure-star"), {
-          autoAlpha: 1,
-          scale: 0.8,
-          duration: 0.2,
-          ease: "power2.out",
-        })
-
-        /* CHARGE */
-        .to(q(".ship-departure-star"), {
-          scale: 2,
-          duration: 0.25,
-          ease: "power2.out",
-        })
-
-        /* =========================================================
-   MASSIVE CYAN BURST
-   ========================================================= */
-
-        .to(q(".ship-departure-burst"), {
-          autoAlpha: 1,
-          scale: 0.2,
-          duration: 0.05,
-          ease: "power4.out",
-        })
-
-        .to(q(".ship-departure-star"), {
-          scale: 5,
-          autoAlpha: 1,
-          duration: 0.12,
-          ease: "expo.out",
-        })
-
-        .to(
-          q(".ship-departure-burst"),
-          {
-            scale: 18,
-            autoAlpha: 0,
-            duration: 0.65,
-            ease: "expo.out",
-          },
-          "<",
-        )
-
-        /* Bright core */
-        .to(q(".ship-departure-star"), {
-          scale: 2,
-          duration: 0.12,
-          ease: "expo.inOut",
-        })
-
-        /* SECOND ENERGY PULSE */
-        .to(q(".ship-departure-burst"), {
-          autoAlpha: 0.8,
-          scale: 0.4,
-          duration: 0.08,
-          ease: "power3.out",
-        })
-
-        .to(
-          q(".ship-departure-burst"),
-          {
-            scale: 10,
-            autoAlpha: 0,
-            duration: 0.45,
-            ease: "expo.out",
-          },
-          "<",
-        )
-
-        /* Collapse into distant cyan star */
-        .to(q(".ship-departure-star"), {
-          scale: 0.7,
-          autoAlpha: 0.95,
-          duration: 0.5,
-          ease: "power3.inOut",
-        })
-
-        /* Tiny star twinkle */
-        .to(q(".ship-departure-star"), {
-          scale: 1.4,
-          autoAlpha: 1,
-          duration: 0.18,
-          ease: "power2.out",
-        })
-        .to(q(".ship-departure-star"), {
-          scale: 0.55,
-          autoAlpha: 0.7,
-          duration: 0.25,
-          ease: "power2.inOut",
-        })
-
-        /* Final distant star */
-        .to(q(".ship-departure-star"), {
-          scale: 0.25,
-          autoAlpha: 0.85,
-          duration: 1.2,
-          ease: "power2.out",
-        })
-
-        /* Slowly disappear */
-        .to(q(".ship-departure-star"), {
-          scale: 0.1,
-          autoAlpha: 0,
-          duration: 1.8,
-          ease: "power2.out",
-        })
-
-        /*
-         * -----------------------------------------------------------
-         * SPACECRAFT DISAPPEARS
-         * -----------------------------------------------------------
-         */
-
-        .to(spaceship.current, {
-          autoAlpha: 0,
-          duration: 0.5,
-          ease: "power2.out",
-        })
-
-        /*
-         * -----------------------------------------------------------
-         * DISTANT CYAN STAR
-         * -----------------------------------------------------------
-         */
-
-        .to(q(".ship-departure-star"), {
-          autoAlpha: 0.75,
-          scale: 0.8,
-          duration: 1.2,
-          ease: "power2.inOut",
-        })
-
-        /*
-         * -----------------------------------------------------------
-         * FINAL FADE INTO STAR FIELD
-         * -----------------------------------------------------------
-         */
-
-        .to(q(".ship-departure-star"), {
-          autoAlpha: 0,
-          scale: 0.25,
-          duration: 1.8,
-          ease: "power2.out",
-        });
-
-      /*
-       * ===========================================================
-       * SCENE 9
-       * DEEP-SPACE HOLD
-       *
-       * Final cinematic moment.
-       *
-       * No additional launch sequence.
-       * ===========================================================
-       */
-
-      timeline
-        .addLabel("scene9")
-
-        .to(
-          {},
-          {
-            duration: 1.8,
-          },
-        );
-
-      /*
-       * ===========================================================
-       * PROGRESS BAR
-       * ===========================================================
+       * Uses the SAME distance as the master timeline.
+       * =========================================================
        */
 
       ScrollTrigger.create({
         trigger: root.current,
+
         start: "top top",
-        end: "+=12000",
+
+        end: `+=${TIMELINE_DISTANCE}`,
 
         onUpdate: (self) => {
+          /*
+           * If you have a progress state/ref, update it here.
+           *
+           * Example:
+           *
+           * setProgress(self.progress);
+           */
+
           if (self.progress <= 0.001) {
             stopCinematicAudio();
           }
@@ -2221,12 +1834,24 @@ export default function CinematicHero() {
       });
     }, root);
 
+    /*
+     * ===========================================================
+     * 07. CLEANUP
+     * ===========================================================
+     */
+
     return () => {
+      /*
+       * -----------------------------------------------------------
+       * GSAP / ScrollTrigger
+       * -----------------------------------------------------------
+       */
+
       context.revert();
 
       /*
        * -----------------------------------------------------------
-       * STOP SHOOTING STAR TIMERS
+       * Shooting-star timers
        * -----------------------------------------------------------
        */
 
@@ -2242,7 +1867,7 @@ export default function CinematicHero() {
 
       /*
        * -----------------------------------------------------------
-       * CLEAN UP SHOOTING STAR TWEENS
+       * Shooting-star animations
        * -----------------------------------------------------------
        */
 
@@ -2258,39 +1883,50 @@ export default function CinematicHero() {
 
       /*
        * -----------------------------------------------------------
-       * STOP ALL AUDIO
+       * Stop audio
        * -----------------------------------------------------------
        */
 
       ambientAudio.current?.pause();
+
       engineHum.current?.pause();
+
       engineFlickerAudio.current?.pause();
 
       scanAudio.current?.pause();
+
       navigationAudio.current?.pause();
+
       systemAudio.current?.pause();
+
       countdownAudio.current?.pause();
 
       launchAudio.current?.pause();
+
       whooshAudio.current?.pause();
 
       /*
        * -----------------------------------------------------------
-       * RESET AUDIO REFS
+       * Reset audio refs
        * -----------------------------------------------------------
        */
 
       ambientAudio.current = null;
 
       engineHum.current = null;
+
       engineFlickerAudio.current = null;
 
       scanAudio.current = null;
+
       navigationAudio.current = null;
+
       systemAudio.current = null;
+
       countdownAudio.current = null;
 
       launchAudio.current = null;
+
       whooshAudio.current = null;
     };
   }, []);
@@ -3099,504 +2735,13 @@ text-cyan-300 opacity-0"
             <span className="h-1 w-1 rounded-full bg-cyan-400" />
           </div>
         </div>
-        {/* =====================================================
-            WELCOME SCENE
-        ===================================================== */}
-        <div
-          ref={welcome}
-          className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
-        >
-          <div className="relative w-full max-w-3xl border border-white/10 bg-black/20 backdrop-blur-[2px]">
-            <HudCorners />
 
-            <HudTitleBar
-              label="Passenger Communication"
-              status="Link Established"
-            />
-
-            <div className="welcome-line absolute left-5 top-[52px] font-mono text-[6px] uppercase tracking-[0.3em] text-white/20">
-              CHANNEL // 01
-            </div>
-
-            <div className="px-6 py-16 text-center md:px-12 md:py-20">
-              <div className="welcome-line font-mono text-[7px] uppercase tracking-[0.5em] text-cyan-300/60">
-                Deep Space Transit Authority
-              </div>
-
-              <h1 className="welcome-line mt-6 text-4xl font-light tracking-tight md:text-7xl">
-                Welcome,
-                <br />
-                <span className="bg-gradient-to-r from-cyan-200 via-white to-violet-300 bg-clip-text text-transparent">
-                  passenger.
-                </span>
-              </h1>
-
-              <div className="welcome-line mx-auto mt-8 h-px w-24 bg-cyan-300/40" />
-
-              <p className="welcome-line mx-auto mt-7 max-w-lg font-mono text-[7px] uppercase leading-7 tracking-[0.28em] text-white/30">
-                Your interstellar journey is about to begin.
-                <br />
-                Please remain seated while navigation systems initialize.
-              </p>
-            </div>
-
-            <div className="flex h-9 items-center justify-between border-t border-white/10 px-5">
-              <span className="font-mono text-[6px] uppercase tracking-[0.3em] text-white/20">
-                PASSENGER CHANNEL
-              </span>
-
-              <span className="font-mono text-[6px] uppercase tracking-[0.3em] text-cyan-300/50">
-                READY
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* =====================================================
-            PILOT SCENE
-        ===================================================== */}
-        <div
-          ref={pilot}
-          className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
-        >
-          <div className="relative w-full max-w-5xl border border-white/10 bg-black/20 backdrop-blur-[2px]">
-            <HudCorners />
-
-            <HudTitleBar label="Crew Identification" status="Profile Active" />
-
-            <div className="grid md:grid-cols-[280px_1fr]">
-              {/* Pilot portrait */}
-
-              <div className="pilot-line relative flex min-h-[310px] items-center justify-center border-b border-white/10 md:border-b-0 md:border-r">
-                <div className="relative h-56 w-44 overflow-hidden border border-white/10 bg-black/30">
-                  <div className="absolute inset-0 bg-gradient-to-b from-cyan-300/[0.08] via-transparent to-black/70" />
-
-                  <Image
-                    src="/images/profile.png"
-                    alt="Pilot profile"
-                    fill
-                    priority
-                    className="object-cover object-center grayscale-[20%]"
-                    sizes="340px"
-                  />
-
-                  {/* Scan */}
-
-                  <div className="pilot-scan-line absolute left-0 top-0 h-px w-full bg-cyan-300/70 shadow-[0_0_10px_rgba(34,211,238,.8)]" />
-
-                  <div className="absolute bottom-3 left-3 font-mono text-[5px] uppercase tracking-[0.25em] text-cyan-300/60">
-                    BIOMETRIC LOCK
-                  </div>
-
-                  <div className="absolute bottom-3 right-3 font-mono text-[5px] text-white/20">
-                    01
-                  </div>
-                </div>
-              </div>
-
-              {/* Pilot information */}
-
-              <div className="flex flex-col justify-center px-7 py-10 md:px-12">
-                <div className="pilot-line font-mono text-[7px] uppercase tracking-[0.35em] text-white/25">
-                  Mission Commander
-                </div>
-
-                <h2 className="pilot-line mt-4 text-4xl font-light tracking-tight md:text-6xl">
-                  Ramil
-                  <br />
-                  <span className="text-white/30">Aoanan.</span>
-                </h2>
-
-                <div className="pilot-line mt-7 h-px w-24 bg-cyan-300/40" />
-
-                <p className="pilot-line mt-7 max-w-xl font-mono text-[7px] uppercase leading-7 tracking-[0.25em] text-white/30">
-                  Full-stack developer and technical writer.
-                  <br />
-                  Frontend systems / interface architecture / digital
-                  exploration.
-                </p>
-
-                <div className="pilot-line mt-9 grid grid-cols-2 gap-6 border-t border-white/10 pt-6 md:grid-cols-3">
-                  <div>
-                    <div className="font-mono text-[5px] uppercase tracking-[0.3em] text-white/20">
-                      Clearance
-                    </div>
-
-                    <div className="mt-2 font-mono text-[7px] text-cyan-300/70">
-                      LEVEL 07
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="font-mono text-[5px] uppercase tracking-[0.3em] text-white/20">
-                      Role
-                    </div>
-
-                    <div className="mt-2 font-mono text-[7px] text-white/60">
-                      PILOT
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="font-mono text-[5px] uppercase tracking-[0.3em] text-white/20">
-                      Status
-                    </div>
-
-                    <div className="mt-2 font-mono text-[7px] text-cyan-300/70">
-                      ACTIVE
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex h-9 items-center justify-between border-t border-white/10 px-5">
-              <span className="font-mono text-[6px] uppercase tracking-[0.25em] text-white/20">
-                CREW DATABASE
-              </span>
-
-              <span className="font-mono text-[6px] uppercase tracking-[0.25em] text-cyan-300/50">
-                VERIFIED
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* =====================================================
-    DESTINATION SCENE — COMPACT HUD
-===================================================== */}
-        <div
-          ref={destination}
-          className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
-        >
-          <div className="relative w-full max-w-4xl border border-white/10 bg-black/20 backdrop-blur-[2px]">
-            <HudCorners />
-
-            {/* TITLE BAR */}
-
-            <HudTitleBar
-              label="Navigation System"
-              status="Auto Nav // Online"
-            />
-
-            {/* HEADER */}
-
-            <div className="destination-line flex items-end justify-between px-5 pb-4 pt-6 md:px-6">
-              <div>
-                <div className="font-mono text-[6px] uppercase tracking-[0.35em] text-white/25">
-                  Mission Navigation
-                </div>
-
-                <h2 className="mt-2 text-3xl font-light tracking-tight md:text-4xl">
-                  Destination
-                  <span className="text-white/30"> acquisition.</span>
-                </h2>
-              </div>
-
-              <div className="hidden text-right md:block">
-                <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-white/25">
-                  Navigation Status
-                </div>
-
-                <div className="mt-1 flex items-center justify-end gap-2 font-mono text-[7px] uppercase tracking-[0.25em] text-cyan-300">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_8px_rgba(34,211,238,1)]" />
-                  TARGET LOCKED
-                </div>
-              </div>
-            </div>
-
-            {/* MAP */}
-
-            <div className="destination-line relative mx-5 h-[280px] overflow-hidden border border-white/10 bg-black/20 md:mx-6 md:h-[300px]">
-              {/* GRID */}
-
-              <div
-                className="map-grid absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(100,180,255,.25) 1px, transparent 1px), linear-gradient(90deg, rgba(100,180,255,.25) 1px, transparent 1px)",
-                  backgroundSize: "40px 40px",
-                }}
-              />
-
-              {/* CROSSHAIR */}
-
-              <div className="pointer-events-none absolute left-0 right-0 top-1/2 h-px bg-cyan-300/10" />
-
-              <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 w-px bg-cyan-300/10" />
-
-              {/* RADAR RINGS */}
-
-              <div className="absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/10" />
-
-              <div className="absolute left-1/2 top-1/2 h-[135px] w-[135px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/15" />
-
-              <div className="absolute left-1/2 top-1/2 h-[75px] w-[75px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/20" />
-
-              {/* NAVIGATION VECTORS */}
-
-              <div className="absolute left-1/2 top-1/2 h-[210px] w-px -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gradient-to-b from-transparent via-cyan-300/10 to-transparent" />
-
-              <div className="absolute left-1/2 top-1/2 h-[210px] w-px -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-gradient-to-b from-transparent via-cyan-300/10 to-transparent" />
-
-              {/* ORIGIN */}
-
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/5 blur-xl" />
-
-                <div className="relative flex h-6 w-6 items-center justify-center rounded-full border border-cyan-300/30">
-                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(80,220,255,1)]" />
-                </div>
-
-                <div className="absolute left-1/2 top-8 -translate-x-1/2 whitespace-nowrap font-mono text-[5px] uppercase tracking-[0.3em] text-white/25">
-                  ORIGIN
-                </div>
-              </div>
-
-              {/* DESTINATION TARGET */}
-
-              <div className="map-target absolute left-[68%] top-[30%]">
-                <div className="relative flex h-11 w-11 items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border border-cyan-300/20" />
-
-                  <div className="absolute inset-2 rounded-full border border-cyan-300/30" />
-
-                  <div className="absolute inset-4 rounded-full border border-cyan-300/50" />
-
-                  <div className="relative h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_16px_rgba(80,220,255,1)]" />
-                </div>
-
-                {/* TARGET CROSSHAIR */}
-
-                <div className="absolute left-1/2 top-1/2 h-px w-12 -translate-x-1/2 bg-cyan-300/30" />
-
-                <div className="absolute left-1/2 top-1/2 h-12 w-px -translate-y-1/2 bg-cyan-300/30" />
-
-                {/* TARGET DATA */}
-
-                <div className="absolute left-12 top-0 whitespace-nowrap">
-                  <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-cyan-300">
-                    <span ref={selectedDestination}>
-                      {selectedMission.name}
-                    </span>
-                  </div>
-
-                  <div className="mt-1 font-mono text-[5px] uppercase tracking-[0.25em] text-white/30">
-                    TARGET // {selectedMission.code}
-                  </div>
-
-                  <div className="mt-1 font-mono text-[5px] uppercase tracking-[0.25em] text-white/20">
-                    DIST // {selectedMission.distance}
-                  </div>
-                </div>
-              </div>
-
-              {/* VECTOR LINE */}
-
-              <div className="absolute left-[52%] top-[48%] h-px w-[17%] origin-left rotate-[-18deg] bg-gradient-to-r from-cyan-300/10 via-cyan-300/30 to-cyan-300/70">
-                <div className="absolute right-0 top-1/2 h-1 w-1 -translate-y-1/2 rotate-45 border-r border-t border-cyan-300/80" />
-              </div>
-
-              {/* TOP LEFT TELEMETRY */}
-
-              <div className="absolute left-4 top-4 font-mono text-[5px] uppercase leading-4 tracking-[0.2em] text-white/30">
-                <div className="text-cyan-300/60">GALACTIC NAVIGATION</div>
-
-                <div>SECTOR // {selectedMission.code}</div>
-
-                <div>VECTOR // CALCULATED</div>
-
-                <div>TRAJECTORY // OPTIMAL</div>
-              </div>
-
-              {/* TOP RIGHT TELEMETRY */}
-
-              <div className="absolute right-4 top-4 text-right font-mono text-[5px] uppercase leading-4 tracking-[0.2em] text-white/30">
-                <div>SCAN // ACTIVE</div>
-
-                <div>SIGNAL // STABLE</div>
-
-                <div className="text-cyan-300/60">LOCK // CONFIRMED</div>
-              </div>
-
-              {/* BOTTOM LEFT */}
-
-              <div className="absolute bottom-4 left-4 font-mono text-[5px] uppercase tracking-[0.2em] text-white/25">
-                <div>DESTINATION</div>
-
-                <div className="mt-1 text-cyan-300/70">
-                  {selectedMission.name}
-                </div>
-              </div>
-
-              {/* BOTTOM RIGHT */}
-
-              <div className="absolute bottom-4 right-4 text-right font-mono text-[5px] uppercase tracking-[0.2em] text-white/25">
-                <div>NAVIGATION</div>
-
-                <div className="mt-1 text-cyan-300/70">AUTONOMOUS</div>
-              </div>
-
-              {/* CENTER STATUS */}
-
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[5px] uppercase tracking-[0.3em] text-white/20">
-                <span className="mr-2 inline-block h-1 w-1 rounded-full bg-cyan-400" />
-                MATRIX SYNCHRONIZED
-              </div>
-            </div>
-
-            {/* TELEMETRY STRIP */}
-
-            <div className="destination-line mx-5 mt-4 grid grid-cols-3 border-y border-white/10 md:mx-6">
-              <div className="border-r border-white/10 px-4 py-3">
-                <div className="font-mono text-[5px] uppercase tracking-[0.3em] text-white/25">
-                  Destination
-                </div>
-
-                <div className="mt-1 text-xs font-light text-white/70">
-                  {selectedMission.name}
-                </div>
-              </div>
-
-              <div className="border-r border-white/10 px-4 py-3">
-                <div className="font-mono text-[5px] uppercase tracking-[0.3em] text-white/25">
-                  Distance
-                </div>
-
-                <div className="mt-1 text-xs font-light text-white/70">
-                  {selectedMission.distance}
-                </div>
-              </div>
-
-              <div className="px-4 py-3">
-                <div className="font-mono text-[5px] uppercase tracking-[0.3em] text-white/25">
-                  Status
-                </div>
-
-                <div className="mt-1 flex items-center gap-2 font-mono text-[6px] text-cyan-300">
-                  <span className="h-1 w-1 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_6px_rgba(34,211,238,1)]" />
-                  LOCKED
-                </div>
-              </div>
-            </div>
-
-            {/* FOOTER */}
-
-            <div className="destination-line flex items-center justify-between px-5 py-4 font-mono text-[5px] uppercase tracking-[0.25em] text-white/20 md:px-6">
-              <span>{selectedMission.description}</span>
-
-              <span className="hidden md:block">
-                AUTO DESTINATION SELECTION
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* =====================================================
-            SYSTEM CHECK
-        ===================================================== */}
-        <div
-          ref={system}
-          className="hero-scene absolute inset-0 z-30 flex items-center justify-center px-5"
-        >
-          <div className="relative w-full max-w-4xl border border-white/10 bg-black/20 backdrop-blur-[2px]">
-            <HudCorners />
-
-            <HudTitleBar
-              label="Spacecraft Diagnostics"
-              status="System Scan // Running"
-            />
-
-            <div className="system-line px-6 pb-5 pt-8 md:px-9">
-              <div className="font-mono text-[6px] uppercase tracking-[0.35em] text-white/25">
-                Pre-flight diagnostic sequence
-              </div>
-
-              <h2 className="mt-3 text-4xl font-light md:text-5xl">
-                Systems
-                <span className="text-white/30"> check.</span>
-              </h2>
-            </div>
-
-            <div className="px-6 pb-7 md:px-9">
-              {[
-                ["PROPULSION", "THRUST ARRAY"],
-                ["NAVIGATION", "GUIDANCE CORE"],
-                ["LIFE SUPPORT", "ENVIRONMENTAL"],
-                ["COMMUNICATION", "DEEP SPACE LINK"],
-              ].map(([name, detail]) => (
-                <div
-                  key={name}
-                  className="system-line border-t border-white/10 py-5"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="font-mono text-[7px] tracking-[0.25em] text-white/60">
-                        {name}
-                      </div>
-
-                      <div className="mt-1 font-mono text-[5px] uppercase tracking-[0.2em] text-white/20">
-                        {detail}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-[6px] text-cyan-300/70">
-                        100%
-                      </span>
-
-                      <span className="flex h-5 w-5 items-center justify-center border border-cyan-300/20 text-[8px] text-cyan-300">
-                        ✓
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 h-px bg-white/5">
-                    <div className="system-progress h-px w-0 bg-cyan-300 shadow-[0_0_8px_rgba(34,211,238,.6)]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex h-9 items-center justify-between border-t border-white/10 px-5">
-              <span className="font-mono text-[6px] uppercase tracking-[0.25em] text-white/20">
-                DIAGNOSTIC ENGINE
-              </span>
-
-              <span className="font-mono text-[6px] uppercase tracking-[0.25em] text-cyan-300/60">
-                ALL SYSTEMS NOMINAL
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* =====================================================
-            SCENE 8
-            COUNTDOWN
-        ====================================================== */}
-        <div
-          ref={countdown}
-          className="hero-scene absolute inset-0 z-50 flex items-center justify-center"
-        >
-          <div className="text-center">
-            <div className="countdown-line font-mono text-[10px] uppercase tracking-[0.5em] text-cyan-300/70">
-              Launch sequence
-            </div>
-
-            <div
-              ref={countNumber}
-              className="countdown-line mt-5 text-[12rem] font-extralight leading-none tracking-tighter text-white md:text-[18rem]"
-            >
-              10
-            </div>
-
-            <div className="countdown-line mt-5 font-mono text-[9px] uppercase tracking-[0.4em] text-white/30">
-              Prepare for ignition
-            </div>
-          </div>
-        </div>
         {/* =====================================================
             ENGINE / LAUNCH GLOW
         ====================================================== */}
         <div
           ref={launchGlow}
-          className="launch-glow pointer-events-none absolute left-1/2 top-[70%] z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/50 blur-[70px]"
+          className="launch-glow pointer-events-none absolute left-1/2 top-[70%] z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/50 blur-[70px] opacity-0"
         />
         {/* =====================================================
             LAUNCH FLASH
