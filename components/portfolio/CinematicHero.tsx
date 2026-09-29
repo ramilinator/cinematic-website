@@ -1208,19 +1208,6 @@ export default function CinematicHero() {
 
           /*
            * -----------------------------------------------------
-           * Hide cockpit.
-           * -----------------------------------------------------
-           */
-
-          .to(cockpit.current, {
-            autoAlpha: 0,
-            scale: 1.02,
-            duration: 1.2,
-            ease: "power2.inOut",
-          })
-
-          /*
-           * -----------------------------------------------------
            * Reveal parked spacecraft.
            * -----------------------------------------------------
            */
@@ -2691,26 +2678,7 @@ text-center
 font-mono text-[8px]
 uppercase tracking-[0.35em]
 text-white/30"
-              >
-                <div>VESSEL // RA-01</div>
-
-                <div className="relative mt-1">
-                  {/* Initial state */}
-
-                  <span className="ship-docked-status text-white/30">
-                    DOCKED • SYSTEMS STANDBY
-                  </span>
-
-                  {/* Activated state */}
-
-                  <span
-                    className="ship-awake-status absolute left-0 top-0
-text-cyan-300 opacity-0"
-                  >
-                    AWAKE • FLIGHT SYSTEMS ONLINE
-                  </span>
-                </div>
-              </div>
+              ></div>
             </div>
           </div>
 
