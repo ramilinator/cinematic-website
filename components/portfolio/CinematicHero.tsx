@@ -116,8 +116,6 @@ function HudCorners() {
   );
 }
 
-type ShipPowerState = "off" | "system" | "engine" | "launch";
-
 export default function CinematicHero() {
   const root = useRef<HTMLDivElement>(null);
 
@@ -585,6 +583,48 @@ export default function CinematicHero() {
 
       let engineFlameTransition: gsap.core.Tween | null = null;
 
+      const antiGravityPulse = gsap.timeline({
+        repeat: -1,
+        yoyo: true,
+        paused: true,
+      });
+
+      antiGravityPulse
+        .to(
+          q(".ship-antigravity-beam"),
+          {
+            autoAlpha: 0.45,
+            scaleY: 0.82,
+            scaleX: 0.94,
+            duration: 1.1,
+            ease: "sine.inOut",
+          },
+          0,
+        )
+        .to(
+          q(".ship-antigravity-core"),
+          {
+            autoAlpha: 0.55,
+            scaleX: 0.82,
+            scaleY: 2,
+            duration: 1.1,
+            ease: "sine.inOut",
+          },
+          0,
+        );
+
+      const startAntiGravity = (hide = true) => {
+        antiGravityPulse.pause();
+
+        if (hide) {
+          gsap.to([q(".ship-antigravity-beam"), q(".ship-antigravity-core")], {
+            autoAlpha: 0,
+            duration: 0.4,
+            ease: "power2.out",
+          });
+        }
+      };
+
       /*
        * ---------------------------------------------------------
        * SHIP POWER STATE
@@ -667,6 +707,7 @@ export default function CinematicHero() {
          */
         if (state === "off") {
           engineIdle.pause();
+          startAntiGravity(false);
 
           gsap.to(q(".ship-cockpit-light"), {
             autoAlpha: 0,
@@ -706,18 +747,6 @@ export default function CinematicHero() {
           });
 
           /*
-           * Launch glow completely disappears.
-           */
-          if (launchGlow.current) {
-            gsap.to(launchGlow.current, {
-              autoAlpha: 0,
-              scale: 1,
-              duration,
-              ease: "power2.out",
-            });
-          }
-
-          /*
            * Flash is always reset when powered off.
            */
           if (launchFlash.current) {
@@ -748,6 +777,7 @@ export default function CinematicHero() {
          */
         if (state === "system") {
           activateShipSystems(duration);
+          startAntiGravity(true);
 
           gsap.to(q(".ship-aura"), {
             autoAlpha: 0.35,
@@ -767,18 +797,6 @@ export default function CinematicHero() {
             duration,
             ease: "power2.out",
           });
-
-          /*
-           * Launch effects stay dormant.
-           */
-          if (launchGlow.current) {
-            gsap.to(launchGlow.current, {
-              autoAlpha: 0,
-              scale: 1,
-              duration,
-              ease: "power2.out",
-            });
-          }
 
           if (launchFlash.current) {
             gsap.set(launchFlash.current, {
@@ -827,27 +845,6 @@ export default function CinematicHero() {
             ease: "power2.out",
           });
 
-          /*
-           * Small launch glow starts appearing.
-           *
-           * This is intentionally subtle here.
-           */
-          if (launchGlow.current) {
-            gsap.to(launchGlow.current, {
-              autoAlpha: 0.15,
-              scale: 1.05,
-              duration,
-              ease: "power2.out",
-            });
-          }
-
-          if (launchFlash.current) {
-            gsap.set(launchFlash.current, {
-              autoAlpha: 0,
-              scale: 1,
-            });
-          }
-
           engineFlameTransition = gsap.to(q(".engine-flame"), {
             autoAlpha: 1,
             scaleX: 0.65,
@@ -873,6 +870,7 @@ export default function CinematicHero() {
          * Maximum continuous power.
          */
         if (state === "launch") {
+          startAntiGravity(false);
           gsap.to(q(".ship-aura"), {
             autoAlpha: 0.9,
             duration,
@@ -891,18 +889,6 @@ export default function CinematicHero() {
             duration,
             ease: "power2.out",
           });
-
-          /*
-           * Strong continuous launch glow.
-           */
-          if (launchGlow.current) {
-            gsap.to(launchGlow.current, {
-              autoAlpha: 0.7,
-              scale: 1.2,
-              duration,
-              ease: "power2.out",
-            });
-          }
 
           /*
            * Flash remains OFF.
@@ -1001,34 +987,6 @@ export default function CinematicHero() {
             ease: "power3.out",
           },
           0.08,
-        )
-
-        /*
-         * =========================================================
-         * 2. LAUNCH GLOW SURGE
-         * =========================================================
-         */
-
-        .to(
-          launchGlow.current,
-          {
-            autoAlpha: 1,
-            scale: 1.5,
-            duration: 0.12,
-            ease: "power4.out",
-          },
-          0,
-        )
-
-        .to(
-          launchGlow.current,
-          {
-            autoAlpha: 0.75,
-            scale: 1.25,
-            duration: 0.45,
-            ease: "power3.out",
-          },
-          0.12,
         )
 
         /*
@@ -1367,6 +1325,10 @@ export default function CinematicHero() {
            * Gentle lift-off.
            * -----------------------------------------------------
            */
+
+          .call(() => {
+            antiGravityPulse.play();
+          })
 
           .to(spaceship.current, {
             y: -200,
@@ -2182,8 +2144,8 @@ Hidden initially by GSAP.
 
             <div
               className="ship-ground-glow absolute left-1/2 top-[79%]
-h-10 w-[470px] -translate-x-1/2 rounded-[50%]
-bg-cyan-400/20 blur-3xl"
+h-5 w-[300px] -translate-x-1/2 rounded-[50%]
+bg-cyan-400/20 blur-2xl"
             />
 
             {/* =======================================================
@@ -2604,6 +2566,20 @@ shadow-[0_0_12px_rgba(255,255,255,0.95),0_0_30px_rgba(34,211,238,0.95),0_0_55px_
                   />
                 </div>
 
+                {/* Anti-gravity beam */}
+                <div className="ship-antigravity-beam pointer-events-none absolute left-1/2 top-full z-[-1] h-[300px] w-[180px] -translate-x-1/2 origin-top opacity-0">
+                  <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(120,220,255,0.75),rgba(80,140,255,0.3),transparent)] blur-[18px]" />
+
+                  <div className="absolute left-1/2 top-0 h-full w-[55px] -translate-x-1/2 bg-[linear-gradient(to_bottom,rgba(220,250,255,0.9),rgba(80,190,255,0.35),transparent)] blur-[8px]" />
+                </div>
+
+                {/* Anti-gravity core */}
+                <div className="ship-antigravity-core pointer-events-none absolute left-1/2 top-full z-[-1] h-[24px] w-[110px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0">
+                  <div className="absolute inset-0 rounded-full bg-cyan-200 blur-[5px]" />
+
+                  <div className="absolute inset-x-[15%] top-1/2 h-[5px] -translate-y-1/2 rounded-full bg-white shadow-[0_0_12px_rgba(180,240,255,1),0_0_28px_rgba(80,180,255,0.9)]" />
+                </div>
+
                 {/* ===================================================
 LOWER REACTOR / STRUCTURAL DETAILS
 ==================================================== */}
@@ -2702,13 +2678,6 @@ text-white/30"
             0_0_130px_rgba(6,182,212,0.4)]"
           />
 
-          {/* =====================================================
-            ENGINE / LAUNCH GLOW
-        ====================================================== */}
-          <div
-            ref={launchGlow}
-            className="launch-glow pointer-events-none absolute left-1/2 top-[70%] z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/50 blur-[70px] opacity-0"
-          />
           {/* =====================================================
             LAUNCH FLASH
         ====================================================== */}
