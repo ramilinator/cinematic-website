@@ -585,16 +585,14 @@ export default function CinematicHero() {
       const engineIdle = gsap.to(q(".engine-flame"), {
         scaleY: 0.86,
         scaleX: 0.94,
-
         duration: 0.14,
-
         repeat: -1,
         yoyo: true,
-
         ease: "sine.inOut",
-
         paused: true,
       });
+
+      let engineFlameTransition: gsap.core.Tween | null = null;
 
       /*
        * ---------------------------------------------------------
@@ -608,16 +606,49 @@ export default function CinematicHero() {
        * ---------------------------------------------------------
        */
 
+      type ShipPowerState = "off" | "system" | "engine" | "launch";
+
       let currentShipState: ShipPowerState = "off";
 
+      /*
+       * =========================================================
+       * SHIP SYSTEMS
+       * =========================================================
+       *
+       * These elements remain active once the ship has powered on.
+       * We do not need to redeclare them in every later state.
+       */
+
+      const activateShipSystems = (duration: number) => {
+        gsap.to(q(".ship-cockpit-light"), {
+          autoAlpha: 1,
+          duration,
+          ease: "power2.out",
+        });
+
+        gsap.to(q(".ship-side-light"), {
+          autoAlpha: 1,
+          duration,
+          ease: "power2.out",
+        });
+
+        gsap.to(q(".ship-nav-light"), {
+          autoAlpha: 1,
+          duration,
+          ease: "power2.out",
+        });
+      };
+
+      /*
+       * =========================================================
+       * SHIP POWER STATE
+       * =========================================================
+       */
       const setShipPowerState = (state: ShipPowerState, immediate = false) => {
         currentShipState = state;
 
         const duration = immediate ? 0 : 0.5;
 
-        /*
-         * Stop any previous transition.
-         */
         gsap.killTweensOf([
           q(".ship-cockpit-light"),
           q(".ship-side-light"),
@@ -625,15 +656,24 @@ export default function CinematicHero() {
           q(".ship-aura"),
           q(".ship-ground-glow"),
           q(".ship-engine-glow"),
-          q(".engine-flame"),
+          launchGlow.current,
+          launchFlash.current,
         ]);
 
         /*
-         * =======================================================
-         * OFF
-         * =======================================================
+         * Kill only the temporary flame transition.
+         *
+         * Do NOT kill .engine-flame directly because engineIdle
+         * also controls it.
          */
+        engineFlameTransition?.kill();
+        engineFlameTransition = null;
 
+        /*
+         * =========================================================
+         * OFF
+         * =========================================================
+         */
         if (state === "off") {
           engineIdle.pause();
 
@@ -674,7 +714,29 @@ export default function CinematicHero() {
             ease: "power2.out",
           });
 
-          gsap.to(q(".engine-flame"), {
+          /*
+           * Launch glow completely disappears.
+           */
+          if (launchGlow.current) {
+            gsap.to(launchGlow.current, {
+              autoAlpha: 0,
+              scale: 1,
+              duration,
+              ease: "power2.out",
+            });
+          }
+
+          /*
+           * Flash is always reset when powered off.
+           */
+          if (launchFlash.current) {
+            gsap.set(launchFlash.current, {
+              autoAlpha: 0,
+              scale: 1,
+            });
+          }
+
+          engineFlameTransition = gsap.to(q(".engine-flame"), {
             autoAlpha: 0,
             scaleX: 0.5,
             scaleY: 0,
@@ -686,35 +748,15 @@ export default function CinematicHero() {
         }
 
         /*
-         * =======================================================
+         * =========================================================
          * SYSTEM
-         * =======================================================
+         * =========================================================
          *
-         * Ship is powered.
-         * Engine remains dormant.
-         * =======================================================
+         * Electronics online.
+         * No launch glow yet.
          */
-
         if (state === "system") {
-          engineIdle.pause();
-
-          gsap.to(q(".ship-cockpit-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
-          gsap.to(q(".ship-side-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
-          gsap.to(q(".ship-nav-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
+          activateShipSystems(duration);
 
           gsap.to(q(".ship-aura"), {
             autoAlpha: 0.35,
@@ -735,7 +777,26 @@ export default function CinematicHero() {
             ease: "power2.out",
           });
 
-          gsap.to(q(".engine-flame"), {
+          /*
+           * Launch effects stay dormant.
+           */
+          if (launchGlow.current) {
+            gsap.to(launchGlow.current, {
+              autoAlpha: 0,
+              scale: 1,
+              duration,
+              ease: "power2.out",
+            });
+          }
+
+          if (launchFlash.current) {
+            gsap.set(launchFlash.current, {
+              autoAlpha: 0,
+              scale: 1,
+            });
+          }
+
+          engineFlameTransition = gsap.to(q(".engine-flame"), {
             autoAlpha: 0,
             scaleX: 0.5,
             scaleY: 0,
@@ -743,39 +804,19 @@ export default function CinematicHero() {
             ease: "power2.out",
           });
 
+          engineIdle.pause();
+
           return;
         }
 
         /*
-         * =======================================================
+         * =========================================================
          * ENGINE
-         * =======================================================
+         * =========================================================
          *
-         * Engine becomes active.
-         *
-         * Once the flame is visible, engineIdle begins looping.
-         * =======================================================
+         * Engine starts building power.
          */
-
         if (state === "engine") {
-          gsap.to(q(".ship-cockpit-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
-          gsap.to(q(".ship-side-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
-          gsap.to(q(".ship-nav-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
           gsap.to(q(".ship-aura"), {
             autoAlpha: 0.55,
             duration,
@@ -795,7 +836,28 @@ export default function CinematicHero() {
             ease: "power2.out",
           });
 
-          gsap.to(q(".engine-flame"), {
+          /*
+           * Small launch glow starts appearing.
+           *
+           * This is intentionally subtle here.
+           */
+          if (launchGlow.current) {
+            gsap.to(launchGlow.current, {
+              autoAlpha: 0.15,
+              scale: 1.05,
+              duration,
+              ease: "power2.out",
+            });
+          }
+
+          if (launchFlash.current) {
+            gsap.set(launchFlash.current, {
+              autoAlpha: 0,
+              scale: 1,
+            });
+          }
+
+          engineFlameTransition = gsap.to(q(".engine-flame"), {
             autoAlpha: 1,
             scaleX: 0.65,
             scaleY: 0.6,
@@ -803,10 +865,6 @@ export default function CinematicHero() {
             ease: "power2.out",
 
             onComplete: () => {
-              /*
-               * Prevent a stale callback from starting
-               * engineIdle after the state has changed.
-               */
               if (currentShipState === "engine") {
                 engineIdle.play();
               }
@@ -817,37 +875,13 @@ export default function CinematicHero() {
         }
 
         /*
-         * =======================================================
+         * =========================================================
          * LAUNCH
-         * =======================================================
+         * =========================================================
          *
-         * Persistent idle animation stops.
-         *
-         * The launch sequence takes control of the flame.
-         * =======================================================
+         * Maximum continuous power.
          */
-
         if (state === "launch") {
-          engineIdle.pause();
-
-          gsap.to(q(".ship-cockpit-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
-          gsap.to(q(".ship-side-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
-          gsap.to(q(".ship-nav-light"), {
-            autoAlpha: 1,
-            duration,
-            ease: "power2.out",
-          });
-
           gsap.to(q(".ship-aura"), {
             autoAlpha: 0.9,
             duration,
@@ -867,16 +901,44 @@ export default function CinematicHero() {
             ease: "power2.out",
           });
 
-          gsap.to(q(".engine-flame"), {
+          /*
+           * Strong continuous launch glow.
+           */
+          if (launchGlow.current) {
+            gsap.to(launchGlow.current, {
+              autoAlpha: 0.7,
+              scale: 1.2,
+              duration,
+              ease: "power2.out",
+            });
+          }
+
+          /*
+           * Flash remains OFF.
+           *
+           * It will only fire during engineBurst.
+           */
+          if (launchFlash.current) {
+            gsap.set(launchFlash.current, {
+              autoAlpha: 0,
+              scale: 1,
+            });
+          }
+
+          /*
+           * Keep engineIdle running.
+           */
+          engineFlameTransition = gsap.to(q(".engine-flame"), {
             autoAlpha: 1,
             scaleX: 1,
             scaleY: 1.3,
             duration,
             ease: "power2.out",
           });
+
+          return;
         }
       };
-
       /*
        * =========================================================
        * 04.2 ENGINE BURST
@@ -890,35 +952,142 @@ export default function CinematicHero() {
 
       const engineBurst = gsap.timeline({
         paused: true,
+
+        onStart: () => {
+          /*
+           * engineIdle stops temporarily.
+           *
+           * The burst now controls the flame.
+           */
+          engineIdle.pause();
+
+          /*
+           * Reset flash before every ignition.
+           */
+          if (launchFlash.current) {
+            gsap.set(launchFlash.current, {
+              autoAlpha: 0,
+              scale: 0.5,
+            });
+          }
+        },
+
+        onComplete: () => {
+          /*
+           * Return flame control to engineIdle after the burst.
+           */
+          if (currentShipState === "launch") {
+            engineIdle.play();
+          }
+        },
       });
 
       engineBurst
-        .set(q(".engine-flame"), {
-          autoAlpha: 1,
-          scaleX: 1,
-          scaleY: 1,
-        })
 
-        .to(q(".engine-flame"), {
-          scaleY: 2.8,
-          scaleX: 1.12,
-          duration: 0.12,
-          ease: "power4.out",
-        })
+        /*
+         * =========================================================
+         * 1. FLASH
+         * =========================================================
+         */
 
-        .to(q(".engine-flame"), {
-          scaleY: 4.5,
-          scaleX: 1.25,
-          duration: 0.16,
-          ease: "power3.in",
-        })
+        .to(
+          launchFlash.current,
+          {
+            autoAlpha: 1,
+            scale: 1.2,
+            duration: 0.08,
+            ease: "power4.out",
+          },
+          0,
+        )
 
-        .to(q(".engine-flame"), {
-          scaleY: 1.4,
-          scaleX: 1,
-          duration: 0.3,
-          ease: "power3.out",
-        });
+        .to(
+          launchFlash.current,
+          {
+            autoAlpha: 0,
+            scale: 2.5,
+            duration: 0.35,
+            ease: "power3.out",
+          },
+          0.08,
+        )
+
+        /*
+         * =========================================================
+         * 2. LAUNCH GLOW SURGE
+         * =========================================================
+         */
+
+        .to(
+          launchGlow.current,
+          {
+            autoAlpha: 1,
+            scale: 1.5,
+            duration: 0.12,
+            ease: "power4.out",
+          },
+          0,
+        )
+
+        .to(
+          launchGlow.current,
+          {
+            autoAlpha: 0.75,
+            scale: 1.25,
+            duration: 0.45,
+            ease: "power3.out",
+          },
+          0.12,
+        )
+
+        /*
+         * =========================================================
+         * 3. ENGINE FLAME BURST
+         * =========================================================
+         */
+
+        .set(
+          q(".engine-flame"),
+          {
+            autoAlpha: 1,
+            scaleX: 1,
+            scaleY: 1,
+          },
+          0,
+        )
+
+        .to(
+          q(".engine-flame"),
+          {
+            scaleY: 2.8,
+            scaleX: 1.12,
+            duration: 0.12,
+            ease: "power4.out",
+          },
+          0,
+        )
+
+        .to(
+          q(".engine-flame"),
+          {
+            scaleY: 4.5,
+            scaleX: 1.25,
+            duration: 0.16,
+            ease: "power3.in",
+          },
+          0.12,
+        )
+
+        .to(
+          q(".engine-flame"),
+          {
+            scaleY: 1.4,
+            scaleX: 1,
+            duration: 0.3,
+            ease: "power3.out",
+          },
+          0.28,
+        );
 
       /*
        * =========================================================
@@ -926,12 +1095,17 @@ export default function CinematicHero() {
        * =========================================================
        */
 
-      const initializeScene = () => {
+      const initializeCinematicState = () => {
         /*
          * -------------------------------------------------------
          * SPACECRAFT
          * -------------------------------------------------------
          */
+
+        /*
+         * Ship is completely dormant.
+         */
+        setShipPowerState("off", true);
 
         gsap.set(spaceship.current, {
           y: 0,
@@ -943,10 +1117,15 @@ export default function CinematicHero() {
           rotateY: 10,
         });
 
-        /*
-         * Ship is completely dormant.
-         */
-        setShipPowerState("off", true);
+        gsap.set(launchGlow.current, {
+          autoAlpha: 0,
+          scale: 1,
+        });
+
+        gsap.set(launchFlash.current, {
+          autoAlpha: 0,
+          scale: 1,
+        });
 
         /*
          * -------------------------------------------------------
@@ -999,7 +1178,7 @@ export default function CinematicHero() {
         });
       };
 
-      initializeScene();
+      initializeCinematicState();
 
       /*
        * =========================================================
@@ -1294,16 +1473,6 @@ export default function CinematicHero() {
           })
 
           /*
-           * -----------------------------------------------------
-           * Final ignition burst.
-           * -----------------------------------------------------
-           */
-
-          .call(() => {
-            engineBurst.restart();
-          })
-
-          /*
            * Final tension hold.
            */
           .to(
@@ -1338,21 +1507,6 @@ export default function CinematicHero() {
               duration: 1.8,
             },
           )
-
-          /*
-           * -----------------------------------------------------
-           * SHUT DOWN PERSISTENT SHIP EFFECTS
-           *
-           * Important:
-           *
-           * The ship is now leaving the scene, so persistent
-           * lights/glows/flame must disappear.
-           * -----------------------------------------------------
-           */
-
-          .call(() => {
-            setShipPowerState("off");
-          })
 
           /*
            * =====================================================
@@ -1494,6 +1648,16 @@ export default function CinematicHero() {
           )
 
           /*
+           * -----------------------------------------------------
+           * Final ignition burst.
+           * -----------------------------------------------------
+           */
+
+          .call(() => {
+            engineBurst.restart();
+          })
+
+          /*
            * =====================================================
            * 4. FINAL SKY CLIMB
            * =====================================================
@@ -1603,6 +1767,21 @@ export default function CinematicHero() {
             autoAlpha: 0,
             duration: 0.5,
             ease: "power2.out",
+          })
+
+          /*
+           * -----------------------------------------------------
+           * SHUT DOWN PERSISTENT SHIP EFFECTS
+           *
+           * Important:
+           *
+           * The ship is now leaving the scene, so persistent
+           * lights/glows/flame must disappear.
+           * -----------------------------------------------------
+           */
+
+          .call(() => {
+            setShipPowerState("off");
           })
 
           /*
