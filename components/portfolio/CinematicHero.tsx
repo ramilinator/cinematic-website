@@ -127,15 +127,6 @@ export default function CinematicHero() {
    * =============================================================
    */
 
-  const cockpit = useRef<HTMLDivElement>(null);
-  const welcome = useRef<HTMLDivElement>(null);
-  const pilot = useRef<HTMLDivElement>(null);
-  const destination = useRef<HTMLDivElement>(null);
-  const selectedDestination = useRef<HTMLSpanElement>(null);
-  const system = useRef<HTMLDivElement>(null);
-  const countdown = useRef<HTMLDivElement>(null);
-
-  const starLayer = useRef<HTMLDivElement | null>(null);
   const starRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const shootingCursor = useRef(0);
 
@@ -1193,22 +1184,6 @@ export default function CinematicHero() {
         tl.addLabel("scene1")
 
           /*
-           * Cockpit establishing shot.
-           */
-          .to(cockpit.current, {
-            autoAlpha: 1,
-            duration: 1.2,
-            ease: "power2.out",
-          })
-
-          /*
-           * Scan sound.
-           */
-          .call(() => {
-            playSound(scanAudio.current, 0.45);
-          })
-
-          /*
            * Small cinematic pause.
            */
           .to(
@@ -2174,13 +2149,7 @@ export default function CinematicHero() {
         >
           AUDIO SYSTEM // {audioOn ? "ONLINE" : "OFFLINE"}
         </button>
-        <div className="pointer-events-none absolute left-0 right-0 top-0 z-40 flex items-center justify-between px-6 py-6 font-mono text-[10px] tracking-[0.3em] text-white/40 md:px-12">
-          <span>RAMIL / EXPLORATION SYSTEM</span>
 
-          <span className="hidden md:block">MISSION // 001</span>
-
-          <span>ONLINE</span>
-        </div>
         {/* =====================================================
             SIDE PROGRESS
         ====================================================== */}
@@ -2241,11 +2210,11 @@ REAR SHADOW / SILHOUETTE
 
               <div
                 className="absolute left-1/2 top-[42%]
-h-[115px] w-[480px]
--translate-x-1/2
-rounded-[50%]
-bg-black/80
-blur-2xl"
+                h-[115px] w-[480px]
+                -translate-x-1/2
+                rounded-[50%]
+                bg-black/80
+                blur-2xl"
               />
 
               {/* =====================================================
@@ -2472,29 +2441,6 @@ h-[58px] w-px
 -translate-x-1/2
 rotate-[2deg]
 bg-white/[0.08]"
-                  />
-
-                  {/* Cockpit reflection */}
-
-                  <div
-                    className="absolute left-[25px] top-[14px]
-h-px w-[55px]
-rotate-[12deg]
-bg-white/10"
-                  />
-
-                  {/* =================================================
-COCKPIT POWER INDICATOR
-Hidden initially by GSAP.
-================================================== */}
-
-                  <div
-                    className="ship-cockpit-light absolute bottom-[10px]
-left-1/2 h-px w-12
--translate-x-1/2
-bg-cyan-300
-opacity-0
-shadow-[0_0_12px_rgba(34,211,238,0.9)]"
                   />
                 </div>
 
@@ -2788,6 +2734,21 @@ text-cyan-300 opacity-0"
             0_0_130px_rgba(6,182,212,0.4)]"
           />
 
+          {/* =====================================================
+            ENGINE / LAUNCH GLOW
+        ====================================================== */}
+          <div
+            ref={launchGlow}
+            className="launch-glow pointer-events-none absolute left-1/2 top-[70%] z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/50 blur-[70px] opacity-0"
+          />
+          {/* =====================================================
+            LAUNCH FLASH
+        ====================================================== */}
+          <div
+            ref={launchFlash}
+            className="pointer-events-none absolute left-1/2 top-1/2 z-[50] h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-200 opacity-0 shadow-[0_0_30px_rgba(34,211,238,1),0_0_80px_rgba(6,182,212,0.9),0_0_150px_rgba(6,182,212,0.6)]"
+          />
+
           {/* =========================================================
     ALIEN LANDING ZONE
     Cinematic extraterrestrial parking environment
@@ -2888,63 +2849,6 @@ text-cyan-300 opacity-0"
       FINAL ATMOSPHERIC VIGNETTE
   ======================================================== */}
           </div>
-        </div>
-        {/* =====================================================
-            SCENE 1
-            COCKPIT
-        ====================================================== */}
-        <div
-          ref={cockpit}
-          className="cockpit-frame pointer-events-none absolute inset-0 z-30"
-        >
-          {/* TOP COCKPIT FRAME */}
-          <div className="absolute left-0 right-0 top-0 h-[14vh] border-b border-white/10 bg-gradient-to-b from-black/80 via-black/30 to-transparent">
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 font-mono text-[8px] tracking-[0.5em] text-white/25">
-              FLIGHT DECK
-            </div>
-          </div>
-
-          {/* BOTTOM COCKPIT / DASHBOARD */}
-          <div className="absolute bottom-0 left-1/2 h-[32vh] w-[120%] -translate-x-1/2 rounded-[50%_50%_0_0] border border-white/10 bg-gradient-to-t from-black via-black/50 to-transparent" />
-
-          {/* BOTTOM STATUS */}
-          <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-3 font-mono text-[8px] tracking-[0.4em] text-white/25">
-            <span className="h-1 w-1 rounded-full bg-cyan-400" />
-            FLIGHT DECK
-            <span className="h-1 w-1 rounded-full bg-cyan-400" />
-          </div>
-        </div>
-
-        {/* =====================================================
-            ENGINE / LAUNCH GLOW
-        ====================================================== */}
-        <div
-          ref={launchGlow}
-          className="launch-glow pointer-events-none absolute left-1/2 top-[70%] z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/50 blur-[70px] opacity-0"
-        />
-        {/* =====================================================
-            LAUNCH FLASH
-        ====================================================== */}
-        <div
-          ref={launchFlash}
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[50] h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-200 opacity-0 shadow-[0_0_30px_rgba(34,211,238,1),0_0_80px_rgba(6,182,212,0.9),0_0_150px_rgba(6,182,212,0.6)]"
-        />
-        {/* =====================================================
-            LAUNCH STATUS
-        ====================================================== */}
-        <div className="launch-status pointer-events-none absolute bottom-20 left-1/2 z-[80] -translate-x-1/2 opacity-0 font-mono text-[8px] uppercase tracking-[0.4em] text-cyan-300">
-          <span className="mr-3 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,1)]" />
-          LAUNCHING
-        </div>
-        {/* =====================================================
-            BOTTOM HUD
-        ====================================================== */}
-        <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-50 flex items-center justify-between px-6 font-mono text-[8px] uppercase tracking-[0.3em] text-white/20 md:px-12">
-          <span>LAT 14.5995°</span>
-
-          <span className="hidden md:block">DIGITAL EXPLORATION UNIT</span>
-
-          <span>LONG 120.9842°</span>
         </div>
       </div>
     </section>
