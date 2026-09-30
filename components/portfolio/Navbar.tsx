@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const links = [
   { label: "About", href: "#about" },
@@ -12,9 +12,41 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const hero = document.getElementById("cinematic-hero");
+
+      if (!hero) {
+        setShowNavbar(true);
+        return;
+      }
+
+      const heroBottom = hero.getBoundingClientRect().bottom + window.scrollY;
+
+      setShowNavbar(window.scrollY >= heroBottom);
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
-    <header className="fixed left-0 top-0 z-[100] w-full">
+    <header
+      className={`
+    fixed left-0 right-0 top-0 z-50
+    transition-all duration-500 ease-out
+    ${showNavbar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}
+  `}
+    >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
         <a
           href="#top"

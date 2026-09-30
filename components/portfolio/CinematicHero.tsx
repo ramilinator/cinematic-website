@@ -207,6 +207,83 @@ function Spacecraft() {
     </div>
   );
 }
+
+function WelcomePassenger() {
+  return (
+    <div className="relative w-[min(620px,calc(100vw-32px))]">
+      <div
+        className="
+          relative overflow-hidden
+          border border-cyan-300/20
+          bg-[#020b12]/70
+          px-6 py-8
+          backdrop-blur-[5px]
+          sm:px-10 sm:py-10
+        "
+      >
+        {/* HUD corners */}
+        <div className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-cyan-300/80" />
+        <div className="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-cyan-300/80" />
+        <div className="absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 border-cyan-300/80" />
+        <div className="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-cyan-300/80" />
+
+        {/* Top accent */}
+        <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
+
+        <div className="relative text-center">
+          {/* System label */}
+          <div className="mb-5 flex items-center justify-center gap-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />
+
+            <span className="font-mono text-[9px] tracking-[0.35em] text-cyan-300/60">
+              EXPLORATION SYSTEM // NX-01
+            </span>
+
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />
+          </div>
+
+          {/* Main title */}
+          <div className="font-mono text-[10px] tracking-[0.4em] text-cyan-300/60">
+            PASSENGER ACCESS
+          </div>
+
+          <h2 className="mt-3 text-3xl font-light tracking-[0.18em] text-white sm:text-5xl">
+            WELCOME ABOARD
+          </h2>
+
+          <div className="mx-auto mt-5 h-px w-32 bg-gradient-to-r from-transparent via-cyan-300/60 to-transparent" />
+
+          <p className="mx-auto mt-5 max-w-md font-mono text-[9px] leading-6 tracking-[0.18em] text-white/45 sm:text-[10px] sm:leading-7">
+            PASSENGER IDENTIFICATION ACKNOWLEDGED.
+            <br />
+            PREPARE FOR DEEP SPACE EXPLORATION.
+          </p>
+
+          {/* Status */}
+          <div className="mt-7 flex items-center justify-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee]" />
+
+            <span className="font-mono text-[8px] tracking-[0.3em] text-cyan-300/70">
+              BOARDING SEQUENCE CONFIRMED
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom information */}
+        <div className="mt-7 flex justify-between border-t border-cyan-300/10 pt-3">
+          <span className="font-mono text-[7px] tracking-[0.25em] text-white/20">
+            MISSION // 001
+          </span>
+
+          <span className="font-mono text-[7px] tracking-[0.25em] text-cyan-300/35">
+            ACCESS GRANTED
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* -------------------------------------------------------------------------- */
 /* PILOT PROFILE HUD                                                          */
 /* -------------------------------------------------------------------------- */
@@ -447,7 +524,9 @@ function PilotProfile() {
 
 export default function CinematicHero() {
   const scrollProgress = useRef<HTMLDivElement>(null);
+  const header = useRef<HTMLElement>(null);
   const root = useRef<HTMLDivElement>(null);
+  const welcomePassenger = useRef<HTMLDivElement>(null);
   const starsLayer = useRef<HTMLDivElement>(null);
   const ship = useRef<HTMLDivElement>(null);
   const shipGlow = useRef<HTMLDivElement>(null);
@@ -479,6 +558,12 @@ export default function CinematicHero() {
         y: 150,
         scale: 0.82,
         opacity: 0,
+      });
+
+      gsap.set(welcomePassenger.current, {
+        opacity: 0,
+        scale: 0.96,
+        y: 10,
       });
 
       gsap.set(pilotProfile.current, {
@@ -554,6 +639,26 @@ export default function CinematicHero() {
        * SCENE 01
        * Pilot identification appears in the center.
        */
+
+      intro
+        .to(welcomePassenger.current, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 1.2,
+          ease: "power3.out",
+        })
+        .to(welcomePassenger.current, {
+          opacity: 1,
+          duration: 2,
+        })
+        .to(welcomePassenger.current, {
+          opacity: 0,
+          scale: 1.02,
+          y: -10,
+          duration: 0.8,
+          ease: "power2.inOut",
+        });
 
       intro
         .to(pilotProfile.current, {
@@ -909,12 +1014,13 @@ export default function CinematicHero() {
   return (
     <main
       ref={root}
+      id="cinematic-hero"
       className="
-        relative h-screen w-full
-        overflow-hidden
-        bg-[#02030a]
-        text-white
-      "
+    relative h-screen w-full
+    overflow-hidden
+    bg-[#02030a]
+    text-white
+  "
     >
       {/* ------------------------------------------------------------------ */}
       {/* SPACE BACKGROUND                                                   */}
@@ -1108,6 +1214,31 @@ export default function CinematicHero() {
           </div>
         </div>
       </div>
+
+      {/* Welcome */}
+      <div
+        ref={welcomePassenger}
+        className="
+      absolute
+      left-1/2
+      top-1/2
+      z-[36]
+      -translate-x-1/2
+      -translate-y-1/2
+      "
+      >
+        <WelcomePassenger />
+      </div>
+
+      {/* Ship */}
+      <div
+        ref={ship}
+        className="
+      absolute left-1/2 top-[57%]
+      z-20
+      -translate-x-1/2
+      "
+      ></div>
 
       {/* ------------------------------------------------------------------ */}
       {/* CENTER PILOT PROFILE                                                */}
