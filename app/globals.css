@@ -248,3 +248,43 @@ body {
     transform: translate3d(42vw, 31vh, 0) rotate(28deg) scaleX(1.05);
   }
 }
+
+@keyframes profileScan {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(625%);
+    opacity: 0;
+  }
+}
+
+@keyframes profileScanLine {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(625%);
+    opacity: 0;
+  }
+}
