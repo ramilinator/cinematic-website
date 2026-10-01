@@ -1404,7 +1404,7 @@ export default function CinematicHero() {
         {/* TOP HUD                                                             */}
         {/* ------------------------------------------------------------------ */}
 
-        <header className="absolute left-0 right-0 top-0 z-40 px-6 py-6 md:px-10">
+        <header className="absolute left-0 right-0 top-10 z-40 px-6 py-6 md:px-10">
           <div className="flex items-start justify-between">
             <div>
               <div className="font-mono text-xs tracking-[0.45em] text-cyan-300">
@@ -1545,6 +1545,7 @@ export default function CinematicHero() {
       bg-black/10
       p-4
       backdrop-blur-sm
+       left-1/2 top-[-100%] -translate-x-1/2 -translate-y-1/2
     "
         >
           <HudCorners />
@@ -1971,7 +1972,7 @@ export default function CinematicHero() {
       {/* BOTTOM HUD                                                          */}
       {/* ------------------------------------------------------------------ */}
 
-      <div className="absolute bottom-7 left-0 right-0 z-40 px-6 md:px-10">
+      <div className="absolute bottom-20 left-0 right-0 z-40 px-6 md:px-10">
         <div className="flex items-end justify-between">
           <div>
             <HudLabel>CRAFT</HudLabel>
@@ -1981,31 +1982,31 @@ export default function CinematicHero() {
             </div>
           </div>
 
+          {/* Scroll indicator */}
+          <div className="mx-auto mt-5 flex w-[160px] flex-col items-center">
+            <div className="font-mono text-[7px] tracking-[0.35em] text-white/25">
+              SCROLL TO LAUNCH
+            </div>
+
+            <div className="mt-3 h-[1px] w-full overflow-hidden bg-white/10">
+              <div
+                ref={scrollProgress}
+                className="
+                h-full
+                w-[4%]
+                bg-cyan-300/70
+                shadow-[0_0_8px_rgba(34,211,238,0.7)]
+              "
+              />
+            </div>
+          </div>
+
           <div className="text-right">
             <HudLabel violet>FLIGHT MODE</HudLabel>
 
             <div className="mt-1 font-mono text-[10px] tracking-[0.25em] text-white/60">
               STANDBY
             </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="mx-auto mt-5 flex w-[160px] flex-col items-center">
-          <div className="font-mono text-[7px] tracking-[0.35em] text-white/25">
-            SCROLL TO LAUNCH
-          </div>
-
-          <div className="mt-3 h-[1px] w-full overflow-hidden bg-white/10">
-            <div
-              ref={scrollProgress}
-              className="
-                h-full
-                w-[4%]
-                bg-cyan-300/70
-                shadow-[0_0_8px_rgba(34,211,238,0.7)]
-              "
-            />
           </div>
         </div>
       </div>
