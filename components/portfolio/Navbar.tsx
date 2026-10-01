@@ -16,21 +16,12 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const hero = document.getElementById("cinematic-hero");
+      const heroHeight = window.innerHeight;
 
-      if (!hero) {
-        setShowNavbar(true);
-        return;
-      }
-
-      const heroBottom = hero.getBoundingClientRect().bottom + window.scrollY;
-
-      setShowNavbar(window.scrollY >= heroBottom);
+      setShowNavbar(window.scrollY > heroHeight);
     };
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     handleScroll();
 
@@ -43,6 +34,11 @@ export default function Navbar() {
     <header
       className={`
     fixed left-0 right-0 top-0 z-50
+    border-b border-white/10
+    bg-[#03040d]/35
+    backdrop-blur-2xl
+    backdrop-saturate-150
+    shadow-[0_8px_40px_rgba(0,0,0,0.25)]
     transition-all duration-500 ease-out
     ${showNavbar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}
   `}

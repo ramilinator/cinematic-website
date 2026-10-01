@@ -23,13 +23,33 @@ gsap.registerPlugin(ScrollTrigger);
 |--------------------------------------------------------------------------
 */
 
-const stars = Array.from({ length: 180 }, (_, i) => ({
-  id: i,
-  left: `${(i * 47.37) % 100}%`,
-  top: `${(i * 71.83) % 100}%`,
-  size: i % 7 === 0 ? 2 : 1,
-  opacity: 0.25 + ((i * 13) % 60) / 100,
-}));
+const stars = Array.from({ length: 220 }, (_, i) => {
+  const x = (i * 47.37) % 100;
+  const y = (i * 71.83) % 100;
+
+  // Distance from the center of the screen.
+  const dx = x - 50;
+  const dy = y - 50;
+
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  return {
+    id: i,
+    left: `${x}%`,
+    top: `${y}%`,
+
+    // Direction away from the camera's vanishing point.
+    dx,
+    dy,
+
+    // Stars closer to the center start smaller/dimmer.
+    depth: Math.min(1, distance / 70),
+
+    size: i % 9 === 0 ? 2 : i % 3 === 0 ? 1.5 : 1,
+
+    opacity: 0.2 + ((i * 13) % 65) / 100,
+  };
+});
 
 function HudCorners() {
   return (
@@ -528,6 +548,7 @@ export default function CinematicHero() {
   const root = useRef<HTMLDivElement>(null);
   const welcomePassenger = useRef<HTMLDivElement>(null);
   const starsLayer = useRef<HTMLDivElement>(null);
+  const starRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const ship = useRef<HTMLDivElement>(null);
   const shipGlow = useRef<HTMLDivElement>(null);
   const horizon = useRef<HTMLDivElement>(null);
@@ -547,6 +568,80 @@ export default function CinematicHero() {
         "PROPULSION SYSTEM STANDBY",
         "FLIGHT CONTROL READY",
       ];
+
+      /*
+       * ----------------------------------------------------------------------
+       * STARFIELD INITIAL STATE
+       * ----------------------------------------------------------------------
+       *
+       * The center of the screen is the forward-facing vanishing point.
+       *
+       * Stars begin relatively close to the vanishing point and expand
+       * outward as the spacecraft moves forward.
+       */
+      gsap.set(starsLayer.current, {
+        scale: 0.72,
+        opacity: 0.75,
+        transformOrigin: "50% 50%",
+      });
+
+      const starAnimations: gsap.core.Timeline[] = [];
+
+      starRefs.current.forEach((star, index) => {
+        if (!star) return;
+
+        const data = stars[index];
+
+        const length = Math.sqrt(data.dx ** 2 + data.dy ** 2);
+
+        if (length === 0) return;
+
+        const dirX = data.dx / length;
+        const dirY = data.dy / length;
+
+        const travel = 600 + (1 - data.depth) * 1000;
+
+        const duration = 1.8 + data.depth * 2 + ((index * 19) % 100) / 100;
+
+        const delay = (((index * 41.37) % 100) / 100) * duration;
+
+        const timeline = gsap.timeline({
+          repeat: -1,
+          delay,
+        });
+
+        timeline
+          .set(star, {
+            x: 0,
+            y: 0,
+            scale: 0.35,
+            opacity: 0,
+          })
+
+          /*
+           * Star emerges from the distance.
+           */
+          .to(star, {
+            opacity: data.opacity * 0.7,
+            scale: 0.8,
+            duration: duration * 0.18,
+            ease: "power2.out",
+          })
+
+          /*
+           * Star accelerates toward the edge.
+           */
+          .to(star, {
+            x: dirX * travel,
+            y: dirY * travel,
+            scale: 2.5 + data.depth * 3,
+            opacity: 0,
+            duration: duration * 0.82,
+            ease: "power2.in",
+          });
+
+        starAnimations.push(timeline);
+      });
 
       /*
        * ----------------------------------------------------------------------
@@ -826,6 +921,10 @@ export default function CinematicHero() {
         0,
       );
 
+      starAnimations.forEach((animation) => {
+        animation.play();
+      });
+
       /*
        * SCENE 07
        * Engine burst.
@@ -876,17 +975,72 @@ export default function CinematicHero() {
       );
 
       /*
-       * Stars accelerate past the spacecraft.
+       * ----------------------------------------------------------------------
+       * STARFIELD — FORWARD CAMERA / CAPTAIN POV
+       * ----------------------------------------------------------------------
+       *
+       * The spacecraft remains centered.
+       *
+       * The center of the screen acts as the camera's vanishing point.
+       * Every star travels away from that point.
+       *
+       * This creates the visual impression that the camera is moving
+       * forward through space.
        */
+      starRefs.current.forEach((star, index) => {
+        if (!star) return;
+
+        const data = stars[index];
+
+        // Normalize direction from the center.
+        const length = Math.sqrt(data.dx * data.dx + data.dy * data.dy);
+
+        if (length === 0) return;
+
+        const dirX = data.dx / length;
+        const dirY = data.dy / length;
+
+        /*
+         * Stars farther from the center require less travel.
+         * Stars near the center travel much farther.
+         *
+         * This creates a much stronger perspective effect.
+         */
+        const travel = 650 + (1 - data.depth) * 900;
+
+        launch.to(
+          star,
+          {
+            x: dirX * travel,
+            y: dirY * travel,
+            scale: 1.5 + data.depth * 2.5,
+            opacity: 0,
+            duration: 2.8,
+            ease: "power3.in",
+          },
+          0.65,
+        );
+      });
+
       launch.to(
         starsLayer.current,
         {
-          y: 700,
-          scale: 1.2,
-          duration: 2.2,
+          scale: 1.15,
+          opacity: 1,
+          duration: 1.2,
           ease: "power2.in",
         },
-        0.8,
+        0.65,
+      );
+
+      launch.to(
+        starsLayer.current,
+        {
+          scale: 1.35,
+          duration: 1.8,
+          ease: "power3.in",
+        },
+        1.8,
       );
 
       launch.to(
@@ -1003,8 +1157,13 @@ export default function CinematicHero() {
 
       return () => {
         window.clearInterval(messageTimer);
+
         engineIdle.kill();
         launch.kill();
+
+        starAnimations.forEach((animation) => {
+          animation.kill();
+        });
       };
     }, root);
 
@@ -1051,20 +1210,81 @@ export default function CinematicHero() {
         />
 
         {/* Star field */}
-        <div ref={starsLayer} className="absolute inset-[-20%]">
-          {stars.map((star) => (
+        <div
+          ref={starsLayer}
+          className="
+    absolute inset-0
+    overflow-hidden
+    will-change-transform
+  "
+          style={{
+            transformOrigin: "50% 50%",
+          }}
+        >
+          {stars.map((star, index) => (
             <span
               key={star.id}
-              className="absolute rounded-full bg-white"
+              ref={(element) => {
+                starRefs.current[index] = element;
+              }}
+              className="
+        absolute
+        rounded-full
+        bg-white
+        will-change-transform
+      "
               style={{
                 left: star.left,
                 top: star.top,
                 width: star.size,
                 height: star.size,
-                opacity: star.opacity,
+                opacity: star.opacity * (0.35 + star.depth * 0.65),
+                boxShadow:
+                  star.size >= 2 ? "0 0 8px rgba(255,255,255,0.65)" : "none",
               }}
             />
           ))}
+        </div>
+
+        <div
+          className="
+    absolute inset-0
+    pointer-events-none
+  "
+        >
+          {Array.from({ length: 45 }, (_, i) => {
+            const x = (i * 83.17) % 100;
+            const y = (i * 37.91) % 100;
+
+            const dx = x - 50;
+            const dy = y - 50;
+
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 8) return null;
+
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+            return (
+              <span
+                key={`speed-${i}`}
+                className="
+          absolute
+          h-px
+          w-8
+          origin-left
+          rounded-full
+          bg-white/30
+          opacity-0
+        "
+                style={{
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  transform: `rotate(${angle}deg)`,
+                }}
+              />
+            );
+          })}
         </div>
 
         {/* Nebula streak */}
