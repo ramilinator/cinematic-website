@@ -540,7 +540,7 @@ function PilotProfile() {
 /* -------------------------------------------------------------------------- */
 
 export default function CinematicHero() {
-  const root = useRef<HTMLMainElement>(null);
+  const root = useRef<HTMLElement>(null);
 
   const [selectedDestination, setSelectedDestination] =
     useState<Destination | null>(null);
