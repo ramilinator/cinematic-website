@@ -1,4 +1,5 @@
 import Navbar from "@/components/portfolio/Navbar";
+import SpaceBackground from "@/components/portfolio/SpaceBackground";
 import CinematicHero from "@/components/portfolio/CinematicHero";
 import About from "@/components/portfolio/About";
 import Skills from "@/components/portfolio/Skills";
@@ -9,10 +10,9 @@ import Contact from "@/components/portfolio/Contact";
 export default function Home() {
   return (
     <main className="overflow-x-hidden bg-[#03040d] text-white">
+      <SpaceBackground />
       <Navbar />
-
       <CinematicHero />
-
       <About />
       <Skills />
       <Projects />

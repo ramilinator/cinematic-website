@@ -1,55 +1,15 @@
 "use client";
+
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/*
-|--------------------------------------------------------------------------
-| CINEMATIC SPACE EXPLORER HERO
-|--------------------------------------------------------------------------
-|
-| 01  Pilot identification
-| 02  System boot
-| 03  Navigation lights
-| 04  Ship elevation
-| 05  Engine ignition
-| 06  Ready for launch
-| 07  Engine burst
-| 08  Departure
-|
-|--------------------------------------------------------------------------
-*/
-
-const stars = Array.from({ length: 220 }, (_, i) => {
-  const x = (i * 47.37) % 100;
-  const y = (i * 71.83) % 100;
-
-  // Distance from the center of the screen.
-  const dx = x - 50;
-  const dy = y - 50;
-
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  return {
-    id: i,
-    left: `${x}%`,
-    top: `${y}%`,
-
-    // Direction away from the camera's vanishing point.
-    dx,
-    dy,
-
-    // Stars closer to the center start smaller/dimmer.
-    depth: Math.min(1, distance / 70),
-
-    size: i % 9 === 0 ? 2 : i % 3 === 0 ? 1.5 : 1,
-
-    opacity: 0.2 + ((i * 13) % 65) / 100,
-  };
-});
+/* -------------------------------------------------------------------------- */
+/* HUD CORNERS                                                                */
+/* -------------------------------------------------------------------------- */
 
 function HudCorners() {
   return (
@@ -62,11 +22,15 @@ function HudCorners() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* HUD LABEL                                                                  */
+/* -------------------------------------------------------------------------- */
+
 function HudLabel({
   children,
   violet = false,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   violet?: boolean;
 }) {
   return (
@@ -90,7 +54,10 @@ function Spacecraft() {
       {/* Atmospheric glow */}
       <div className="absolute left-1/2 top-[55%] h-[220px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-[80px]" />
 
-      {/* Engine exhaust */}
+      {/* ------------------------------------------------------------------ */}
+      {/* ENGINE EXHAUST                                                     */}
+      {/* ------------------------------------------------------------------ */}
+
       <div className="engine-glow absolute left-1/2 top-[76%] z-0 flex -translate-x-1/2 gap-5">
         <div className="engine-flame h-[100px] w-[48px] rounded-b-[30px] bg-gradient-to-b from-white via-cyan-300 to-blue-600 opacity-0 blur-[7px]" />
 
@@ -99,7 +66,10 @@ function Spacecraft() {
         <div className="engine-flame h-[100px] w-[48px] rounded-b-[30px] bg-gradient-to-b from-white via-cyan-300 to-blue-600 opacity-0 blur-[7px]" />
       </div>
 
-      {/* Main ship */}
+      {/* ------------------------------------------------------------------ */}
+      {/* MAIN SHIP                                                           */}
+      {/* ------------------------------------------------------------------ */}
+
       <div className="ship-body absolute left-1/2 top-1/2 z-10 h-[145px] w-[300px] -translate-x-1/2 -translate-y-1/2">
         {/* Left wing */}
         <div
@@ -176,7 +146,8 @@ function Spacecraft() {
         {/* Center light */}
         <div
           className="
-            ship-light absolute left-1/2 top-[91px]
+            ship-light
+            absolute left-1/2 top-[91px]
             h-[4px] w-[105px]
             -translate-x-1/2
             rounded-full
@@ -189,9 +160,12 @@ function Spacecraft() {
         {/* Left navigation light */}
         <div
           className="
-            nav-light-left absolute left-[23px] top-[66px]
-            h-[6px] w-[6px] rounded-full
-            bg-cyan-300 opacity-0
+            nav-light-left
+            absolute left-[23px] top-[66px]
+            h-[6px] w-[6px]
+            rounded-full
+            bg-cyan-300
+            opacity-0
             shadow-[0_0_12px_#22d3ee]
           "
         />
@@ -199,9 +173,12 @@ function Spacecraft() {
         {/* Right navigation light */}
         <div
           className="
-            nav-light-right absolute right-[23px] top-[66px]
-            h-[6px] w-[6px] rounded-full
-            bg-violet-300 opacity-0
+            nav-light-right
+            absolute right-[23px] top-[66px]
+            h-[6px] w-[6px]
+            rounded-full
+            bg-violet-300
+            opacity-0
             shadow-[0_0_12px_#a78bfa]
           "
         />
@@ -228,6 +205,10 @@ function Spacecraft() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* WELCOME PASSENGER                                                          */
+/* -------------------------------------------------------------------------- */
+
 function WelcomePassenger() {
   return (
     <div className="relative w-[min(620px,calc(100vw-32px))]">
@@ -241,17 +222,14 @@ function WelcomePassenger() {
           sm:px-10 sm:py-10
         "
       >
-        {/* HUD corners */}
         <div className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-cyan-300/80" />
         <div className="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-cyan-300/80" />
         <div className="absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 border-cyan-300/80" />
         <div className="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-cyan-300/80" />
 
-        {/* Top accent */}
         <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
 
         <div className="relative text-center">
-          {/* System label */}
           <div className="mb-5 flex items-center justify-center gap-3">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />
 
@@ -262,7 +240,6 @@ function WelcomePassenger() {
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />
           </div>
 
-          {/* Main title */}
           <div className="font-mono text-[10px] tracking-[0.4em] text-cyan-300/60">
             PASSENGER ACCESS
           </div>
@@ -279,7 +256,6 @@ function WelcomePassenger() {
             PREPARE FOR DEEP SPACE EXPLORATION.
           </p>
 
-          {/* Status */}
           <div className="mt-7 flex items-center justify-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee]" />
 
@@ -289,7 +265,6 @@ function WelcomePassenger() {
           </div>
         </div>
 
-        {/* Bottom information */}
         <div className="mt-7 flex justify-between border-t border-cyan-300/10 pt-3">
           <span className="font-mono text-[7px] tracking-[0.25em] text-white/20">
             MISSION // 001
@@ -305,13 +280,12 @@ function WelcomePassenger() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* PILOT PROFILE HUD                                                          */
+/* PILOT PROFILE                                                              */
 /* -------------------------------------------------------------------------- */
 
 function PilotProfile() {
   return (
     <div className="relative w-[min(760px,calc(100vw-32px))] sm:w-[min(760px,calc(100vw-48px))]">
-      {/* Outer HUD frame */}
       <div
         className="
           relative
@@ -323,16 +297,13 @@ function PilotProfile() {
           md:px-10 md:py-9
         "
       >
-        {/* HUD corner brackets */}
         <div className="pointer-events-none absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-cyan-300/70 sm:h-8 sm:w-8" />
         <div className="pointer-events-none absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-cyan-300/70 sm:h-8 sm:w-8" />
         <div className="pointer-events-none absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-cyan-300/70 sm:h-8 sm:w-8" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-cyan-300/70 sm:h-8 sm:w-8" />
 
-        {/* Top scan line */}
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
 
-        {/* Header */}
         <div
           className="
             mb-5 flex items-center justify-between
@@ -353,7 +324,6 @@ function PilotProfile() {
           </span>
         </div>
 
-        {/* Main profile */}
         <div
           className="
             flex flex-col items-center gap-7
@@ -370,16 +340,13 @@ function PilotProfile() {
               md:h-[220px] md:w-[220px]
             "
           >
-            {/* Targeting frame */}
             <div className="absolute inset-0 border border-cyan-300/20" />
 
-            {/* Corner brackets */}
             <div className="absolute -left-2 -top-2 h-6 w-6 border-l-2 border-t-2 border-cyan-300/80 sm:-left-3 sm:-top-3 sm:h-8 sm:w-8" />
             <div className="absolute -right-2 -top-2 h-6 w-6 border-r-2 border-t-2 border-cyan-300/80 sm:-right-3 sm:-top-3 sm:h-8 sm:w-8" />
             <div className="absolute -bottom-2 -left-2 h-6 w-6 border-b-2 border-l-2 border-cyan-300/80 sm:-bottom-3 sm:-left-3 sm:h-8 sm:w-8" />
             <div className="absolute -bottom-2 -right-2 h-6 w-6 border-b-2 border-r-2 border-cyan-300/80 sm:-bottom-3 sm:-right-3 sm:h-8 sm:w-8" />
 
-            {/* Portrait viewport */}
             <div className="absolute inset-2 overflow-hidden bg-cyan-950/[0.08] sm:inset-3">
               <div className="absolute inset-0 scale-[1.20]">
                 <Image
@@ -391,68 +358,51 @@ function PilotProfile() {
                 />
               </div>
 
-              {/* Static horizontal scanlines */}
               <div
                 className="
                   pointer-events-none absolute inset-0 z-10
                   opacity-30
-                  bg-[repeating-linear-gradient(
-                    to_bottom,
-                    transparent 0px,
-                    transparent 3px,
-                    rgba(103,232,249,0.08) 4px,
-                    transparent 5px
-                  )]
+                  bg-[repeating-linear-gradient(to_bottom,transparent_0px,transparent_3px,rgba(103,232,249,0.08)_4px,transparent_5px)]
                 "
               />
 
-              {/* Moving scan beam */}
               <div
                 className="
-              pointer-events-none absolute
-              left-0 top-[-25%]
-              z-20
-              h-[20%] w-full
-              animate-[profileScan_3.6s_linear_infinite]
-              bg-gradient-to-b
-              from-transparent
-              via-cyan-300/20
-              to-transparent
-              shadow-[0_0_18px_rgba(34,211,238,0.25)]
-              "
+                  pointer-events-none absolute
+                  left-0 top-[-25%]
+                  z-20
+                  h-[20%] w-full
+                  animate-[profileScan_3.6s_linear_infinite]
+                  bg-gradient-to-b
+                  from-transparent
+                  via-cyan-300/20
+                  to-transparent
+                  shadow-[0_0_18px_rgba(34,211,238,0.25)]
+                "
               />
 
-              {/* Bright scan edge */}
               <div
                 className="
-              pointer-events-none absolute
-              left-0 top-[-25%]
-              z-20
-              h-px w-full
-              animate-[profileScanLine_3.6s_linear_infinite]
-              bg-cyan-300/70
-              shadow-[0_0_8px_rgba(103,232,249,0.9)]
-              "
+                  pointer-events-none absolute
+                  left-0 top-[-25%]
+                  z-20
+                  h-px w-full
+                  animate-[profileScanLine_3.6s_linear_infinite]
+                  bg-cyan-300/70
+                  shadow-[0_0_8px_rgba(103,232,249,0.9)]
+                "
               />
 
-              {/* Image vignette */}
               <div
                 className="
                   pointer-events-none absolute inset-0 z-30
-                  bg-[radial-gradient(
-                    circle,
-                    transparent 45%,
-                    rgba(8,145,178,0.10) 75%,
-                    rgba(2,3,10,0.28) 100%
-                  )]
+                  bg-[radial-gradient(circle,transparent_45%,rgba(8,145,178,0.10)_75%,rgba(2,3,10,0.28)_100%)]
                 "
               />
 
-              {/* Subtle cyan tint */}
               <div className="pointer-events-none absolute inset-0 z-30 bg-cyan-400/[0.025]" />
             </div>
 
-            {/* Image status */}
             <div className="absolute -bottom-5 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap bg-[#02030a] px-2 font-mono text-[7px] tracking-[0.2em] text-cyan-300/50 sm:-bottom-6 sm:px-3 sm:text-[10px] sm:tracking-[0.25em]">
               BIOMETRIC // VERIFIED
             </div>
@@ -472,7 +422,6 @@ function PilotProfile() {
               EXPLORATION PILOT
             </div>
 
-            {/* Data rows */}
             <div className="space-y-3 border-l-0 pl-0 sm:space-y-4 md:border-l md:border-cyan-300/15 md:pl-5">
               <div>
                 <div className="font-mono text-[8px] tracking-[0.22em] text-white/30 sm:text-[10px] sm:tracking-[0.28em]">
@@ -518,7 +467,6 @@ function PilotProfile() {
           </div>
         </div>
 
-        {/* Bottom status strip */}
         <div className="mt-7 flex flex-col items-center gap-2 border-t border-cyan-300/10 pt-3 sm:mt-9 sm:flex-row sm:justify-between sm:pt-4">
           <div className="font-mono text-[7px] tracking-[0.2em] text-white/25 sm:text-[10px] sm:tracking-[0.3em]">
             EXPLORATION PROGRAM // NX-01
@@ -529,7 +477,6 @@ function PilotProfile() {
           </div>
         </div>
 
-        {/* Decorative data marks - hidden on mobile */}
         <div className="absolute -right-12 top-1/2 hidden -translate-y-1/2 flex-col gap-1 opacity-40 sm:flex">
           <div className="h-px w-8 bg-cyan-300" />
           <div className="h-px w-5 bg-cyan-300" />
@@ -542,13 +489,15 @@ function PilotProfile() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* CINEMATIC HERO                                                             */
+/* -------------------------------------------------------------------------- */
+
 export default function CinematicHero() {
   const scrollProgress = useRef<HTMLDivElement>(null);
-  const header = useRef<HTMLElement>(null);
-  const root = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLMainElement>(null);
+
   const welcomePassenger = useRef<HTMLDivElement>(null);
-  const starsLayer = useRef<HTMLDivElement>(null);
-  const starRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const ship = useRef<HTMLDivElement>(null);
   const shipGlow = useRef<HTMLDivElement>(null);
   const horizon = useRef<HTMLDivElement>(null);
@@ -569,85 +518,9 @@ export default function CinematicHero() {
         "FLIGHT CONTROL READY",
       ];
 
-      /*
-       * ----------------------------------------------------------------------
-       * STARFIELD INITIAL STATE
-       * ----------------------------------------------------------------------
-       *
-       * The center of the screen is the forward-facing vanishing point.
-       *
-       * Stars begin relatively close to the vanishing point and expand
-       * outward as the spacecraft moves forward.
-       */
-      gsap.set(starsLayer.current, {
-        scale: 0.72,
-        opacity: 0.75,
-        transformOrigin: "50% 50%",
-      });
-
-      const starAnimations: gsap.core.Timeline[] = [];
-
-      starRefs.current.forEach((star, index) => {
-        if (!star) return;
-
-        const data = stars[index];
-
-        const length = Math.sqrt(data.dx ** 2 + data.dy ** 2);
-
-        if (length === 0) return;
-
-        const dirX = data.dx / length;
-        const dirY = data.dy / length;
-
-        const travel = 600 + (1 - data.depth) * 1000;
-
-        const duration = 1.8 + data.depth * 2 + ((index * 19) % 100) / 100;
-
-        const delay = (((index * 41.37) % 100) / 100) * duration;
-
-        const timeline = gsap.timeline({
-          repeat: -1,
-          delay,
-        });
-
-        timeline
-          .set(star, {
-            x: 0,
-            y: 0,
-            scale: 0.35,
-            opacity: 0,
-          })
-
-          /*
-           * Star emerges from the distance.
-           */
-          .to(star, {
-            opacity: data.opacity * 0.7,
-            scale: 0.8,
-            duration: duration * 0.18,
-            ease: "power2.out",
-          })
-
-          /*
-           * Star accelerates toward the edge.
-           */
-          .to(star, {
-            x: dirX * travel,
-            y: dirY * travel,
-            scale: 2.5 + data.depth * 3,
-            opacity: 0,
-            duration: duration * 0.82,
-            ease: "power2.in",
-          });
-
-        starAnimations.push(timeline);
-      });
-
-      /*
-       * ----------------------------------------------------------------------
-       * INITIAL STATE
-       * ----------------------------------------------------------------------
-       */
+      /* ------------------------------------------------------------------ */
+      /* INITIAL STATE                                                       */
+      /* ------------------------------------------------------------------ */
 
       gsap.set(ship.current, {
         y: 150,
@@ -696,13 +569,12 @@ export default function CinematicHero() {
 
       gsap.set(horizon.current, {
         opacity: 0,
+        scaleY: 1,
       });
 
-      /*
-       * ----------------------------------------------------------------------
-       * BOOT MESSAGES
-       * ----------------------------------------------------------------------
-       */
+      /* ------------------------------------------------------------------ */
+      /* BOOT MESSAGES                                                       */
+      /* ------------------------------------------------------------------ */
 
       let messageIndex = 0;
 
@@ -720,157 +592,9 @@ export default function CinematicHero() {
         messageIndex++;
       }, 850);
 
-      /*
-       * ----------------------------------------------------------------------
-       * INTRO TIMELINE
-       * ----------------------------------------------------------------------
-       */
-
-      const intro = gsap.timeline({
-        delay: 0.3,
-      });
-
-      /*
-       * SCENE 01
-       * Pilot identification appears in the center.
-       */
-
-      intro
-        .to(welcomePassenger.current, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 1.2,
-          ease: "power3.out",
-        })
-        .to(welcomePassenger.current, {
-          opacity: 1,
-          duration: 2,
-        })
-        .to(welcomePassenger.current, {
-          opacity: 0,
-          scale: 1.02,
-          y: -10,
-          duration: 0.8,
-          ease: "power2.inOut",
-        });
-
-      intro
-        .to(pilotProfile.current, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 1.4,
-          ease: "power3.out",
-        })
-        /*
-         * Hold pilot profile briefly.
-         */
-        .to(
-          {},
-          {
-            duration: 2.2,
-          },
-        )
-
-        /*
-         * SCENE 02
-         * Ship reveals while parked.
-         */
-        .to(ship.current, {
-          opacity: 1,
-          duration: 2.2,
-          ease: "power2.out",
-        })
-
-        /*
-         * SCENE 03
-         * Ship gently rises into center.
-         */
-        .to(ship.current, {
-          y: 0,
-          scale: 1,
-          duration: 2.8,
-          ease: "power3.inOut",
-        })
-
-        /*
-         * SCENE 04
-         * Navigation lights.
-         */
-        .to(
-          ".nav-light-left, .nav-light-right",
-          {
-            opacity: 1,
-            duration: 0.8,
-            stagger: 0.2,
-          },
-          "-=0.7",
-        )
-
-        /*
-         * Body lights.
-         */
-        .to(
-          ".ship-light",
-          {
-            opacity: 1,
-            duration: 1.2,
-            ease: "power2.out",
-          },
-          "-=0.2",
-        )
-
-        /*
-         * SCENE 05
-         * Engine startup.
-         */
-        .to(".engine-core", {
-          backgroundColor: "#67e8f9",
-          boxShadow: "0 0 14px rgba(34,211,238,.9)",
-          duration: 1.5,
-        })
-
-        /*
-         * Engine glow.
-         */
-        .to(
-          ".engine-glow",
-          {
-            opacity: 0.75,
-            duration: 1,
-          },
-          "-=0.8",
-        )
-
-        /*
-         * SCENE 06
-         * Engine idle.
-         */
-        .to(".engine-flame", {
-          opacity: 0.65,
-          scaleY: 0.45,
-          duration: 1,
-          stagger: 0.08,
-        })
-
-        /*
-         * Horizon.
-         */
-        .to(
-          horizon.current,
-          {
-            opacity: 1,
-            duration: 1.5,
-          },
-          "-=0.8",
-        );
-
-      /*
-       * ----------------------------------------------------------------------
-       * ENGINE IDLE
-       * ----------------------------------------------------------------------
-       */
+      /* ------------------------------------------------------------------ */
+      /* ENGINE IDLE                                                         */
+      /* ------------------------------------------------------------------ */
 
       const engineIdle = gsap.to(".engine-flame", {
         scaleY: 0.7,
@@ -882,13 +606,184 @@ export default function CinematicHero() {
         paused: true,
       });
 
-      engineIdle.play();
+      /* ------------------------------------------------------------------ */
+      /* INTRO TIMELINE                                                      */
+      /* ------------------------------------------------------------------ */
+
+      const intro = gsap.timeline({
+        delay: 0.3,
+      });
 
       /*
-       * ----------------------------------------------------------------------
-       * SCROLL LAUNCH TIMELINE
-       * ----------------------------------------------------------------------
+       * SCENE 01
+       * Welcome.
        */
+
+      intro
+        .to(welcomePassenger.current, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 1.2,
+          ease: "power3.out",
+        })
+
+        .to(welcomePassenger.current, {
+          opacity: 1,
+          duration: 2,
+        })
+
+        .to(welcomePassenger.current, {
+          opacity: 0,
+          scale: 1.02,
+          y: -10,
+          duration: 0.8,
+          ease: "power2.inOut",
+        });
+
+      /*
+       * SCENE 02
+       * Pilot identification.
+       */
+
+      intro
+        .to(pilotProfile.current, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 1.4,
+          ease: "power3.out",
+        })
+
+        .to(
+          {},
+          {
+            duration: 2.2,
+          },
+        );
+
+      /*
+       * SCENE 03
+       * Ship reveal.
+       */
+
+      intro.to(ship.current, {
+        opacity: 1,
+        duration: 2.2,
+        ease: "power2.out",
+      });
+
+      /*
+       * SCENE 04
+       * Ship rises into its final center position.
+       */
+
+      intro.to(ship.current, {
+        y: 0,
+        scale: 1,
+        duration: 2.8,
+        ease: "power3.inOut",
+      });
+
+      /*
+       * SCENE 05
+       * Navigation lights.
+       */
+
+      intro.to(
+        ".nav-light-left, .nav-light-right",
+        {
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.2,
+        },
+        "-=0.7",
+      );
+
+      /*
+       * Body light.
+       */
+
+      intro.to(
+        ".ship-light",
+        {
+          opacity: 1,
+          duration: 1.2,
+          ease: "power2.out",
+        },
+        "-=0.2",
+      );
+
+      /*
+       * Ship atmospheric glow.
+       */
+
+      intro.to(
+        shipGlow.current,
+        {
+          opacity: 0.75,
+          duration: 1,
+          ease: "power2.out",
+        },
+        "-=0.7",
+      );
+
+      /*
+       * SCENE 06
+       * Engine startup.
+       */
+
+      intro.to(".engine-core", {
+        backgroundColor: "#67e8f9",
+        boxShadow: "0 0 14px rgba(34,211,238,.9)",
+        duration: 1.5,
+      });
+
+      intro.to(
+        ".engine-glow",
+        {
+          opacity: 0.75,
+          duration: 1,
+        },
+        "-=0.8",
+      );
+
+      /*
+       * Initial flame ignition.
+       */
+
+      intro.to(".engine-flame", {
+        opacity: 0.65,
+        scaleY: 0.45,
+        duration: 1,
+        stagger: 0.08,
+      });
+
+      /*
+       * Start the idle animation only AFTER
+       * the engines have actually started.
+       */
+
+      intro.call(() => {
+        engineIdle.play();
+      });
+
+      /*
+       * Horizon comes alive.
+       */
+
+      intro.to(
+        horizon.current,
+        {
+          opacity: 1,
+          duration: 1.5,
+        },
+        "-=0.8",
+      );
+
+      /* ------------------------------------------------------------------ */
+      /* LAUNCH SCROLL TIMELINE                                              */
+      /* ------------------------------------------------------------------ */
 
       const launch = gsap.timeline({
         scrollTrigger: {
@@ -901,14 +796,20 @@ export default function CinematicHero() {
           invalidateOnRefresh: true,
 
           onUpdate: (self) => {
-            if (scrollProgress.current) {
-              gsap.set(scrollProgress.current, {
-                width: `${Math.max(4, self.progress * 100)}%`,
-              });
-            }
+            if (!scrollProgress.current) return;
+
+            gsap.set(scrollProgress.current, {
+              width: `${Math.max(4, self.progress * 100)}%`,
+            });
           },
         },
       });
+
+      /*
+       * ------------------------------------------------------------------ */
+      /* SCENE 07                                                           */
+      /* Pilot disappears as launch begins.                                 */
+      /* ------------------------------------------------------------------ */
 
       launch.to(
         pilotProfile.current,
@@ -921,12 +822,7 @@ export default function CinematicHero() {
         0,
       );
 
-      starAnimations.forEach((animation) => {
-        animation.play();
-      });
-
       /*
-       * SCENE 07
        * Engine burst.
        */
 
@@ -953,6 +849,10 @@ export default function CinematicHero() {
         0,
       );
 
+      /*
+       * Make sure ship remains visible when launch starts.
+       */
+
       launch.to(
         ship.current,
         {
@@ -960,8 +860,14 @@ export default function CinematicHero() {
           duration: 1.2,
           ease: "power2.out",
         },
-        0.5,
+        0,
       );
+
+      /*
+       * First upward movement.
+       *
+       * This starts from the ship's existing elevated position.
+       */
 
       launch.to(
         ship.current,
@@ -975,73 +881,8 @@ export default function CinematicHero() {
       );
 
       /*
-       * ----------------------------------------------------------------------
-       * STARFIELD — FORWARD CAMERA / CAPTAIN POV
-       * ----------------------------------------------------------------------
-       *
-       * The spacecraft remains centered.
-       *
-       * The center of the screen acts as the camera's vanishing point.
-       * Every star travels away from that point.
-       *
-       * This creates the visual impression that the camera is moving
-       * forward through space.
+       * Horizon expands and disappears.
        */
-      starRefs.current.forEach((star, index) => {
-        if (!star) return;
-
-        const data = stars[index];
-
-        // Normalize direction from the center.
-        const length = Math.sqrt(data.dx * data.dx + data.dy * data.dy);
-
-        if (length === 0) return;
-
-        const dirX = data.dx / length;
-        const dirY = data.dy / length;
-
-        /*
-         * Stars farther from the center require less travel.
-         * Stars near the center travel much farther.
-         *
-         * This creates a much stronger perspective effect.
-         */
-        const travel = 650 + (1 - data.depth) * 900;
-
-        launch.to(
-          star,
-          {
-            x: dirX * travel,
-            y: dirY * travel,
-            scale: 1.5 + data.depth * 2.5,
-            opacity: 0,
-            duration: 2.8,
-            ease: "power3.in",
-          },
-          0.65,
-        );
-      });
-
-      launch.to(
-        starsLayer.current,
-        {
-          scale: 1.15,
-          opacity: 1,
-          duration: 1.2,
-          ease: "power2.in",
-        },
-        0.65,
-      );
-
-      launch.to(
-        starsLayer.current,
-        {
-          scale: 1.35,
-          duration: 1.8,
-          ease: "power3.in",
-        },
-        1.8,
-      );
 
       launch.to(
         horizon.current,
@@ -1054,21 +895,16 @@ export default function CinematicHero() {
         1,
       );
 
+      /* ------------------------------------------------------------------ */
+      /* SCENE 08                                                           */
+      /* Deep-space departure.                                               */
+      /* ------------------------------------------------------------------ */
+
       /*
-       * ----------------------------------------------------------------------
-       * SCENE 09
-       * Deep-space departure.
-       *
-       * The spacecraft progressively becomes smaller:
-       *
-       * 0.62  →  0.30  →  0.12  →  0.035  →  0.008
-       *
-       * This makes it visually transition from spacecraft → distant craft
-       * → tiny point → star-like dot.
-       * ----------------------------------------------------------------------
+       * Stage 1
+       * Ship becomes distant.
        */
 
-      /* Stage 1 — distant spacecraft */
       launch.to(
         ship.current,
         {
@@ -1080,7 +916,11 @@ export default function CinematicHero() {
         3,
       );
 
-      /* Stage 2 — very distant */
+      /*
+       * Stage 2
+       * Very distant.
+       */
+
       launch.to(
         ship.current,
         {
@@ -1092,7 +932,11 @@ export default function CinematicHero() {
         4.8,
       );
 
-      /* Stage 3 — tiny spacecraft */
+      /*
+       * Stage 3
+       * Tiny spacecraft.
+       */
+
       launch.to(
         ship.current,
         {
@@ -1104,7 +948,11 @@ export default function CinematicHero() {
         6.4,
       );
 
-      /* Stage 4 — star-like point */
+      /*
+       * Stage 4
+       * Star-like point.
+       */
+
       launch.to(
         ship.current,
         {
@@ -1119,10 +967,8 @@ export default function CinematicHero() {
 
       /*
        * Final disappearance.
-       *
-       * Keep this extremely small so the spacecraft appears to become
-       * a distant point of light rather than simply shrinking away.
        */
+
       launch.to(
         ship.current,
         {
@@ -1135,8 +981,9 @@ export default function CinematicHero() {
       );
 
       /*
-       * Engine exhaust disappears separately.
+       * Engine exhaust fades away.
        */
+
       launch.to(
         ".engine-flame",
         {
@@ -1149,25 +996,36 @@ export default function CinematicHero() {
       );
 
       /*
-       * Star field initial state.
+       * Engine glow fades.
        */
-      gsap.set(starsLayer.current, {
-        scale: 1,
-      });
+
+      launch.to(
+        ".engine-glow",
+        {
+          opacity: 0,
+          scale: 0.8,
+          duration: 1,
+          ease: "power2.in",
+        },
+        7,
+      );
+
+      /* ------------------------------------------------------------------ */
+      /* CLEANUP                                                             */
+      /* ------------------------------------------------------------------ */
 
       return () => {
         window.clearInterval(messageTimer);
 
+        intro.kill();
         engineIdle.kill();
         launch.kill();
-
-        starAnimations.forEach((animation) => {
-          animation.kill();
-        });
       };
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -1175,146 +1033,15 @@ export default function CinematicHero() {
       ref={root}
       id="cinematic-hero"
       className="
-    relative h-screen w-full
-    overflow-hidden
-    bg-[#02030a]
-    text-white
-  "
-    >
-      {/* ------------------------------------------------------------------ */}
-      {/* SPACE BACKGROUND                                                   */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Blue atmosphere */}
-        <div
-          className="
-            absolute left-1/2 top-[42%]
-            h-[65vh] w-[65vw]
-            -translate-x-1/2 -translate-y-1/2
-            rounded-full
-            bg-blue-700/10
-            blur-[130px]
-          "
-        />
-
-        {/* Violet atmosphere */}
-        <div
-          className="
-            absolute right-[-10%] top-[25%]
-            h-[50vh] w-[45vw]
-            rounded-full
-            bg-violet-700/10
-            blur-[130px]
-          "
-        />
-
-        {/* Star field */}
-        <div
-          ref={starsLayer}
-          className="
-    absolute inset-0
-    overflow-hidden
-    will-change-transform
-  "
-          style={{
-            transformOrigin: "50% 50%",
-          }}
-        >
-          {stars.map((star, index) => (
-            <span
-              key={star.id}
-              ref={(element) => {
-                starRefs.current[index] = element;
-              }}
-              className="
-        absolute
-        rounded-full
-        bg-white
-        will-change-transform
+        relative
+        z-10
+        h-screen
+        w-full
+        overflow-hidden
+        bg-transparent
+        text-white
       "
-              style={{
-                left: star.left,
-                top: star.top,
-                width: star.size,
-                height: star.size,
-                opacity: star.opacity * (0.35 + star.depth * 0.65),
-                boxShadow:
-                  star.size >= 2 ? "0 0 8px rgba(255,255,255,0.65)" : "none",
-              }}
-            />
-          ))}
-        </div>
-
-        <div
-          className="
-    absolute inset-0
-    pointer-events-none
-  "
-        >
-          {Array.from({ length: 45 }, (_, i) => {
-            const x = (i * 83.17) % 100;
-            const y = (i * 37.91) % 100;
-
-            const dx = x - 50;
-            const dy = y - 50;
-
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 8) return null;
-
-            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-            return (
-              <span
-                key={`speed-${i}`}
-                className="
-          absolute
-          h-px
-          w-8
-          origin-left
-          rounded-full
-          bg-white/30
-          opacity-0
-        "
-                style={{
-                  left: `${x}%`,
-                  top: `${y}%`,
-                  transform: `rotate(${angle}deg)`,
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Nebula streak */}
-        <div
-          className="
-            absolute left-[-20%] top-[42%]
-            h-[1px] w-[140%]
-            rotate-[-8deg]
-            bg-gradient-to-r
-            from-transparent
-            via-cyan-400/20
-            to-transparent
-            blur-[2px]
-          "
-        />
-
-        {/* Horizon */}
-        <div
-          ref={horizon}
-          className="
-            absolute left-1/2 top-[72%]
-            h-[130px] w-[80vw]
-            -translate-x-1/2
-            rounded-[50%]
-            bg-cyan-400/10
-            blur-[55px]
-          "
-        />
-      </div>
-
+    >
       {/* ------------------------------------------------------------------ */}
       {/* TOP HUD                                                             */}
       {/* ------------------------------------------------------------------ */}
@@ -1332,9 +1059,11 @@ export default function CinematicHero() {
           </div>
 
           <button
+            type="button"
             onClick={() => setAudioOn((value) => !value)}
             className="
-              font-mono text-[9px]
+              font-mono
+              text-[9px]
               tracking-[0.25em]
               text-white/50
               transition
@@ -1363,13 +1092,17 @@ export default function CinematicHero() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* SYSTEM MESSAGES                                                    */}
+      {/* LEFT SYSTEM HUD                                                     */}
       {/* ------------------------------------------------------------------ */}
 
       <div
         className="
-          absolute left-6 top-1/2 z-30
-          hidden w-[230px]
+          absolute
+          left-6
+          top-1/2
+          z-30
+          hidden
+          w-[230px]
           -translate-y-1/2
           md:block
         "
@@ -1383,7 +1116,15 @@ export default function CinematicHero() {
             {bootMessages.map((message, index) => (
               <div
                 key={`${message}-${index}`}
-                className="flex items-center gap-3 font-mono text-[8px] tracking-[0.15em] text-white/45"
+                className="
+                  flex
+                  items-center
+                  gap-3
+                  font-mono
+                  text-[8px]
+                  tracking-[0.15em]
+                  text-white/45
+                "
               >
                 <span className="h-1 w-1 rounded-full bg-cyan-300 shadow-[0_0_7px_#22d3ee]" />
 
@@ -1395,13 +1136,17 @@ export default function CinematicHero() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* RIGHT HUD                                                           */}
+      {/* RIGHT DESTINATION HUD                                               */}
       {/* ------------------------------------------------------------------ */}
 
       <div
         className="
-          absolute right-6 top-1/2 z-30
-          hidden w-[190px]
+          absolute
+          right-6
+          top-1/2
+          z-30
+          hidden
+          w-[190px]
           -translate-y-1/2
           md:block
         "
@@ -1435,33 +1180,26 @@ export default function CinematicHero() {
         </div>
       </div>
 
-      {/* Welcome */}
+      {/* ------------------------------------------------------------------ */}
+      {/* WELCOME                                                             */}
+      {/* ------------------------------------------------------------------ */}
+
       <div
         ref={welcomePassenger}
         className="
-      absolute
-      left-1/2
-      top-1/2
-      z-[36]
-      -translate-x-1/2
-      -translate-y-1/2
-      "
+          absolute
+          left-1/2
+          top-1/2
+          z-[36]
+          -translate-x-1/2
+          -translate-y-1/2
+        "
       >
         <WelcomePassenger />
       </div>
 
-      {/* Ship */}
-      <div
-        ref={ship}
-        className="
-      absolute left-1/2 top-[57%]
-      z-20
-      -translate-x-1/2
-      "
-      ></div>
-
       {/* ------------------------------------------------------------------ */}
-      {/* CENTER PILOT PROFILE                                                */}
+      {/* PILOT PROFILE                                                       */}
       {/* ------------------------------------------------------------------ */}
 
       <div
@@ -1479,20 +1217,51 @@ export default function CinematicHero() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
+      {/* HORIZON                                                             */}
+      {/* ------------------------------------------------------------------ */}
+
+      <div
+        ref={horizon}
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[68%]
+          z-10
+          h-[2px]
+          w-[70vw]
+          -translate-x-1/2
+          bg-gradient-to-r
+          from-transparent
+          via-cyan-300/40
+          to-transparent
+          blur-[1px]
+        "
+      />
+
+      {/* ------------------------------------------------------------------ */}
       {/* SPACECRAFT                                                          */}
       {/* ------------------------------------------------------------------ */}
 
       <div
         ref={ship}
         className="
-          absolute left-1/2 top-[57%]
+          absolute
+          left-1/2
+          top-[57%]
           z-20
           -translate-x-1/2
         "
       >
         <div
           ref={shipGlow}
-          className="absolute inset-0 rounded-full bg-cyan-400/10 blur-[70px]"
+          className="
+            absolute
+            inset-0
+            rounded-full
+            bg-cyan-400/10
+            blur-[70px]
+          "
         />
 
         <Spacecraft />
@@ -1530,26 +1299,41 @@ export default function CinematicHero() {
           <div className="mt-3 h-[1px] w-full overflow-hidden bg-white/10">
             <div
               ref={scrollProgress}
-              className="h-full w-[4%] bg-cyan-300/70 shadow-[0_0_8px_rgba(34,211,238,0.7)]"
+              className="
+                h-full
+                w-[4%]
+                bg-cyan-300/70
+                shadow-[0_0_8px_rgba(34,211,238,0.7)]
+              "
             />
           </div>
         </div>
       </div>
 
-      {/* Cinematic vignette */}
+      {/* ------------------------------------------------------------------ */}
+      {/* CINEMATIC VIGNETTE                                                  */}
+      {/* ------------------------------------------------------------------ */}
+
       <div
         className="
           pointer-events-none
-          absolute inset-0 z-50
+          absolute
+          inset-0
+          z-50
           bg-[radial-gradient(circle_at_center,transparent_35%,rgba(0,0,0,.55)_100%)]
         "
       />
 
-      {/* Scanline */}
+      {/* ------------------------------------------------------------------ */}
+      {/* SCANLINES                                                           */}
+      {/* ------------------------------------------------------------------ */}
+
       <div
         className="
           pointer-events-none
-          absolute inset-0 z-50
+          absolute
+          inset-0
+          z-50
           opacity-[0.025]
           [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px)]
           [background-size:100%_4px]
