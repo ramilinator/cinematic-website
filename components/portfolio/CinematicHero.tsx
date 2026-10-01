@@ -552,6 +552,14 @@ export default function CinematicHero() {
   const destinationStatus = useRef<HTMLDivElement>(null);
   const destinationBar = useRef<HTMLDivElement>(null);
 
+  const gpsPanel = useRef<HTMLDivElement>(null);
+  const gpsCoordinates = useRef<HTMLDivElement>(null);
+  const gpsHeading = useRef<HTMLDivElement>(null);
+  const gpsAltitude = useRef<HTMLDivElement>(null);
+  const gpsVelocity = useRef<HTMLDivElement>(null);
+  const gpsLock = useRef<HTMLDivElement>(null);
+  const gpsScan = useRef<HTMLDivElement>(null);
+
   const scrollProgress = useRef<HTMLDivElement>(null);
   const welcomePassenger = useRef<HTMLDivElement>(null);
   const ship = useRef<HTMLDivElement>(null);
@@ -561,6 +569,108 @@ export default function CinematicHero() {
   const [audioOn, setAudioOn] = useState(false);
 
   const [bootMessages, setBootMessages] = useState<SystemStatus[]>([]);
+
+  useEffect(() => {
+    if (!gpsPanel.current) return;
+
+    const ctx = gsap.context(() => {
+      const elements = [
+        gpsCoordinates.current,
+        gpsHeading.current,
+        gpsAltitude.current,
+        gpsVelocity.current,
+        gpsLock.current,
+      ].filter(Boolean);
+
+      gsap.set(elements, {
+        opacity: 0,
+        y: 6,
+      });
+
+      gsap.set(gpsScan.current, {
+        width: "0%",
+      });
+
+      const tl = gsap.timeline();
+
+      tl.to(gpsPanel.current, {
+        opacity: 1,
+        duration: 0.45,
+        ease: "power2.out",
+      })
+        .to(
+          gpsCoordinates.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            ease: "power3.out",
+          },
+          "-=0.15",
+        )
+        .to(
+          gpsHeading.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.35,
+            ease: "power3.out",
+          },
+          "-=0.2",
+        )
+        .to(
+          gpsAltitude.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.35,
+            ease: "power3.out",
+          },
+          "-=0.2",
+        )
+        .to(
+          gpsVelocity.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.35,
+            ease: "power3.out",
+          },
+          "-=0.2",
+        )
+        .to(
+          gpsLock.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.35,
+            ease: "power3.out",
+          },
+          "-=0.2",
+        )
+        .to(
+          gpsScan.current,
+          {
+            width: "100%",
+            duration: 1.5,
+            ease: "power3.inOut",
+          },
+          "-=0.1",
+        );
+
+      // Continuous navigation scan
+      gsap.to(gpsScan.current, {
+        opacity: 0.35,
+        duration: 0.9,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 1.4,
+      });
+    }, gpsPanel);
+
+    return () => ctx.revert();
+  }, []);
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * destinations.length);
@@ -1417,6 +1527,135 @@ export default function CinematicHero() {
       opacity-60
     "
         />
+      </div>
+
+      <div
+        ref={gpsPanel}
+        className="
+    absolute bottom-[82px] left-1/2 z-30
+    hidden w-[420px]
+    -translate-x-1/2
+    md:block
+  "
+      >
+        <div
+          className="
+      relative
+      border border-white/10
+      bg-black/10
+      p-4
+      backdrop-blur-sm
+    "
+        >
+          <HudCorners />
+
+          {/* HEADER */}
+          <div className="flex items-center justify-between">
+            <HudLabel>NAVIGATION TELEMETRY</HudLabel>
+
+            <div className="flex items-center gap-2">
+              <span
+                className="
+            h-1.5 w-1.5 rounded-full
+            bg-cyan-300
+            shadow-[0_0_8px_rgba(34,211,238,0.9)]
+          "
+              />
+
+              <span className="font-mono text-[6px] tracking-[0.16em] text-cyan-300/70">
+                NAV ONLINE
+              </span>
+            </div>
+          </div>
+
+          {/* NAVIGATION VECTOR */}
+          <div ref={gpsCoordinates} className="mt-4">
+            <div className="font-mono text-[6px] tracking-[0.18em] text-white/30">
+              NAVIGATION VECTOR
+            </div>
+
+            <div className="mt-1 font-mono text-[11px] tracking-[0.14em] text-cyan-200">
+              NX-07&nbsp;&nbsp;/&nbsp;&nbsp;SECTOR
+              04&nbsp;&nbsp;/&nbsp;&nbsp;VECTOR 284.6°
+            </div>
+          </div>
+
+          {/* TELEMETRY */}
+          <div className="mt-4 grid grid-cols-3 gap-4">
+            {/* HEADING */}
+            <div ref={gpsHeading} className="min-w-0">
+              <div className="font-mono text-[6px] tracking-[0.16em] text-white/30">
+                HEADING
+              </div>
+
+              <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-white/75">
+                284.6°
+              </div>
+            </div>
+
+            {/* ALTITUDE */}
+            <div ref={gpsAltitude} className="min-w-0">
+              <div className="font-mono text-[6px] tracking-[0.16em] text-white/30">
+                FLIGHT LEVEL
+              </div>
+
+              <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-white/75">
+                FL-184
+              </div>
+            </div>
+
+            {/* VELOCITY */}
+            <div ref={gpsVelocity} className="min-w-0">
+              <div className="font-mono text-[6px] tracking-[0.16em] text-white/30">
+                VELOCITY
+              </div>
+
+              <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-white/75">
+                0.00 KM/S
+              </div>
+            </div>
+          </div>
+
+          {/* NAVIGATION LOCK */}
+          <div ref={gpsLock} className="mt-4">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="font-mono text-[6px] tracking-[0.18em] text-white/30">
+                NAVIGATION LOCK
+              </span>
+
+              <span className="font-mono text-[6px] tracking-[0.16em] text-cyan-300">
+                LOCKED
+              </span>
+            </div>
+
+            <div className="relative h-[2px] w-full overflow-hidden bg-white/10">
+              <div
+                ref={gpsScan}
+                className="
+            absolute inset-y-0 left-0
+            w-0
+            bg-cyan-400
+            shadow-[0_0_8px_rgba(34,211,238,0.8)]
+          "
+              />
+            </div>
+          </div>
+
+          {/* SYSTEM READOUT */}
+          <div className="mt-3 flex items-center justify-between">
+            <span className="font-mono text-[5px] tracking-[0.18em] text-white/20">
+              SAT-LINK 08
+            </span>
+
+            <span className="font-mono text-[5px] tracking-[0.18em] text-white/20">
+              SIGNAL 98%
+            </span>
+
+            <span className="font-mono text-[5px] tracking-[0.18em] text-white/20">
+              AUTO NAV
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* ------------------------------------------------------------------ */}
