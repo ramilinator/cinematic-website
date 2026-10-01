@@ -799,7 +799,7 @@ export default function CinematicHero() {
         scrollTrigger: {
           trigger: root.current,
           start: "top top",
-          end: "+=6500",
+          end: "+=500",
           scrub: 2,
           pin: true,
           anticipatePin: 1,
