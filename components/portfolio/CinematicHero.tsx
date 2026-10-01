@@ -547,7 +547,7 @@ export default function CinematicHero() {
 
   const destinationPanel = useRef<HTMLDivElement>(null);
   const destinationName = useRef<HTMLDivElement>(null);
-  const destinationCode = useRef<HTMLSpanElement>(null);
+  const destinationCode = useRef<HTMLDivElement>(null);
   const destinationDistance = useRef<HTMLDivElement>(null);
   const destinationStatus = useRef<HTMLDivElement>(null);
   const destinationBar = useRef<HTMLDivElement>(null);
