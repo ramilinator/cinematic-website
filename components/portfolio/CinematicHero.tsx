@@ -7,6 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+type SystemStatus = {
+  name: string;
+  label: string;
+  percent: number;
+};
+
 /* -------------------------------------------------------------------------- */
 /* HUD CORNERS                                                                */
 /* -------------------------------------------------------------------------- */
@@ -502,20 +508,40 @@ export default function CinematicHero() {
   const shipGlow = useRef<HTMLDivElement>(null);
   const horizon = useRef<HTMLDivElement>(null);
   const pilotProfile = useRef<HTMLDivElement>(null);
-
-  const [bootMessages, setBootMessages] = useState<string[]>([]);
   const [audioOn, setAudioOn] = useState(false);
+
+  const [bootMessages, setBootMessages] = useState<SystemStatus[]>([]);
 
   useEffect(() => {
     if (!root.current || !ship.current) return;
 
     const ctx = gsap.context(() => {
-      const messageSequence = [
-        "INITIALIZING EXPLORATION SYSTEM",
-        "NAVIGATION ARRAY ONLINE",
-        "LIFE SUPPORT SYSTEMS STABLE",
-        "PROPULSION SYSTEM STANDBY",
-        "FLIGHT CONTROL READY",
+      const systemSequence = [
+        {
+          name: "EXPLORATION CORE",
+          label: "INITIALIZING",
+          percent: 100,
+        },
+        {
+          name: "NAVIGATION ARRAY",
+          label: "ONLINE",
+          percent: 82,
+        },
+        {
+          name: "LIFE SUPPORT",
+          label: "STABLE",
+          percent: 96,
+        },
+        {
+          name: "PROPULSION SYSTEM",
+          label: "STANDBY",
+          percent: 68,
+        },
+        {
+          name: "FLIGHT CONTROL",
+          label: "READY",
+          percent: 100,
+        },
       ];
 
       /* ------------------------------------------------------------------ */
@@ -579,17 +605,21 @@ export default function CinematicHero() {
       let messageIndex = 0;
 
       const messageTimer = window.setInterval(() => {
-        if (messageIndex >= messageSequence.length) {
+        const system = systemSequence[messageIndex];
+
+        // Safety check: never add an undefined system
+        if (!system) {
           window.clearInterval(messageTimer);
           return;
         }
 
-        setBootMessages((previous) => [
-          ...previous,
-          messageSequence[messageIndex],
-        ]);
+        setBootMessages((previous) => [...previous, system]);
 
-        messageIndex++;
+        messageIndex += 1;
+
+        if (messageIndex >= systemSequence.length) {
+          window.clearInterval(messageTimer);
+        }
       }, 850);
 
       /* ------------------------------------------------------------------ */
@@ -1112,23 +1142,78 @@ export default function CinematicHero() {
 
           <HudLabel>SYSTEM STATUS</HudLabel>
 
-          <div className="mt-5 space-y-3">
-            {bootMessages.map((message, index) => (
-              <div
-                key={`${message}-${index}`}
-                className="
-                  flex
-                  items-center
-                  gap-3
-                  font-mono
-                  text-[8px]
-                  tracking-[0.15em]
-                  text-white/45
-                "
-              >
-                <span className="h-1 w-1 rounded-full bg-cyan-300 shadow-[0_0_7px_#22d3ee]" />
+          <div className="mt-5 space-y-4">
+            {bootMessages.map((system, index) => (
+              <div key={`${system.name}-${index}`} className="system-row">
+                {/* System name + percentage */}
+                <div className="mb-1.5 flex items-center justify-between">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="
+              h-1.5
+              w-1.5
+              shrink-0
+              rounded-full
+              bg-cyan-300
+              shadow-[0_0_8px_#22d3ee]
+            "
+                    />
 
-                {message}
+                    <span className="truncate font-mono text-[7px] tracking-[0.12em] text-white/55">
+                      {system.name}
+                    </span>
+                  </div>
+
+                  <span className="ml-2 shrink-0 font-mono text-[7px] tracking-[0.1em] text-cyan-300/80">
+                    {system.percent}%
+                  </span>
+                </div>
+
+                {/* Animated diagnostic bar */}
+                <div className="flex items-center gap-2">
+                  <div className="relative h-[4px] flex-1 overflow-hidden bg-white/[0.06]">
+                    <div
+                      className="
+              system-bar
+              absolute
+              inset-y-0
+              left-0
+              bg-cyan-400/70
+              shadow-[0_0_8px_rgba(34,211,238,0.65)]
+            "
+                      style={{
+                        width: `${system.percent}%`,
+                        transformOrigin: "left center",
+                      }}
+                    />
+
+                    {/* Moving scanner */}
+                    <div
+                      className="
+              absolute
+              inset-y-0
+              left-0
+              w-[18px]
+              bg-white/60
+              blur-[3px]
+              animate-[systemScan_1.8s_linear_infinite]
+            "
+                    />
+                  </div>
+
+                  <span
+                    className={`
+            w-[42px]
+            text-right
+            font-mono
+            text-[6px]
+            tracking-[0.08em]
+            ${system.percent >= 95 ? "text-cyan-300" : "text-white/30"}
+          `}
+                  >
+                    {system.label}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
