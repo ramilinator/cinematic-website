@@ -564,7 +564,6 @@ export default function CinematicHero() {
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * destinations.length);
-
     setSelectedDestination(destinations[randomIndex]);
   }, []);
 
@@ -1221,26 +1220,96 @@ export default function CinematicHero() {
         text-white
       "
     >
-      {/* ------------------------------------------------------------------ */}
-      {/* TOP HUD                                                             */}
-      {/* ------------------------------------------------------------------ */}
+      {/* FRONT WINDOW / COCKPIT FRAME */}
+      <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+        {/* Top window frame */}
+        <div className="absolute left-0 right-0 top-0 h-[90px]">
+          {/* Main neon edge */}
+          <div
+            className="
+        absolute left-0 right-0 top-[54px] h-px
+        bg-cyan-300/70
+        shadow-[0_0_8px_rgba(34,211,238,0.8),0_0_24px_rgba(34,211,238,0.25)]
+      "
+          />
 
-      <header className="absolute left-0 right-0 top-0 z-40 px-6 py-6 md:px-10">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="font-mono text-xs tracking-[0.45em] text-cyan-300">
-              RAMIL
-            </div>
+          {/* Secondary line */}
+          <div
+            className="
+        absolute left-[8%] right-[8%] top-[58px] h-px
+        bg-violet-400/25
+        shadow-[0_0_10px_rgba(139,92,246,0.4)]
+      "
+          />
 
-            <div className="mt-1 font-mono text-[8px] tracking-[0.35em] text-white/40">
-              EXPLORATION SYSTEM
-            </div>
+          {/* Left angled support */}
+          <div
+            className="
+        absolute left-0 top-[54px]
+        h-[35px] w-[14%]
+        border-r border-t border-cyan-300/40
+        [clip-path:polygon(0_0,100%_0,86%_100%,0_100%)]
+      "
+          />
+
+          {/* Right angled support */}
+          <div
+            className="
+        absolute right-0 top-[54px]
+        h-[35px] w-[14%]
+        border-l border-t border-cyan-300/40
+        [clip-path:polygon(0_0,100%_0,100%_100%,14%_100%)]
+      "
+          />
+
+          {/* Center window marker */}
+          <div
+            className="
+        absolute left-1/2 top-[48px]
+        h-[13px] w-[110px]
+        -translate-x-1/2
+        border-x border-cyan-300/50
+      "
+          >
+            <div className="absolute left-1/2 top-0 h-[2px] w-[42px] -translate-x-1/2 bg-cyan-300/80 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
           </div>
 
-          <button
-            type="button"
-            onClick={() => setAudioOn((value) => !value)}
-            className="
+          {/* Technical ticks */}
+          <div className="absolute left-[18%] top-[51px] flex gap-2">
+            <span className="h-[7px] w-px bg-cyan-300/50" />
+            <span className="h-[4px] w-px bg-cyan-300/30" />
+            <span className="h-[7px] w-px bg-cyan-300/50" />
+            <span className="h-[4px] w-px bg-cyan-300/30" />
+          </div>
+
+          <div className="absolute right-[18%] top-[51px] flex gap-2">
+            <span className="h-[4px] w-px bg-cyan-300/30" />
+            <span className="h-[7px] w-px bg-cyan-300/50" />
+            <span className="h-[4px] w-px bg-cyan-300/30" />
+            <span className="h-[7px] w-px bg-cyan-300/50" />
+          </div>
+        </div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* TOP HUD                                                             */}
+        {/* ------------------------------------------------------------------ */}
+
+        <header className="absolute left-0 right-0 top-0 z-40 px-6 py-6 md:px-10">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="font-mono text-xs tracking-[0.45em] text-cyan-300">
+                RAMIL
+              </div>
+
+              <div className="mt-1 font-mono text-[8px] tracking-[0.35em] text-white/40">
+                EXPLORATION SYSTEM
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setAudioOn((value) => !value)}
+              className="
               font-mono
               text-[9px]
               tracking-[0.25em]
@@ -1248,11 +1317,107 @@ export default function CinematicHero() {
               transition
               hover:text-cyan-300
             "
+            >
+              AUDIO SYSTEM // {audioOn ? "ONLINE" : "OFFLINE"}
+            </button>
+          </div>
+        </header>
+
+        {/* Bottom window frame */}
+        <div className="absolute bottom-0 left-0 right-0 h-[120px]">
+          {/* Main bottom neon edge */}
+          <div
+            className="
+        absolute bottom-[55px] left-0 right-0 h-px
+        bg-cyan-300/60
+        shadow-[0_0_10px_rgba(34,211,238,0.7),0_0_30px_rgba(34,211,238,0.2)]
+      "
+          />
+
+          {/* Violet secondary line */}
+          <div
+            className="
+        absolute bottom-[51px] left-[10%] right-[10%] h-px
+        bg-violet-400/25
+        shadow-[0_0_12px_rgba(139,92,246,0.35)]
+      "
+          />
+
+          {/* Bottom cockpit structure */}
+          <div
+            className="
+        absolute bottom-0 left-0 right-0 h-[58px]
+        border-t border-white/5
+        bg-gradient-to-t from-black/60 to-transparent
+        backdrop-blur-[2px]
+      "
+          />
+
+          {/* Left angled support */}
+          <div
+            className="
+        absolute bottom-[55px] left-0
+        h-[42px] w-[18%]
+        border-r border-b border-cyan-300/35
+        [clip-path:polygon(0_0,100%_0,86%_100%,0_100%)]
+      "
+          />
+
+          {/* Right angled support */}
+          <div
+            className="
+        absolute bottom-[55px] right-0
+        h-[42px] w-[18%]
+        border-l border-b border-cyan-300/35
+        [clip-path:polygon(0_0,100%_0,100%_100%,14%_100%)]
+      "
+          />
+
+          {/* Center cockpit console seam */}
+          <div
+            className="
+        absolute bottom-[55px] left-1/2
+        h-[18px] w-[180px]
+        -translate-x-1/2
+        border-x border-cyan-300/30
+      "
           >
-            AUDIO SYSTEM // {audioOn ? "ONLINE" : "OFFLINE"}
-          </button>
+            <div
+              className="
+          absolute bottom-0 left-1/2
+          h-px w-[70px]
+          -translate-x-1/2
+          bg-cyan-300/70
+          shadow-[0_0_10px_rgba(34,211,238,0.9)]
+        "
+            />
+          </div>
+
+          {/* Bottom technical ticks */}
+          <div className="absolute bottom-[51px] left-[22%] flex gap-2">
+            <span className="h-[7px] w-px bg-cyan-300/40" />
+            <span className="h-[4px] w-px bg-cyan-300/25" />
+            <span className="h-[7px] w-px bg-cyan-300/40" />
+            <span className="h-[4px] w-px bg-cyan-300/25" />
+          </div>
+
+          <div className="absolute bottom-[51px] right-[22%] flex gap-2">
+            <span className="h-[4px] w-px bg-cyan-300/25" />
+            <span className="h-[7px] w-px bg-cyan-300/40" />
+            <span className="h-[4px] w-px bg-cyan-300/25" />
+            <span className="h-[7px] w-px bg-cyan-300/40" />
+          </div>
         </div>
-      </header>
+
+        {/* Subtle glass reflection */}
+        <div
+          className="
+      absolute inset-0
+      bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.025)_42%,transparent_48%,transparent_100%)]
+      opacity-60
+    "
+        />
+      </div>
 
       {/* ------------------------------------------------------------------ */}
       {/* CENTER TITLE                                                        */}
