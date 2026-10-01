@@ -13,6 +13,46 @@ type SystemStatus = {
   percent: number;
 };
 
+type Destination = {
+  name: string;
+  code: string;
+  distance: string;
+  status: string;
+};
+
+const destinations: Destination[] = [
+  {
+    name: "NEBULA NX-07",
+    code: "NX-07",
+    distance: "1,240 LY",
+    status: "READY",
+  },
+  {
+    name: "ORION OR-19",
+    code: "OR-19",
+    distance: "1,344 LY",
+    status: "READY",
+  },
+  {
+    name: "ANDROMEDA AD-01",
+    code: "AD-01",
+    distance: "2.53 MLY",
+    status: "READY",
+  },
+  {
+    name: "VEGA VG-12",
+    code: "VG-12",
+    distance: "25.04 LY",
+    status: "READY",
+  },
+  {
+    name: "LYRA LY-08",
+    code: "LY-08",
+    distance: "620 LY",
+    status: "READY",
+  },
+];
+
 /* -------------------------------------------------------------------------- */
 /* HUD CORNERS                                                                */
 /* -------------------------------------------------------------------------- */
@@ -500,9 +540,19 @@ function PilotProfile() {
 /* -------------------------------------------------------------------------- */
 
 export default function CinematicHero() {
-  const scrollProgress = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLMainElement>(null);
 
+  const [selectedDestination, setSelectedDestination] =
+    useState<Destination | null>(null);
+
+  const destinationPanel = useRef<HTMLDivElement>(null);
+  const destinationName = useRef<HTMLDivElement>(null);
+  const destinationCode = useRef<HTMLSpanElement>(null);
+  const destinationDistance = useRef<HTMLDivElement>(null);
+  const destinationStatus = useRef<HTMLDivElement>(null);
+  const destinationBar = useRef<HTMLDivElement>(null);
+
+  const scrollProgress = useRef<HTMLDivElement>(null);
   const welcomePassenger = useRef<HTMLDivElement>(null);
   const ship = useRef<HTMLDivElement>(null);
   const shipGlow = useRef<HTMLDivElement>(null);
@@ -511,6 +561,105 @@ export default function CinematicHero() {
   const [audioOn, setAudioOn] = useState(false);
 
   const [bootMessages, setBootMessages] = useState<SystemStatus[]>([]);
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * destinations.length);
+
+    setSelectedDestination(destinations[randomIndex]);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDestination || !destinationPanel.current) return;
+
+    const ctx = gsap.context(() => {
+      const elements = [
+        destinationName.current,
+        destinationCode.current,
+        destinationDistance.current,
+        destinationStatus.current,
+      ].filter(Boolean);
+
+      gsap.set(elements, {
+        opacity: 0,
+        y: 8,
+      });
+
+      gsap.set(destinationBar.current, {
+        width: "0%",
+      });
+
+      const tl = gsap.timeline();
+
+      tl.to(destinationPanel.current, {
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      })
+        .to(
+          destinationName.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power3.out",
+          },
+          "-=0.2",
+        )
+        .to(
+          destinationCode.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            ease: "power3.out",
+          },
+          "-=0.3",
+        )
+        .to(
+          destinationDistance.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+            ease: "power3.out",
+          },
+          "-=0.25",
+        )
+        .to(
+          destinationStatus.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            ease: "power3.out",
+          },
+          "-=0.2",
+        )
+        .to(
+          destinationBar.current,
+          {
+            width: "100%",
+            duration: 1.2,
+            ease: "power3.inOut",
+          },
+          "-=0.2",
+        );
+
+      // Subtle scanning pulse after initialization.
+      gsap.to(destinationBar.current, {
+        opacity: 0.45,
+        duration: 0.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 1.2,
+      });
+    }, destinationPanel);
+
+    return () => {
+      ctx.revert();
+    };
+  }, [selectedDestination]);
 
   useEffect(() => {
     if (!root.current || !ship.current) return;
@@ -1225,43 +1374,105 @@ export default function CinematicHero() {
       {/* ------------------------------------------------------------------ */}
 
       <div
+        ref={destinationPanel}
         className="
-          absolute
-          right-6
-          top-1/2
-          z-30
-          hidden
-          w-[190px]
-          -translate-y-1/2
-          md:block
-        "
+    absolute right-6 top-1/2 z-30
+    hidden w-[230px] -translate-y-1/2
+    md:block
+  "
       >
         <div className="relative border border-white/10 bg-black/10 p-5 backdrop-blur-sm">
           <HudCorners />
 
-          <HudLabel violet>DESTINATION</HudLabel>
+          <HudLabel>DESTINATION</HudLabel>
 
-          <div className="mt-5">
-            <div className="font-mono text-lg tracking-[0.2em] text-white/80">
-              NEBULA
+          {selectedDestination && (
+            <div className="mt-5">
+              {/* Destination name */}
+              <div
+                ref={destinationName}
+                className="
+            font-mono text-[13px] font-semibold
+            tracking-[0.18em] text-white
+          "
+              >
+                {selectedDestination.name}
+              </div>
+
+              {/* Destination code */}
+              <div
+                ref={destinationCode}
+                className="
+            mt-1 font-mono text-[7px]
+            tracking-[0.22em] text-cyan-300/60
+          "
+              >
+                TARGET // {selectedDestination.code}
+              </div>
+
+              {/* Distance */}
+              <div ref={destinationDistance} className="mt-5">
+                <div className="font-mono text-[7px] tracking-[0.18em] text-white/35">
+                  DISTANCE
+                </div>
+
+                <div className="mt-1 font-mono text-[18px] tracking-[0.08em] text-cyan-300">
+                  {selectedDestination.distance}
+                </div>
+              </div>
+
+              {/* Navigation scan bar */}
+              <div className="mt-5">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="font-mono text-[6px] tracking-[0.18em] text-white/35">
+                    NAVIGATION LOCK
+                  </span>
+
+                  <span
+                    ref={destinationStatus}
+                    className="
+                font-mono text-[6px]
+                tracking-[0.16em] text-cyan-300
+              "
+                  >
+                    {selectedDestination.status}
+                  </span>
+                </div>
+
+                <div className="relative h-[2px] w-full overflow-hidden bg-white/10">
+                  <div
+                    ref={destinationBar}
+                    className="
+                absolute inset-y-0 left-0
+                w-0 bg-cyan-400
+                shadow-[0_0_8px_rgba(34,211,238,0.8)]
+              "
+                  />
+                </div>
+              </div>
+
+              {/* Coordinate-style readout */}
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <div className="font-mono text-[6px] tracking-[0.15em] text-white/25">
+                    VECTOR
+                  </div>
+                  <div className="mt-1 font-mono text-[7px] tracking-[0.1em] text-white/60">
+                    LOCKED
+                  </div>
+                </div>
+
+                <div>
+                  <div className="font-mono text-[6px] tracking-[0.15em] text-white/25">
+                    COURSE
+                  </div>
+                  <div className="mt-1 font-mono text-[7px] tracking-[0.1em] text-white/60">
+                    AUTO
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="mt-1 font-mono text-[9px] tracking-[0.3em] text-violet-300">
-              NX-07
-            </div>
-
-            <div className="mt-5 h-px bg-white/10" />
-
-            <div className="mt-4 flex justify-between font-mono text-[8px] text-white/30">
-              <span>DISTANCE</span>
-              <span>1,240 LY</span>
-            </div>
-
-            <div className="mt-2 flex justify-between font-mono text-[8px] text-white/30">
-              <span>STATUS</span>
-              <span className="text-cyan-300">READY</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
