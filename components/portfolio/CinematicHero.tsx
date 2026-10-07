@@ -197,7 +197,7 @@ function RocketStage({ children }: { children?: ReactNode }) {
 
       {/* Central rocket */}
       <div className="rocket-visual relative z-10 flex h-full w-full items-center justify-center">
-        <WireframeRocket className="h-[420px] w-[420px] text-[#58C7EF]" />
+        <WireframeRocket className="absolute left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2" />
       </div>
 
       {/* Scene-specific futuristic HUD */}

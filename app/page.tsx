@@ -9,7 +9,7 @@ import Contact from "@/components/portfolio/Contact";
 export default function Home() {
   return (
     <main className="overflow-x-hidden bg-[#03040d] text-white">
-      <Navbar />
+      {/* <Navbar /> */}
       <CinematicHero />
       <About />
       <Skills />
