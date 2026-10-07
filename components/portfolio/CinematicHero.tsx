@@ -1,5 +1,7 @@
 "use client";
 
+import WireframeRocket, { type WireframeRocketHandle } from "./WireframeRocket";
+
 import Link from "next/link";
 import {
   ArrowDown,
@@ -162,253 +164,28 @@ function CornerFrame() {
 }
 
 /* ==========================================================================
-   CENTRAL PROFESSIONAL WIRE-FRAME ROCKET
-   ========================================================================== */
-
-function CentralRocket() {
-  return (
-    <svg
-      viewBox="0 0 280 500"
-      className="central-rocket h-full w-full overflow-visible"
-      fill="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient
-          id="rocketStroke"
-          x1="0"
-          y1="0"
-          x2="280"
-          y2="500"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0" stopColor="#58C7EF" />
-          <stop offset=".45" stopColor="#334155" />
-          <stop offset="1" stopColor="#E1A934" />
-        </linearGradient>
-
-        <filter id="rocketGlow">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
-
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
-      {/* ================================================================
-          MAIN BODY
-      ================================================================ */}
-
-      <g
-        stroke="url(#rocketStroke)"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        {/* nose */}
-
-        <path
-          d="
-            M140 28
-            C108 55 88 100 82 150
-            V300
-            L101 328
-            H179
-            L198 300
-            V150
-            C192 100 172 55 140 28
-            Z
-          "
-          strokeWidth="2"
-        />
-
-        {/* secondary body contour */}
-
-        <path
-          d="
-            M111 67
-            C96 92 91 119 91 153
-            V281
-          "
-          strokeWidth="1"
-          opacity=".65"
-        />
-
-        <path
-          d="
-            M169 67
-            C184 92 189 119 189 153
-            V281
-          "
-          strokeWidth="1"
-          opacity=".65"
-        />
-
-        {/* cockpit housing */}
-
-        <circle cx="140" cy="143" r="34" strokeWidth="1.5" />
-
-        <circle cx="140" cy="143" r="24" stroke="#58C7EF" strokeWidth="1.5" />
-
-        <circle cx="140" cy="143" r="8" stroke="#E1A934" strokeWidth="1" />
-
-        <circle cx="140" cy="143" r="2.5" fill="#58C7EF" stroke="none" />
-
-        {/* cockpit crosshair */}
-
-        <path
-          d="M140 111 V175"
-          strokeWidth="1"
-          strokeDasharray="3 5"
-          opacity=".5"
-        />
-
-        <path
-          d="M108 143 H172"
-          strokeWidth="1"
-          strokeDasharray="3 5"
-          opacity=".5"
-        />
-
-        {/* upper body section */}
-
-        <path d="M89 195 H191" strokeWidth="1" opacity=".65" />
-
-        <path d="M86 224 H194" strokeWidth="1" opacity=".65" />
-
-        {/* center spine */}
-
-        <path
-          d="M140 28 V328"
-          stroke="#CBD5E1"
-          strokeWidth="1"
-          strokeDasharray="4 7"
-        />
-
-        {/* left wing */}
-
-        <path
-          d="
-            M82 220
-            L42 276
-            L42 306
-            L82 290
-          "
-          strokeWidth="2"
-        />
-
-        <path d="M82 245 L55 285" strokeWidth="1" />
-
-        {/* right wing */}
-
-        <path
-          d="
-            M198 220
-            L238 276
-            L238 306
-            L198 290
-          "
-          strokeWidth="2"
-        />
-
-        <path d="M198 245 L225 285" strokeWidth="1" />
-
-        {/* lower body */}
-
-        <path d="M91 300 H189" strokeWidth="1.5" />
-
-        {/* engine housing */}
-
-        <path
-          d="
-            M101 328
-            H179
-            L167 365
-            H113
-            Z
-          "
-          strokeWidth="2"
-        />
-
-        {/* engine chambers */}
-
-        <path d="M113 328 V360" strokeWidth="1" />
-
-        <path d="M140 328 V365" strokeWidth="1.5" />
-
-        <path d="M167 328 V360" strokeWidth="1" />
-
-        {/* engine core */}
-
-        <rect
-          x="128"
-          y="335"
-          width="24"
-          height="30"
-          rx="3"
-          stroke="#E1A934"
-          strokeWidth="1.5"
-        />
-
-        {/* lower technical rails */}
-
-        <path d="M104 382 H176" strokeWidth="1" />
-
-        <path d="M110 397 H170" strokeWidth="1" />
-
-        {/* tiny technical markers */}
-
-        <circle cx="102" cy="195" r="2" fill="#58C7EF" stroke="none" />
-
-        <circle cx="178" cy="195" r="2" fill="#E1A934" stroke="none" />
-
-        <circle cx="102" cy="224" r="1.5" fill="#58C7EF" stroke="none" />
-
-        <circle cx="178" cy="224" r="1.5" fill="#E1A934" stroke="none" />
-      </g>
-
-      {/* subtle illuminated technical core */}
-
-      <g filter="url(#rocketGlow)" opacity=".8">
-        <circle cx="140" cy="143" r="3" fill="#58C7EF" />
-
-        <circle cx="140" cy="350" r="3" fill="#E1A934" />
-      </g>
-    </svg>
-  );
-}
-
-/* ==========================================================================
    SHARED ROCKET STAGE
    ========================================================================== */
 
 function RocketStage({ children }: { children?: ReactNode }) {
   return (
-    <div className="rocket-stage relative h-[560px] w-[560px] max-w-[92vw]">
-      {/* outer coordinate frame */}
+    <div className="rocket-stage relative flex h-[520px] w-[520px] items-center justify-center">
+      {/* ================================================================
+         CENTRAL WIRE-FRAME ROCKET
+      ================================================================ */}
 
-      <div className="absolute left-1/2 top-1/2 h-[500px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-slate-200" />
-
-      <div className="absolute left-1/2 top-1/2 h-[440px] w-[285px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#58C7EF]/20" />
-
-      {/* central crosshair */}
-
-      <div className="absolute left-1/2 top-1/2 h-[500px] w-px -translate-x-1/2 -translate-y-1/2 bg-slate-200/60" />
-
-      <div className="absolute left-1/2 top-1/2 h-px w-[500px] -translate-x-1/2 -translate-y-1/2 bg-slate-200/60" />
-
-      {/* rocket */}
-
-      <div className="rocket-core absolute left-1/2 top-1/2 h-[470px] w-[263px] -translate-x-1/2 -translate-y-1/2">
-        <CentralRocket />
+      <div className="rocket-visual absolute inset-0 z-10 flex items-center justify-center">
+        <WireframeRocket className="h-[420px] w-[420px] text-[#58C7EF]" />
       </div>
 
-      {children}
+      {/* ================================================================
+         SCENE OVERLAY
+      ================================================================ */}
+
+      <div className="absolute inset-0 z-20">{children}</div>
     </div>
   );
 }
-
 /* ==========================================================================
    SCENE 01 — IDEA OVERLAY
    ========================================================================== */
@@ -1183,15 +960,11 @@ export default function CinematicHero() {
         });
       }
 
-      /* ================================================================
-         ROCKET FLOAT
-      ================================================================ */
+      const rocketVisual = root.querySelectorAll(".rocket-visual");
 
-      const rocketCores = root.querySelectorAll(".rocket-core");
-
-      gsap.to(rocketCores, {
-        y: -5,
-        duration: 2.8,
+      gsap.to(rocketVisual, {
+        y: -6,
+        duration: 3,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
