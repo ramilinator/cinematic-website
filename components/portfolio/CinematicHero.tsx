@@ -1,324 +1,381 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
+import {
+  ArrowDown,
+  ArrowUpRight,
+  Check,
+  Code2,
+  Cpu,
+  Globe2,
+  Layers3,
+  MousePointer2,
+  Sparkles,
+  Terminal,
+  Zap,
+} from "lucide-react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type SystemStatus = {
-  name: string;
-  label: string;
-  percent: number;
+/* -------------------------------------------------------------------------- */
+/* TYPES                                                                      */
+/* -------------------------------------------------------------------------- */
+
+type SceneLabelProps = {
+  number: string;
+  title: string;
 };
 
-type Destination = {
-  name: string;
-  code: string;
-  distance: string;
-  status: string;
-};
+type IconType = typeof Code2;
 
-const destinations: Destination[] = [
+/* -------------------------------------------------------------------------- */
+/* DATA                                                                       */
+/* -------------------------------------------------------------------------- */
+
+const technologies = [
+  { name: "JavaScript", short: "JS", angle: -90 },
+  { name: "React", short: "RE", angle: -45 },
+  { name: "Next.js", short: "NX", angle: 0 },
+  { name: "Tailwind", short: "TW", angle: 45 },
+  { name: "GSAP", short: "GS", angle: 90 },
+  { name: "Strapi", short: "ST", angle: 135 },
+  { name: "WordPress", short: "WP", angle: 180 },
+  { name: "Git", short: "GI", angle: 225 },
+];
+
+const details: {
+  title: string;
+  description: string;
+  icon: IconType;
+}[] = [
   {
-    name: "NEBULA NX-07",
-    code: "NX-07",
-    distance: "1,240 LY",
-    status: "READY",
+    title: "Interaction",
+    description: "Interfaces that respond naturally to every action.",
+    icon: MousePointer2,
   },
   {
-    name: "ORION OR-19",
-    code: "OR-19",
-    distance: "1,344 LY",
-    status: "READY",
+    title: "Responsive",
+    description: "Experiences designed for every screen size.",
+    icon: Layers3,
   },
   {
-    name: "ANDROMEDA AD-01",
-    code: "AD-01",
-    distance: "2.53 MLY",
-    status: "READY",
+    title: "Performance",
+    description: "Fast, focused and built with purpose.",
+    icon: Zap,
   },
   {
-    name: "VEGA VG-12",
-    code: "VG-12",
-    distance: "25.04 LY",
-    status: "READY",
-  },
-  {
-    name: "LYRA LY-08",
-    code: "LY-08",
-    distance: "620 LY",
-    status: "READY",
+    title: "Structure",
+    description: "Clean systems that remain easy to evolve.",
+    icon: Code2,
   },
 ];
 
 /* -------------------------------------------------------------------------- */
-/* HUD CORNERS                                                                */
+/* SMALL COMPONENTS                                                           */
 /* -------------------------------------------------------------------------- */
 
-function HudCorners() {
+function SceneLabel({ number, title }: SceneLabelProps) {
   return (
-    <>
-      <span className="absolute left-0 top-0 h-5 w-5 border-l border-t border-cyan-400/60" />
-      <span className="absolute right-0 top-0 h-5 w-5 border-r border-t border-cyan-400/60" />
-      <span className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-cyan-400/60" />
-      <span className="absolute bottom-0 right-0 h-5 w-5 border-b border-r border-cyan-400/60" />
-    </>
+    <div className="scene-label mb-8 flex items-center gap-4 text-[10px] font-medium uppercase tracking-[0.28em] text-slate-400">
+      <span className="font-mono text-blue-600">{number}</span>
+
+      <span className="h-px w-10 bg-slate-300" />
+
+      <span>{title}</span>
+    </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* HUD LABEL                                                                  */
-/* -------------------------------------------------------------------------- */
+function CornerFrame() {
+  return (
+    <div className="pointer-events-none absolute inset-6 sm:inset-10">
+      <span className="absolute left-0 top-0 h-5 w-5 border-l border-t border-slate-300" />
+      <span className="absolute right-0 top-0 h-5 w-5 border-r border-t border-slate-300" />
+      <span className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-slate-300" />
+      <span className="absolute bottom-0 right-0 h-5 w-5 border-b border-r border-slate-300" />
+    </div>
+  );
+}
 
-function HudLabel({
+function GridBackground() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px)
+          `,
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      <div
+        className="absolute inset-0 opacity-40"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(37,99,235,0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(124,58,237,0.025) 1px, transparent 1px)
+          `,
+          backgroundSize: "240px 240px",
+        }}
+      />
+
+      <div className="absolute left-1/2 top-1/2 h-[650px] w-[650px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/[0.035] blur-3xl" />
+
+      <div className="absolute left-[20%] top-[20%] h-[350px] w-[350px] rounded-full bg-violet-500/[0.025] blur-3xl" />
+    </div>
+  );
+}
+
+function SceneContainer({
   children,
-  violet = false,
+  className = "",
+  ref,
 }: {
   children: ReactNode;
-  violet?: boolean;
+  className?: string;
+  ref?: React.Ref<HTMLElement>;
 }) {
   return (
-    <div
-      className={`font-mono text-[9px] tracking-[0.35em] ${
-        violet ? "text-violet-300" : "text-cyan-300"
-      }`}
+    <section
+      ref={ref}
+      className={`scene absolute inset-0 flex min-h-screen items-center justify-center overflow-hidden px-6 sm:px-10 lg:px-16 ${className}`}
     >
       {children}
-    </div>
+    </section>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* CSS SPACECRAFT                                                             */
+/* SCENE 01 — IDEA                                                           */
 /* -------------------------------------------------------------------------- */
 
-function Spacecraft() {
+function IdeaGraphic() {
   return (
-    <div className="spacecraft relative h-[300px] w-[540px]">
-      {/* Atmospheric glow */}
-      <div className="absolute left-1/2 top-[55%] h-[220px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-[80px]" />
+    <div className="idea-graphic relative h-[390px] w-[390px]">
+      <div className="absolute inset-10 rounded-full border border-slate-300" />
+      <div className="absolute inset-[70px] rounded-full border border-dashed border-blue-300" />
+      <div className="absolute inset-[105px] rounded-full border border-slate-200" />
 
-      {/* ------------------------------------------------------------------ */}
-      {/* ENGINE EXHAUST                                                     */}
-      {/* ------------------------------------------------------------------ */}
+      <div className="absolute left-[18px] top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.4)]" />
 
-      <div className="engine-glow absolute left-1/2 top-[76%] z-0 flex -translate-x-1/2 gap-5">
-        <div className="engine-flame h-[100px] w-[48px] rounded-b-[30px] bg-gradient-to-b from-white via-cyan-300 to-blue-600 opacity-0 blur-[7px]" />
+      <div className="absolute right-[18px] top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-violet-500" />
 
-        <div className="engine-flame h-[120px] w-[55px] rounded-b-[35px] bg-gradient-to-b from-white via-cyan-300 to-blue-600 opacity-0 blur-[8px]" />
+      <div className="absolute left-1/2 top-[18px] h-2 w-2 -translate-x-1/2 rounded-full bg-slate-400" />
 
-        <div className="engine-flame h-[100px] w-[48px] rounded-b-[30px] bg-gradient-to-b from-white via-cyan-300 to-blue-600 opacity-0 blur-[7px]" />
+      <div className="absolute bottom-[18px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-blue-300" />
+
+      <div className="idea-core absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-blue-200 bg-white/80 shadow-[0_20px_70px_rgba(37,99,235,0.12)] backdrop-blur">
+        <div className="text-center">
+          <Sparkles className="mx-auto mb-3 h-6 w-6 text-blue-600" />
+
+          <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-400">
+            concept
+          </div>
+
+          <div className="mt-1 text-lg font-semibold tracking-tight text-slate-900">
+            IDEA
+          </div>
+        </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* MAIN SHIP                                                           */}
-      {/* ------------------------------------------------------------------ */}
+      <div className="absolute left-1/2 top-0 h-[105px] w-px -translate-x-1/2 bg-gradient-to-b from-transparent to-slate-300" />
 
-      <div className="ship-body absolute left-1/2 top-1/2 z-10 h-[145px] w-[300px] -translate-x-1/2 -translate-y-1/2">
-        {/* Left wing */}
-        <div
-          className="
-            absolute left-[-135px] top-[47px]
-            h-[62px] w-[160px]
-            origin-right -skew-y-[18deg]
-            rounded-l-[45px] rounded-br-[12px]
-            border border-cyan-300/20
-            bg-gradient-to-br from-slate-800 via-slate-900 to-[#050914]
-            shadow-[inset_0_0_30px_rgba(34,211,238,0.08)]
-          "
-        >
-          <div className="absolute right-5 top-1/2 h-[2px] w-20 -translate-y-1/2 bg-cyan-300/40 shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+      <div className="absolute bottom-0 left-1/2 h-[105px] w-px -translate-x-1/2 bg-gradient-to-t from-transparent to-slate-300" />
 
-          <div className="absolute right-10 top-[38px] h-[3px] w-10 bg-violet-400/60" />
-        </div>
+      <div className="absolute left-0 top-1/2 h-px w-[105px] bg-gradient-to-r from-transparent to-slate-300" />
 
-        {/* Right wing */}
-        <div
-          className="
-            absolute right-[-135px] top-[47px]
-            h-[62px] w-[160px]
-            origin-left skew-y-[18deg]
-            rounded-r-[45px] rounded-bl-[12px]
-            border border-cyan-300/20
-            bg-gradient-to-bl from-slate-800 via-slate-900 to-[#050914]
-            shadow-[inset_0_0_30px_rgba(34,211,238,0.08)]
-          "
-        >
-          <div className="absolute left-5 top-1/2 h-[2px] w-20 -translate-y-1/2 bg-cyan-300/40 shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+      <div className="absolute right-0 top-1/2 h-px w-[105px] bg-gradient-to-l from-transparent to-slate-300" />
 
-          <div className="absolute left-10 top-[38px] h-[3px] w-10 bg-violet-400/60" />
-        </div>
+      <div className="absolute left-0 top-8 font-mono text-[9px] uppercase tracking-widest text-slate-400">
+        POSSIBILITY
+      </div>
 
-        {/* Central fuselage */}
-        <div
-          className="
-            absolute left-1/2 top-1/2
-            h-[125px] w-[250px]
-            -translate-x-1/2 -translate-y-1/2
-            rounded-[48%_48%_30%_30%]
-            border border-cyan-200/20
-            bg-gradient-to-b from-slate-600 via-slate-900 to-[#03050c]
-            shadow-[inset_0_12px_35px_rgba(255,255,255,0.06),0_0_45px_rgba(34,211,238,0.08)]
-          "
-        />
-
-        {/* Upper spine */}
-        <div
-          className="
-            absolute left-1/2 top-[12px]
-            h-[70px] w-[105px]
-            -translate-x-1/2
-            rounded-[50%_50%_35%_35%]
-            border border-cyan-200/20
-            bg-gradient-to-b from-slate-500 to-slate-950
-          "
-        />
-
-        {/* Rear canopy */}
-        <div
-          className="
-            absolute left-1/2 top-[22px]
-            h-[43px] w-[86px]
-            -translate-x-1/2
-            rounded-[50%]
-            border border-cyan-200/30
-            bg-gradient-to-b from-cyan-200/30 via-blue-500/15 to-transparent
-            shadow-[0_0_20px_rgba(34,211,238,0.15)]
-          "
-        />
-
-        {/* Center light */}
-        <div
-          className="
-            ship-light
-            absolute left-1/2 top-[91px]
-            h-[4px] w-[105px]
-            -translate-x-1/2
-            rounded-full
-            bg-cyan-300
-            opacity-0
-            shadow-[0_0_8px_#67e8f9,0_0_20px_#22d3ee]
-          "
-        />
-
-        {/* Left navigation light */}
-        <div
-          className="
-            nav-light-left
-            absolute left-[23px] top-[66px]
-            h-[6px] w-[6px]
-            rounded-full
-            bg-cyan-300
-            opacity-0
-            shadow-[0_0_12px_#22d3ee]
-          "
-        />
-
-        {/* Right navigation light */}
-        <div
-          className="
-            nav-light-right
-            absolute right-[23px] top-[66px]
-            h-[6px] w-[6px]
-            rounded-full
-            bg-violet-300
-            opacity-0
-            shadow-[0_0_12px_#a78bfa]
-          "
-        />
-
-        {/* Engine housing */}
-        <div className="absolute bottom-[-5px] left-1/2 flex -translate-x-1/2 gap-5">
-          {[0, 1, 2].map((engine) => (
-            <div
-              key={engine}
-              className="
-                engine-housing
-                h-[28px] w-[42px]
-                rounded-b-xl
-                border border-slate-600/60
-                bg-gradient-to-b from-slate-700 to-black
-              "
-            >
-              <div className="engine-core mx-auto mt-1 h-[8px] w-[22px] rounded-full bg-slate-700" />
-            </div>
-          ))}
-        </div>
+      <div className="absolute bottom-8 right-0 font-mono text-[9px] uppercase tracking-widest text-slate-400">
+        DIRECTION
       </div>
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* WELCOME PASSENGER                                                          */
+/* SCENE 02 — VISION                                                          */
 /* -------------------------------------------------------------------------- */
 
-function WelcomePassenger() {
+function VisionGraphic() {
   return (
-    <div className="relative w-[min(620px,calc(100vw-32px))]">
-      <div
-        className="
-          relative overflow-hidden
-          border border-cyan-300/20
-          bg-[#020b12]/70
-          px-6 py-8
-          backdrop-blur-[5px]
-          sm:px-10 sm:py-10
-        "
-      >
-        <div className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-cyan-300/80" />
-        <div className="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-cyan-300/80" />
-        <div className="absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 border-cyan-300/80" />
-        <div className="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-cyan-300/80" />
+    <div className="vision-graphic relative w-full max-w-[700px]">
+      <div className="absolute -inset-10 rounded-[40px] bg-blue-500/[0.035] blur-3xl" />
 
-        <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.10)]">
+        <div className="flex h-12 items-center border-b border-slate-200 px-4">
+          <div className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+          </div>
 
-        <div className="relative text-center">
-          <div className="mb-5 flex items-center justify-center gap-3">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />
-
-            <span className="font-mono text-[9px] tracking-[0.35em] text-cyan-300/60">
-              EXPLORATION SYSTEM // NX-01
+          <div className="mx-auto flex h-6 w-64 items-center rounded-md bg-slate-50 px-3">
+            <span className="font-mono text-[8px] text-slate-400">
+              your-digital-experience.dev
             </span>
+          </div>
+        </div>
 
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />
+        <div className="grid min-h-[350px] grid-cols-[1.25fr_.75fr] gap-8 p-8">
+          <div className="flex flex-col justify-center">
+            <div className="mb-4 h-2 w-20 rounded-full bg-blue-100" />
+
+            <div className="space-y-2">
+              <div className="h-6 w-[85%] rounded bg-slate-900" />
+              <div className="h-6 w-[62%] rounded bg-slate-900" />
+            </div>
+
+            <div className="mt-6 h-2 w-[75%] rounded bg-slate-100" />
+            <div className="mt-2 h-2 w-[65%] rounded bg-slate-100" />
+
+            <div className="mt-8 flex gap-3">
+              <div className="h-9 w-28 rounded-lg bg-slate-900" />
+              <div className="h-9 w-24 rounded-lg border border-slate-200" />
+            </div>
           </div>
 
-          <div className="font-mono text-[10px] tracking-[0.4em] text-cyan-300/60">
-            PASSENGER ACCESS
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-4 rounded-2xl bg-gradient-to-br from-blue-50 to-violet-50" />
+
+            <div className="relative h-44 w-44 rounded-full border border-blue-200">
+              <div className="absolute inset-6 rounded-full border border-dashed border-violet-200" />
+
+              <div className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-lg">
+                <Globe2 className="m-auto mt-3 h-7 w-7 text-blue-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3">
+          <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
+            visual system
+          </span>
+
+          <span className="flex items-center gap-2 font-mono text-[8px] text-blue-600">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            assembling
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* SCENE 03 — BUILD                                                           */
+/* -------------------------------------------------------------------------- */
+
+function CodeGraphic() {
+  return (
+    <div className="code-graphic w-full max-w-[700px]">
+      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#111318] shadow-[0_40px_100px_rgba(15,23,42,0.22)]">
+        <div className="flex h-12 items-center border-b border-white/[0.08] px-4">
+          <div className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+            <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+            <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
           </div>
 
-          <h2 className="mt-3 text-3xl font-light tracking-[0.18em] text-white sm:text-5xl">
-            WELCOME ABOARD
-          </h2>
+          <div className="ml-5 flex items-center gap-2 font-mono text-[9px] text-white/40">
+            <Code2 className="h-3 w-3" />
+            experience.tsx
+          </div>
 
-          <div className="mx-auto mt-5 h-px w-32 bg-gradient-to-r from-transparent via-cyan-300/60 to-transparent" />
+          <div className="ml-auto font-mono text-[8px] uppercase tracking-widest text-emerald-400">
+            live
+          </div>
+        </div>
 
-          <p className="mx-auto mt-5 max-w-md font-mono text-[9px] leading-6 tracking-[0.18em] text-white/45 sm:text-[10px] sm:leading-7">
-            PASSENGER IDENTIFICATION ACKNOWLEDGED.
+        <div className="grid grid-cols-[42px_1fr] py-6">
+          <div className="select-none border-r border-white/[0.06] text-right font-mono text-[10px] leading-7 text-white/20">
+            01
             <br />
-            PREPARE FOR DEEP SPACE EXPLORATION.
-          </p>
+            02
+            <br />
+            03
+            <br />
+            04
+            <br />
+            05
+            <br />
+            06
+            <br />
+            07
+            <br />
+            08
+          </div>
 
-          <div className="mt-7 flex items-center justify-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee]" />
+          <div className="px-6 font-mono text-[11px] leading-7">
+            <div>
+              <span className="text-violet-400">const</span>{" "}
+              <span className="text-blue-300">experience</span>{" "}
+              <span className="text-white/50">=</span>{" "}
+              <span className="text-white/70">{"{"}</span>
+            </div>
 
-            <span className="font-mono text-[8px] tracking-[0.3em] text-cyan-300/70">
-              BOARDING SEQUENCE CONFIRMED
-            </span>
+            <div className="pl-5">
+              <span className="text-white/40">design:</span>{" "}
+              <span className="text-emerald-300">"intentional"</span>,
+            </div>
+
+            <div className="pl-5">
+              <span className="text-white/40">interaction:</span>{" "}
+              <span className="text-emerald-300">"fluid"</span>,
+            </div>
+
+            <div className="pl-5">
+              <span className="text-white/40">performance:</span>{" "}
+              <span className="text-emerald-300">"optimized"</span>,
+            </div>
+
+            <div className="pl-5">
+              <span className="text-white/40">structure:</span>{" "}
+              <span className="text-emerald-300">"scalable"</span>,
+            </div>
+
+            <div>
+              <span className="text-white/70">{"}"}</span>;
+            </div>
+
+            <div className="mt-5 flex items-center gap-3 text-[9px] uppercase tracking-widest">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.7)]" />
+              <span className="text-white/40">compiling experience...</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-7 flex justify-between border-t border-cyan-300/10 pt-3">
-          <span className="font-mono text-[7px] tracking-[0.25em] text-white/20">
-            MISSION // 001
+        <div className="flex items-center justify-between border-t border-white/[0.06] px-5 py-3">
+          <span className="font-mono text-[8px] text-white/25">
+            main / production
           </span>
 
-          <span className="font-mono text-[7px] tracking-[0.25em] text-cyan-300/35">
-            ACCESS GRANTED
+          <span className="font-mono text-[8px] text-emerald-400">
+            build complete
           </span>
+        </div>
+      </div>
+
+      <div className="build-terminal ml-auto mt-[-20px] mr-6 w-[260px] overflow-hidden rounded-xl border border-slate-700 bg-[#181a20] shadow-xl">
+        <div className="border-b border-white/[0.06] px-4 py-2 font-mono text-[8px] text-white/30">
+          terminal
+        </div>
+
+        <div className="p-4 font-mono text-[9px] leading-5">
+          <div className="text-white/40">$ npm run build</div>
+          <div className="text-emerald-400">✓ compiled successfully</div>
+          <div className="text-white/30">ready in 1.84s</div>
         </div>
       </div>
     </div>
@@ -326,209 +383,83 @@ function WelcomePassenger() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* PILOT PROFILE                                                              */
+/* SCENE 04 — EXPERIENCE                                                       */
 /* -------------------------------------------------------------------------- */
 
-function PilotProfile() {
+function ExperienceGraphic() {
   return (
-    <div className="relative w-[min(760px,calc(100vw-32px))] sm:w-[min(760px,calc(100vw-48px))]">
-      <div
-        className="
-          relative
-          border border-cyan-300/20
-          bg-cyan-950/[0.035]
-          px-4 py-5
-          backdrop-blur-[3px]
-          sm:px-7 sm:py-7
-          md:px-10 md:py-9
-        "
-      >
-        <div className="pointer-events-none absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-cyan-300/70 sm:h-8 sm:w-8" />
-        <div className="pointer-events-none absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-cyan-300/70 sm:h-8 sm:w-8" />
-        <div className="pointer-events-none absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-cyan-300/70 sm:h-8 sm:w-8" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-cyan-300/70 sm:h-8 sm:w-8" />
+    <div className="experience-graphic relative w-full max-w-[720px]">
+      <div className="absolute -inset-10 rounded-full bg-blue-500/[0.035] blur-3xl" />
 
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
+      <div className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_35px_100px_rgba(15,23,42,0.12)]">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
+          <div className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+          </div>
 
-        <div
-          className="
-            mb-5 flex items-center justify-between
-            border-b border-cyan-300/10 pb-3
-            sm:mb-7 sm:pb-4
-          "
-        >
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.9)] sm:h-2.5 sm:w-2.5" />
+          <div className="ml-3 h-6 flex-1 rounded-md bg-slate-50" />
 
-            <span className="truncate font-mono text-[9px] tracking-[0.25em] text-cyan-200/90 sm:text-sm sm:tracking-[0.4em]">
-              PILOT IDENTIFICATION
+          <div className="h-6 w-6 rounded-md bg-slate-100" />
+        </div>
+
+        <div className="grid gap-4 p-5 sm:grid-cols-[1.4fr_.6fr]">
+          <div className="relative overflow-hidden rounded-xl bg-[#f5f7fa] p-7">
+            <div className="absolute right-[-20px] top-[-30px] h-36 w-36 rounded-full border border-blue-100" />
+            <div className="absolute right-[20px] top-[10px] h-20 w-20 rounded-full border border-dashed border-violet-200" />
+
+            <div className="relative">
+              <div className="mb-3 h-2 w-16 rounded-full bg-blue-200" />
+
+              <div className="space-y-2">
+                <div className="h-5 w-[80%] rounded bg-slate-900" />
+                <div className="h-5 w-[55%] rounded bg-slate-900" />
+              </div>
+
+              <div className="mt-5 max-w-[280px] text-[10px] leading-5 text-slate-400">
+                Design should communicate before the first interaction.
+              </div>
+
+              <div className="mt-6 h-9 w-28 rounded-lg bg-slate-900" />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="h-24 rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <div className="mb-3 h-2 w-10 rounded bg-blue-200" />
+              <div className="h-2 w-[70%] rounded bg-slate-200" />
+              <div className="mt-2 h-2 w-[50%] rounded bg-slate-200" />
+            </div>
+
+            <div className="h-24 rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <div className="mb-3 h-2 w-10 rounded bg-violet-200" />
+              <div className="h-2 w-[75%] rounded bg-slate-200" />
+              <div className="mt-2 h-2 w-[45%] rounded bg-slate-200" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between px-5 py-3">
+          <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
+            interaction layer
+          </span>
+
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+
+            <span className="font-mono text-[8px] text-blue-600">
+              responsive
             </span>
           </div>
-
-          <span className="ml-3 shrink-0 font-mono text-[8px] tracking-[0.2em] text-cyan-300/40 sm:text-xs sm:tracking-[0.3em]">
-            ID // 001
-          </span>
         </div>
+      </div>
 
-        <div
-          className="
-            flex flex-col items-center gap-7
-            sm:gap-8
-            md:flex-row md:items-center md:gap-10
-          "
-        >
-          {/* Profile image */}
-          <div
-            className="
-              relative
-              h-[150px] w-[150px] shrink-0
-              sm:h-[180px] sm:w-[180px]
-              md:h-[220px] md:w-[220px]
-            "
-          >
-            <div className="absolute inset-0 border border-cyan-300/20" />
+      <div className="experience-cursor absolute bottom-[-15px] right-[18%]">
+        <MousePointer2 className="h-8 w-8 fill-slate-900 text-white drop-shadow-lg" />
 
-            <div className="absolute -left-2 -top-2 h-6 w-6 border-l-2 border-t-2 border-cyan-300/80 sm:-left-3 sm:-top-3 sm:h-8 sm:w-8" />
-            <div className="absolute -right-2 -top-2 h-6 w-6 border-r-2 border-t-2 border-cyan-300/80 sm:-right-3 sm:-top-3 sm:h-8 sm:w-8" />
-            <div className="absolute -bottom-2 -left-2 h-6 w-6 border-b-2 border-l-2 border-cyan-300/80 sm:-bottom-3 sm:-left-3 sm:h-8 sm:w-8" />
-            <div className="absolute -bottom-2 -right-2 h-6 w-6 border-b-2 border-r-2 border-cyan-300/80 sm:-bottom-3 sm:-right-3 sm:h-8 sm:w-8" />
-
-            <div className="absolute inset-2 overflow-hidden bg-cyan-950/[0.08] sm:inset-3">
-              <div className="absolute inset-0 scale-[1.20]">
-                <Image
-                  src="/images/profile.png"
-                  alt="Ramil Aoanan"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-
-              <div
-                className="
-                  pointer-events-none absolute inset-0 z-10
-                  opacity-30
-                  bg-[repeating-linear-gradient(to_bottom,transparent_0px,transparent_3px,rgba(103,232,249,0.08)_4px,transparent_5px)]
-                "
-              />
-
-              <div
-                className="
-                  pointer-events-none absolute
-                  left-0 top-[-25%]
-                  z-20
-                  h-[20%] w-full
-                  animate-[profileScan_3.6s_linear_infinite]
-                  bg-gradient-to-b
-                  from-transparent
-                  via-cyan-300/20
-                  to-transparent
-                  shadow-[0_0_18px_rgba(34,211,238,0.25)]
-                "
-              />
-
-              <div
-                className="
-                  pointer-events-none absolute
-                  left-0 top-[-25%]
-                  z-20
-                  h-px w-full
-                  animate-[profileScanLine_3.6s_linear_infinite]
-                  bg-cyan-300/70
-                  shadow-[0_0_8px_rgba(103,232,249,0.9)]
-                "
-              />
-
-              <div
-                className="
-                  pointer-events-none absolute inset-0 z-30
-                  bg-[radial-gradient(circle,transparent_45%,rgba(8,145,178,0.10)_75%,rgba(2,3,10,0.28)_100%)]
-                "
-              />
-
-              <div className="pointer-events-none absolute inset-0 z-30 bg-cyan-400/[0.025]" />
-            </div>
-
-            <div className="absolute -bottom-5 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap bg-[#02030a] px-2 font-mono text-[7px] tracking-[0.2em] text-cyan-300/50 sm:-bottom-6 sm:px-3 sm:text-[10px] sm:tracking-[0.25em]">
-              BIOMETRIC // VERIFIED
-            </div>
-          </div>
-
-          {/* Profile information */}
-          <div className="w-full min-w-0 text-center md:text-left">
-            <div className="mb-1 font-mono text-[8px] tracking-[0.28em] text-cyan-300/45 sm:text-[10px] sm:tracking-[0.35em]">
-              DESIGNATION
-            </div>
-
-            <div className="mb-1 whitespace-nowrap text-2xl font-light tracking-[0.08em] text-white sm:text-3xl md:text-4xl md:tracking-[0.12em]">
-              RAMIL AOANAN
-            </div>
-
-            <div className="mb-5 font-mono text-[9px] tracking-[0.2em] text-cyan-300/70 sm:mb-7 sm:text-xs sm:text-sm sm:tracking-[0.28em]">
-              EXPLORATION PILOT
-            </div>
-
-            <div className="space-y-3 border-l-0 pl-0 sm:space-y-4 md:border-l md:border-cyan-300/15 md:pl-5">
-              <div>
-                <div className="font-mono text-[8px] tracking-[0.22em] text-white/30 sm:text-[10px] sm:tracking-[0.28em]">
-                  SPECIALIZATION
-                </div>
-
-                <div className="mt-1 font-mono text-[10px] tracking-[0.12em] text-white/75 sm:text-sm sm:tracking-[0.16em]">
-                  WEB SYSTEMS
-                </div>
-              </div>
-
-              <div>
-                <div className="font-mono text-[8px] tracking-[0.22em] text-white/30 sm:text-[10px] sm:tracking-[0.28em]">
-                  PRIMARY STACK
-                </div>
-
-                <div className="mt-1 font-mono text-[10px] tracking-[0.12em] text-white/75 sm:text-sm sm:tracking-[0.16em]">
-                  REACT / NEXT.JS
-                </div>
-              </div>
-
-              <div>
-                <div className="font-mono text-[8px] tracking-[0.22em] text-white/30 sm:text-[10px] sm:tracking-[0.28em]">
-                  EXPERIENCE
-                </div>
-
-                <div className="mt-1 font-mono text-[10px] tracking-[0.12em] text-white/75 sm:text-sm sm:tracking-[0.16em]">
-                  05+ YEARS
-                </div>
-              </div>
-
-              <div>
-                <div className="font-mono text-[8px] tracking-[0.22em] text-white/30 sm:text-[10px] sm:tracking-[0.28em]">
-                  MISSION STATUS
-                </div>
-
-                <div className="mt-1 flex items-center justify-center gap-2 font-mono text-[10px] tracking-[0.12em] text-cyan-300 md:justify-start sm:text-sm sm:tracking-[0.16em]">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.9)]" />
-                  ACTIVE
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-7 flex flex-col items-center gap-2 border-t border-cyan-300/10 pt-3 sm:mt-9 sm:flex-row sm:justify-between sm:pt-4">
-          <div className="font-mono text-[7px] tracking-[0.2em] text-white/25 sm:text-[10px] sm:tracking-[0.3em]">
-            EXPLORATION PROGRAM // NX-01
-          </div>
-
-          <div className="font-mono text-[7px] tracking-[0.2em] text-cyan-300/45 sm:text-[10px] sm:tracking-[0.3em]">
-            AUTHORIZED PILOT
-          </div>
-        </div>
-
-        <div className="absolute -right-12 top-1/2 hidden -translate-y-1/2 flex-col gap-1 opacity-40 sm:flex">
-          <div className="h-px w-8 bg-cyan-300" />
-          <div className="h-px w-5 bg-cyan-300" />
-          <div className="h-px w-10 bg-cyan-300" />
-          <div className="h-px w-4 bg-cyan-300" />
-          <div className="h-px w-7 bg-cyan-300" />
+        <div className="ml-5 mt-[-2px] rounded-full bg-slate-900 px-3 py-1 font-mono text-[8px] text-white">
+          interaction
         </div>
       </div>
     </div>
@@ -536,1510 +467,1323 @@ function PilotProfile() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* CINEMATIC HERO                                                             */
+/* SCENE 05 — DETAILS                                                         */
+/* -------------------------------------------------------------------------- */
+
+function DetailsGraphic() {
+  return (
+    <div className="details-graphic relative grid w-full max-w-[720px] grid-cols-2 gap-3 sm:grid-cols-4">
+      {details.map((item, index) => {
+        const Icon = item.icon;
+
+        return (
+          <div
+            key={item.title}
+            className="detail-card group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_15px_45px_rgba(15,23,42,0.06)]"
+          >
+            <div className="absolute right-[-25px] top-[-25px] h-20 w-20 rounded-full border border-slate-100 transition-transform duration-500 group-hover:scale-125" />
+
+            <div className="relative">
+              <div className="mb-10 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
+                <Icon className="h-4 w-4 text-blue-600" />
+              </div>
+
+              <div className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
+                0{index + 1}
+              </div>
+
+              <div className="mt-2 text-sm font-semibold text-slate-900">
+                {item.title}
+              </div>
+
+              <div className="mt-3 text-[10px] leading-5 text-slate-400">
+                {item.description}
+              </div>
+            </div>
+
+            <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-500 transition-all duration-500 group-hover:w-full" />
+          </div>
+        );
+      })}
+
+      <div className="absolute -left-8 top-1/2 hidden h-px w-6 bg-slate-300 lg:block" />
+      <div className="absolute -right-8 top-1/2 hidden h-px w-6 bg-slate-300 lg:block" />
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* SCENE 06 — TECHNOLOGY                                                       */
+/* -------------------------------------------------------------------------- */
+
+function TechnologyGraphic() {
+  return (
+    <div className="technology-graphic relative h-[430px] w-[430px]">
+      <div className="absolute inset-8 rounded-full border border-slate-200" />
+      <div className="absolute inset-[70px] rounded-full border border-dashed border-blue-200" />
+      <div className="absolute inset-[125px] rounded-full border border-slate-100" />
+
+      <div className="absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-blue-200 bg-white shadow-[0_20px_60px_rgba(37,99,235,0.12)]">
+        <Cpu className="mb-2 h-6 w-6 text-blue-600" />
+
+        <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
+          system
+        </div>
+
+        <div className="mt-1 text-sm font-semibold text-slate-900">STACK</div>
+      </div>
+
+      {technologies.map((technology) => {
+        const radius = 170;
+
+        const x = Math.cos((technology.angle * Math.PI) / 180) * radius;
+
+        const y = Math.sin((technology.angle * Math.PI) / 180) * radius;
+
+        return (
+          <div
+            key={technology.name}
+            className="tech-node absolute left-1/2 top-1/2"
+            style={{
+              transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+            }}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
+              <span className="font-mono text-[9px] font-semibold text-slate-600">
+                {technology.short}
+              </span>
+            </div>
+
+            <div className="mt-2 whitespace-nowrap text-center font-mono text-[7px] uppercase tracking-wider text-slate-400">
+              {technology.name}
+            </div>
+          </div>
+        );
+      })}
+
+      {technologies.map((technology) => (
+        <div
+          key={`line-${technology.name}`}
+          className="absolute left-1/2 top-1/2 h-px origin-left bg-slate-200"
+          style={{
+            width: "170px",
+            transform: `rotate(${technology.angle}deg)`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* SCENE 07 — TRANSFORMATION                                                   */
+/* -------------------------------------------------------------------------- */
+
+function TransformationGraphic() {
+  const items = [
+    { label: "IDEA", icon: Sparkles },
+    { label: "DESIGN", icon: Layers3 },
+    { label: "CODE", icon: Code2 },
+    { label: "EXPERIENCE", icon: Globe2 },
+  ];
+
+  return (
+    <div className="transformation-graphic w-full max-w-[800px]">
+      <div className="relative">
+        <div className="absolute left-[10%] right-[10%] top-1/2 hidden h-px bg-slate-200 sm:block" />
+
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+          {items.map((item, index) => {
+            const Icon = item.icon;
+
+            return (
+              <div
+                key={item.label}
+                className="transformation-node relative flex flex-col items-center text-center"
+              >
+                <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-[0_15px_40px_rgba(15,23,42,0.07)]">
+                  <Icon className="h-6 w-6 text-blue-600" />
+
+                  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 font-mono text-[7px] text-white">
+                    0{index + 1}
+                  </span>
+                </div>
+
+                <div className="mt-5 font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-700">
+                  {item.label}
+                </div>
+
+                <div className="mt-2 h-1 w-8 rounded-full bg-slate-100" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-12 text-center">
+        <div className="font-mono text-[8px] uppercase tracking-[0.35em] text-slate-400">
+          one continuous process
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* SCENE 08 — LAUNCH                                                          */
+/* -------------------------------------------------------------------------- */
+
+function LaunchGraphic() {
+  return (
+    <div className="launch-graphic relative w-full max-w-[560px]">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_35px_100px_rgba(15,23,42,0.12)]">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+              <Terminal className="h-4 w-4 text-blue-600" />
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold text-slate-900">
+                Deployment
+              </div>
+
+              <div className="font-mono text-[7px] uppercase tracking-widest text-slate-400">
+                production system
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+
+            <span className="font-mono text-[7px] uppercase tracking-widest text-emerald-600">
+              ready
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-4 p-6">
+          {["Design", "Development", "Optimization", "Deployment"].map(
+            (item) => (
+              <div key={item} className="flex items-center gap-4">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50">
+                  <Check className="h-3 w-3 text-emerald-600" />
+                </div>
+
+                <div className="flex-1">
+                  <div className="text-xs font-medium text-slate-700">
+                    {item}
+                  </div>
+
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100">
+                    <div className="launch-progress h-full w-full rounded-full bg-emerald-400" />
+                  </div>
+                </div>
+
+                <span className="font-mono text-[7px] text-emerald-600">
+                  100%
+                </span>
+              </div>
+            ),
+          )}
+        </div>
+
+        <div className="border-t border-slate-100 bg-slate-50/70 px-6 py-5">
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
+                experience
+              </div>
+
+              <div className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+                READY
+              </div>
+            </div>
+
+            <div className="text-right">
+              <div className="font-mono text-[7px] text-slate-400">RELEASE</div>
+
+              <div className="font-mono text-xs text-blue-600">01.0.0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute -bottom-8 left-1/2 h-16 w-px -translate-x-1/2 bg-gradient-to-b from-blue-400 to-transparent" />
+
+      <div className="absolute -bottom-10 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,.5)]" />
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* SCENE 09 — CTA                                                             */
+/* -------------------------------------------------------------------------- */
+
+function FinalGraphic() {
+  return (
+    <div className="final-graphic relative h-[360px] w-[360px]">
+      <div className="absolute inset-0 rounded-full border border-slate-200" />
+      <div className="absolute inset-10 rounded-full border border-dashed border-blue-200" />
+      <div className="absolute inset-20 rounded-full border border-slate-100" />
+
+      <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.10)]">
+        <div className="flex h-full flex-col items-center justify-center">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
+            <Code2 className="h-5 w-5 text-white" />
+          </div>
+
+          <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
+            start
+          </div>
+
+          <div className="mt-1 text-sm font-semibold text-slate-900">BUILD</div>
+        </div>
+      </div>
+
+      <div className="absolute left-1/2 top-[-2px] h-3 w-3 -translate-x-1/2 rounded-full bg-blue-500" />
+
+      <div className="absolute bottom-[-2px] left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-violet-500" />
+
+      <div className="absolute left-[-2px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-slate-400" />
+
+      <div className="absolute right-[-2px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-blue-300" />
+
+      <div className="absolute left-8 top-8 font-mono text-[7px] uppercase tracking-widest text-slate-400">
+        YOUR IDEA
+      </div>
+
+      <div className="absolute bottom-8 right-8 font-mono text-[7px] uppercase tracking-widest text-slate-400">
+        YOUR NEXT STEP
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* MAIN COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
 export default function CinematicHero() {
-  const root = useRef<HTMLElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const [selectedDestination, setSelectedDestination] =
-    useState<Destination | null>(null);
+  const sceneRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const destinationPanel = useRef<HTMLDivElement>(null);
-  const destinationName = useRef<HTMLDivElement>(null);
-  const destinationCode = useRef<HTMLDivElement>(null);
-  const destinationDistance = useRef<HTMLDivElement>(null);
-  const destinationStatus = useRef<HTMLDivElement>(null);
-  const destinationBar = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const scanRef = useRef<HTMLDivElement>(null);
 
-  const gpsPanel = useRef<HTMLDivElement>(null);
-  const gpsCoordinates = useRef<HTMLDivElement>(null);
-  const gpsHeading = useRef<HTMLDivElement>(null);
-  const gpsAltitude = useRef<HTMLDivElement>(null);
-  const gpsVelocity = useRef<HTMLDivElement>(null);
-  const gpsLock = useRef<HTMLDivElement>(null);
-  const gpsScan = useRef<HTMLDivElement>(null);
+  const ideaGraphicRef = useRef<HTMLDivElement>(null);
+  const visionGraphicRef = useRef<HTMLDivElement>(null);
+  const codeGraphicRef = useRef<HTMLDivElement>(null);
+  const experienceGraphicRef = useRef<HTMLDivElement>(null);
+  const detailsGraphicRef = useRef<HTMLDivElement>(null);
+  const technologyGraphicRef = useRef<HTMLDivElement>(null);
+  const transformationGraphicRef = useRef<HTMLDivElement>(null);
+  const launchGraphicRef = useRef<HTMLDivElement>(null);
+  const finalGraphicRef = useRef<HTMLDivElement>(null);
 
-  const scrollProgress = useRef<HTMLDivElement>(null);
-  const welcomePassenger = useRef<HTMLDivElement>(null);
-  const ship = useRef<HTMLDivElement>(null);
-  const shipGlow = useRef<HTMLDivElement>(null);
-  const horizon = useRef<HTMLDivElement>(null);
-  const pilotProfile = useRef<HTMLDivElement>(null);
-  const [audioOn, setAudioOn] = useState(false);
+  useLayoutEffect(() => {
+    const root = rootRef.current;
 
-  const [bootMessages, setBootMessages] = useState<SystemStatus[]>([]);
-
-  useEffect(() => {
-    if (!gpsPanel.current) return;
+    if (!root) return;
 
     const ctx = gsap.context(() => {
-      const elements = [
-        gpsCoordinates.current,
-        gpsHeading.current,
-        gpsAltitude.current,
-        gpsVelocity.current,
-        gpsLock.current,
-      ].filter(Boolean);
+      const scenes = sceneRefs.current.filter(Boolean) as HTMLElement[];
 
-      gsap.set(elements, {
+      if (!scenes.length) return;
+
+      /* ================================================================
+         UNIVERSAL TEXT TRANSITION
+      ================================================================ */
+
+      const TEXT_FROM = {
         opacity: 0,
-        y: 6,
-      });
+        x: 70,
+        filter: "blur(8px)",
+      };
 
-      gsap.set(gpsScan.current, {
-        width: "0%",
-      });
-
-      const tl = gsap.timeline();
-
-      tl.to(gpsPanel.current, {
+      const TEXT_IN = {
         opacity: 1,
-        duration: 0.45,
-        ease: "power2.out",
-      })
-        .to(
-          gpsCoordinates.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            ease: "power3.out",
-          },
-          "-=0.15",
-        )
-        .to(
-          gpsHeading.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          gpsAltitude.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          gpsVelocity.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          gpsLock.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          gpsScan.current,
-          {
-            width: "100%",
-            duration: 1.5,
-            ease: "power3.inOut",
-          },
-          "-=0.1",
+        x: 0,
+        filter: "blur(0px)",
+      };
+
+      const TEXT_OUT = {
+        opacity: 0,
+        x: -70,
+        filter: "blur(8px)",
+      };
+
+      /* ================================================================
+         INITIAL SCENE STATE
+      ================================================================ */
+
+      gsap.set(scenes, {
+        autoAlpha: 0,
+      });
+
+      gsap.set(scenes[0], {
+        autoAlpha: 1,
+      });
+
+      /*
+       * Every text element starts from exactly the same
+       * hidden state.
+       */
+      const allText = root.querySelectorAll(
+        ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
+      );
+
+      gsap.set(allText, TEXT_FROM);
+
+      /*
+       * Scene 01 text starts visible.
+       */
+      const firstText = scenes[0].querySelectorAll(
+        ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
+      );
+
+      gsap.set(firstText, TEXT_IN);
+
+      /* ================================================================
+         GRAPHICS INITIAL STATE
+      ================================================================ */
+
+      gsap.set(
+        [
+          visionGraphicRef.current,
+          codeGraphicRef.current,
+          experienceGraphicRef.current,
+          detailsGraphicRef.current,
+          technologyGraphicRef.current,
+          transformationGraphicRef.current,
+          launchGraphicRef.current,
+          finalGraphicRef.current,
+        ],
+        {
+          opacity: 0,
+          y: 50,
+          scale: 0.94,
+        },
+      );
+
+      gsap.set(ideaGraphicRef.current, {
+        opacity: 0,
+        y: 50,
+        scale: 0.94,
+      });
+
+      /* ================================================================
+         AMBIENT SCAN
+      ================================================================ */
+
+      gsap.to(scanRef.current, {
+        yPercent: 100,
+        duration: 5,
+        repeat: -1,
+        ease: "none",
+      });
+
+      /* ================================================================
+         MASTER TIMELINE
+      ================================================================ */
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "+=12000",
+          scrub: 1.4,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      /* ================================================================
+         TEXT TRANSITION HELPER
+      ================================================================ */
+
+      const animateSceneText = (scene: HTMLElement, isFirst = false) => {
+        const textElements = scene.querySelectorAll(
+          ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
         );
 
-      // Continuous navigation scan
-      gsap.to(gpsScan.current, {
-        opacity: 0.35,
-        duration: 0.9,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: 1.4,
+        if (!textElements.length) return;
+
+        if (!isFirst) {
+          gsap.set(textElements, TEXT_FROM);
+
+          tl.to(textElements, {
+            ...TEXT_IN,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: "power3.out",
+          });
+        } else {
+          tl.to(textElements, {
+            ...TEXT_IN,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: "power3.out",
+          });
+        }
+      };
+
+      const exitSceneText = (scene: HTMLElement) => {
+        const textElements = scene.querySelectorAll(
+          ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
+        );
+
+        if (!textElements.length) return;
+
+        tl.to(textElements, {
+          ...TEXT_OUT,
+          duration: 0.9,
+          stagger: 0.08,
+          ease: "power2.in",
+        });
+      };
+
+      /* ================================================================
+         SCENE 01
+      ================================================================ */
+
+      tl.to(ideaGraphicRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1,
+        ease: "power3.out",
       });
-    }, gpsPanel);
+
+      tl.to(
+        ideaGraphicRef.current,
+        {
+          rotate: 5,
+          duration: 1.8,
+          ease: "none",
+        },
+        "<",
+      );
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[0]);
+
+      tl.to(
+        ideaGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[0], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 02
+      ================================================================ */
+
+      tl.set(scenes[1], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[1]);
+
+      tl.to(
+        visionGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      tl.to({}, { duration: 0.9 });
+
+      exitSceneText(scenes[1]);
+
+      tl.to(
+        visionGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[1], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 03
+      ================================================================ */
+
+      tl.set(scenes[2], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[2]);
+
+      tl.to(
+        codeGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      const codeLines = codeGraphicRef.current?.querySelectorAll(
+        ".px-6.font-mono > div",
+      );
+
+      if (codeLines) {
+        tl.from(
+          codeLines,
+          {
+            opacity: 0,
+            y: 15,
+            stagger: 0.08,
+            duration: 0.35,
+            ease: "power2.out",
+          },
+          "-=0.55",
+        );
+      }
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[2]);
+
+      tl.to(
+        codeGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[2], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 04
+      ================================================================ */
+
+      tl.set(scenes[3], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[3]);
+
+      tl.to(
+        experienceGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      tl.fromTo(
+        experienceGraphicRef.current?.querySelector(".experience-cursor"),
+        {
+          x: -70,
+          y: 40,
+          opacity: 0,
+        },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "power3.out",
+        },
+        "-=0.5",
+      );
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[3]);
+
+      tl.to(
+        experienceGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[3], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 05
+      ================================================================ */
+
+      tl.set(scenes[4], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[4]);
+
+      tl.to(
+        detailsGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      const detailCards =
+        detailsGraphicRef.current?.querySelectorAll(".detail-card");
+
+      if (detailCards) {
+        tl.from(
+          detailCards,
+          {
+            opacity: 0,
+            y: 25,
+            scale: 0.95,
+            stagger: 0.1,
+            duration: 0.45,
+            ease: "power2.out",
+          },
+          "-=0.5",
+        );
+      }
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[4]);
+
+      tl.to(
+        detailsGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[4], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 06
+      ================================================================ */
+
+      tl.set(scenes[5], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[5]);
+
+      tl.to(
+        technologyGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      const techNodes =
+        technologyGraphicRef.current?.querySelectorAll(".tech-node");
+
+      if (techNodes) {
+        tl.from(
+          techNodes,
+          {
+            opacity: 0,
+            scale: 0.8,
+            stagger: 0.06,
+            duration: 0.4,
+            ease: "power2.out",
+          },
+          "-=0.5",
+        );
+      }
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[5]);
+
+      tl.to(
+        technologyGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[5], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 07
+      ================================================================ */
+
+      tl.set(scenes[6], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[6]);
+
+      tl.to(
+        transformationGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      const transformationNodes =
+        transformationGraphicRef.current?.querySelectorAll(
+          ".transformation-node",
+        );
+
+      if (transformationNodes) {
+        tl.from(
+          transformationNodes,
+          {
+            opacity: 0,
+            y: 25,
+            scale: 0.95,
+            stagger: 0.12,
+            duration: 0.45,
+            ease: "power2.out",
+          },
+          "-=0.5",
+        );
+      }
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[6]);
+
+      tl.to(
+        transformationGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[6], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 08
+      ================================================================ */
+
+      tl.set(scenes[7], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[7]);
+
+      tl.to(
+        launchGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      const progressBars =
+        launchGraphicRef.current?.querySelectorAll(".launch-progress");
+
+      if (progressBars) {
+        gsap.set(progressBars, {
+          width: "0%",
+        });
+
+        tl.to(
+          progressBars,
+          {
+            width: "100%",
+            stagger: 0.15,
+            duration: 0.5,
+            ease: "power2.inOut",
+          },
+          "-=0.5",
+        );
+      }
+
+      tl.to({}, { duration: 0.8 });
+
+      exitSceneText(scenes[7]);
+
+      tl.to(
+        launchGraphicRef.current,
+        {
+          opacity: 0,
+          y: -50,
+          scale: 0.96,
+          duration: 0.9,
+          ease: "power2.in",
+        },
+        "<",
+      );
+
+      tl.set(scenes[7], {
+        autoAlpha: 0,
+      });
+
+      /* ================================================================
+         SCENE 09
+      ================================================================ */
+
+      tl.set(scenes[8], {
+        autoAlpha: 1,
+      });
+
+      animateSceneText(scenes[8]);
+
+      tl.to(
+        finalGraphicRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+        },
+        "<0.15",
+      );
+
+      tl.to(
+        finalGraphicRef.current,
+        {
+          rotate: -5,
+          duration: 1.8,
+          ease: "none",
+        },
+        "<",
+      );
+
+      /* ================================================================
+         PROGRESS INDICATOR
+      ================================================================ */
+
+      ScrollTrigger.create({
+        trigger: root,
+        start: "top top",
+        end: "+=12000",
+        scrub: true,
+        onUpdate: (self) => {
+          if (progressRef.current) {
+            gsap.set(progressRef.current, {
+              scaleY: self.progress,
+            });
+          }
+        },
+      });
+    }, root);
 
     return () => ctx.revert();
   }, []);
 
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * destinations.length);
-    setSelectedDestination(destinations[randomIndex]);
-  }, []);
-
-  useEffect(() => {
-    if (!selectedDestination || !destinationPanel.current) return;
-
-    const ctx = gsap.context(() => {
-      const elements = [
-        destinationName.current,
-        destinationCode.current,
-        destinationDistance.current,
-        destinationStatus.current,
-      ].filter(Boolean);
-
-      gsap.set(elements, {
-        opacity: 0,
-        y: 8,
-      });
-
-      gsap.set(destinationBar.current, {
-        width: "0%",
-      });
-
-      const tl = gsap.timeline();
-
-      tl.to(destinationPanel.current, {
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      })
-        .to(
-          destinationName.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.55,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          destinationCode.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            ease: "power3.out",
-          },
-          "-=0.3",
-        )
-        .to(
-          destinationDistance.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.45,
-            ease: "power3.out",
-          },
-          "-=0.25",
-        )
-        .to(
-          destinationStatus.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          destinationBar.current,
-          {
-            width: "100%",
-            duration: 1.2,
-            ease: "power3.inOut",
-          },
-          "-=0.2",
-        );
-
-      // Subtle scanning pulse after initialization.
-      gsap.to(destinationBar.current, {
-        opacity: 0.45,
-        duration: 0.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: 1.2,
-      });
-    }, destinationPanel);
-
-    return () => {
-      ctx.revert();
-    };
-  }, [selectedDestination]);
-
-  useEffect(() => {
-    if (!root.current || !ship.current) return;
-
-    const ctx = gsap.context(() => {
-      const systemSequence = [
-        {
-          name: "EXPLORATION CORE",
-          label: "INITIALIZING",
-          percent: 100,
-        },
-        {
-          name: "NAVIGATION ARRAY",
-          label: "ONLINE",
-          percent: 82,
-        },
-        {
-          name: "LIFE SUPPORT",
-          label: "STABLE",
-          percent: 96,
-        },
-        {
-          name: "PROPULSION SYSTEM",
-          label: "STANDBY",
-          percent: 68,
-        },
-        {
-          name: "FLIGHT CONTROL",
-          label: "READY",
-          percent: 100,
-        },
-      ];
-
-      /* ------------------------------------------------------------------ */
-      /* INITIAL STATE                                                       */
-      /* ------------------------------------------------------------------ */
-
-      gsap.set(ship.current, {
-        y: 150,
-        scale: 0.82,
-        opacity: 0,
-      });
-
-      gsap.set(welcomePassenger.current, {
-        opacity: 0,
-        scale: 0.96,
-        y: 10,
-      });
-
-      gsap.set(pilotProfile.current, {
-        opacity: 0,
-        scale: 0.96,
-        y: 10,
-      });
-
-      gsap.set(".ship-light", {
-        opacity: 0,
-      });
-
-      gsap.set(".nav-light-left, .nav-light-right", {
-        opacity: 0,
-      });
-
-      gsap.set(".engine-core", {
-        backgroundColor: "#334155",
-        boxShadow: "none",
-      });
-
-      gsap.set(".engine-flame", {
-        opacity: 0,
-        scaleY: 0.15,
-        transformOrigin: "top center",
-      });
-
-      gsap.set(".engine-glow", {
-        opacity: 0,
-      });
-
-      gsap.set(shipGlow.current, {
-        opacity: 0,
-      });
-
-      gsap.set(horizon.current, {
-        opacity: 0,
-        scaleY: 1,
-      });
-
-      /* ------------------------------------------------------------------ */
-      /* BOOT MESSAGES                                                       */
-      /* ------------------------------------------------------------------ */
-
-      let messageIndex = 0;
-
-      const messageTimer = window.setInterval(() => {
-        const system = systemSequence[messageIndex];
-
-        // Safety check: never add an undefined system
-        if (!system) {
-          window.clearInterval(messageTimer);
-          return;
-        }
-
-        setBootMessages((previous) => [...previous, system]);
-
-        messageIndex += 1;
-
-        if (messageIndex >= systemSequence.length) {
-          window.clearInterval(messageTimer);
-        }
-      }, 850);
-
-      /* ------------------------------------------------------------------ */
-      /* ENGINE IDLE                                                         */
-      /* ------------------------------------------------------------------ */
-
-      const engineIdle = gsap.to(".engine-flame", {
-        scaleY: 0.7,
-        opacity: 0.85,
-        duration: 0.32,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        paused: true,
-      });
-
-      /* ------------------------------------------------------------------ */
-      /* INTRO TIMELINE                                                      */
-      /* ------------------------------------------------------------------ */
-
-      const intro = gsap.timeline({
-        delay: 0.3,
-      });
-
-      /*
-       * SCENE 01
-       * Welcome.
-       */
-
-      intro
-        .to(welcomePassenger.current, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 1.2,
-          ease: "power3.out",
-        })
-
-        .to(welcomePassenger.current, {
-          opacity: 1,
-          duration: 2,
-        })
-
-        .to(welcomePassenger.current, {
-          opacity: 0,
-          scale: 1.02,
-          y: -10,
-          duration: 0.8,
-          ease: "power2.inOut",
-        });
-
-      /*
-       * SCENE 02
-       * Pilot identification.
-       */
-
-      intro
-        .to(pilotProfile.current, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 1.4,
-          ease: "power3.out",
-        })
-
-        .to(
-          {},
-          {
-            duration: 2.2,
-          },
-        );
-
-      /*
-       * SCENE 03
-       * Ship reveal.
-       */
-
-      intro.to(ship.current, {
-        opacity: 1,
-        duration: 2.2,
-        ease: "power2.out",
-      });
-
-      /*
-       * SCENE 04
-       * Ship rises into its final center position.
-       */
-
-      intro.to(ship.current, {
-        y: 0,
-        scale: 1,
-        duration: 2.8,
-        ease: "power3.inOut",
-      });
-
-      /*
-       * SCENE 05
-       * Navigation lights.
-       */
-
-      intro.to(
-        ".nav-light-left, .nav-light-right",
-        {
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.2,
-        },
-        "-=0.7",
-      );
-
-      /*
-       * Body light.
-       */
-
-      intro.to(
-        ".ship-light",
-        {
-          opacity: 1,
-          duration: 1.2,
-          ease: "power2.out",
-        },
-        "-=0.2",
-      );
-
-      /*
-       * Ship atmospheric glow.
-       */
-
-      intro.to(
-        shipGlow.current,
-        {
-          opacity: 0.75,
-          duration: 1,
-          ease: "power2.out",
-        },
-        "-=0.7",
-      );
-
-      /*
-       * SCENE 06
-       * Engine startup.
-       */
-
-      intro.to(".engine-core", {
-        backgroundColor: "#67e8f9",
-        boxShadow: "0 0 14px rgba(34,211,238,.9)",
-        duration: 1.5,
-      });
-
-      intro.to(
-        ".engine-glow",
-        {
-          opacity: 0.75,
-          duration: 1,
-        },
-        "-=0.8",
-      );
-
-      /*
-       * Initial flame ignition.
-       */
-
-      intro.to(".engine-flame", {
-        opacity: 0.65,
-        scaleY: 0.45,
-        duration: 1,
-        stagger: 0.08,
-      });
-
-      /*
-       * Start the idle animation only AFTER
-       * the engines have actually started.
-       */
-
-      intro.call(() => {
-        engineIdle.play();
-      });
-
-      /*
-       * Horizon comes alive.
-       */
-
-      intro.to(
-        horizon.current,
-        {
-          opacity: 1,
-          duration: 1.5,
-        },
-        "-=0.8",
-      );
-
-      /* ------------------------------------------------------------------ */
-      /* LAUNCH SCROLL TIMELINE                                              */
-      /* ------------------------------------------------------------------ */
-
-      const launch = gsap.timeline({
-        scrollTrigger: {
-          trigger: root.current,
-          start: "top top",
-          end: "+=500",
-          scrub: 2,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-
-          onUpdate: (self) => {
-            if (!scrollProgress.current) return;
-
-            gsap.set(scrollProgress.current, {
-              width: `${Math.max(4, self.progress * 100)}%`,
-            });
-          },
-        },
-      });
-
-      /*
-       * ------------------------------------------------------------------ */
-      /* SCENE 07                                                           */
-      /* Pilot disappears as launch begins.                                 */
-      /* ------------------------------------------------------------------ */
-
-      launch.to(
-        pilotProfile.current,
-        {
-          opacity: 0,
-          scale: 0.98,
-          y: -12,
-          duration: 0.45,
-        },
-        0,
-      );
-
-      /*
-       * Engine burst.
-       */
-
-      launch.to(
-        ".engine-flame",
-        {
-          opacity: 1,
-          scaleY: 1.8,
-          duration: 0.7,
-          stagger: 0.05,
-          ease: "power3.in",
-        },
-        0,
-      );
-
-      launch.to(
-        ".engine-glow",
-        {
-          opacity: 1,
-          scale: 1.35,
-          duration: 0.8,
-          ease: "power2.in",
-        },
-        0,
-      );
-
-      /*
-       * Make sure ship remains visible when launch starts.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          opacity: 1,
-          duration: 1.2,
-          ease: "power2.out",
-        },
-        0,
-      );
-
-      /*
-       * First upward movement.
-       *
-       * This starts from the ship's existing elevated position.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          y: "-=180",
-          scale: 0.62,
-          duration: 2.2,
-          ease: "power2.in",
-        },
-        0.8,
-      );
-
-      /*
-       * Horizon expands and disappears.
-       */
-
-      launch.to(
-        horizon.current,
-        {
-          scaleY: 2.5,
-          opacity: 0,
-          duration: 2,
-          ease: "power2.in",
-        },
-        1,
-      );
-
-      /* ------------------------------------------------------------------ */
-      /* SCENE 08                                                           */
-      /* Deep-space departure.                                               */
-      /* ------------------------------------------------------------------ */
-
-      /*
-       * Stage 1
-       * Ship becomes distant.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          y: "-=180",
-          scale: 0.3,
-          duration: 1.8,
-          ease: "power3.in",
-        },
-        3,
-      );
-
-      /*
-       * Stage 2
-       * Very distant.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          y: "-=120",
-          scale: 0.12,
-          duration: 1.6,
-          ease: "power3.in",
-        },
-        4.8,
-      );
-
-      /*
-       * Stage 3
-       * Tiny spacecraft.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          y: "-=70",
-          scale: 0.035,
-          duration: 1.5,
-          ease: "power4.in",
-        },
-        6.4,
-      );
-
-      /*
-       * Stage 4
-       * Star-like point.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          y: "-=35",
-          scale: 0.008,
-          opacity: 0.85,
-          duration: 1.2,
-          ease: "power4.in",
-        },
-        7.9,
-      );
-
-      /*
-       * Final disappearance.
-       */
-
-      launch.to(
-        ship.current,
-        {
-          scale: 0.001,
-          opacity: 0,
-          duration: 0.7,
-          ease: "power4.in",
-        },
-        9.1,
-      );
-
-      /*
-       * Engine exhaust fades away.
-       */
-
-      launch.to(
-        ".engine-flame",
-        {
-          opacity: 0,
-          scaleY: 0.2,
-          duration: 1.2,
-          ease: "power2.in",
-        },
-        6.8,
-      );
-
-      /*
-       * Engine glow fades.
-       */
-
-      launch.to(
-        ".engine-glow",
-        {
-          opacity: 0,
-          scale: 0.8,
-          duration: 1,
-          ease: "power2.in",
-        },
-        7,
-      );
-
-      /* ------------------------------------------------------------------ */
-      /* CLEANUP                                                             */
-      /* ------------------------------------------------------------------ */
-
-      return () => {
-        window.clearInterval(messageTimer);
-
-        intro.kill();
-        engineIdle.kill();
-        launch.kill();
-      };
-    }, root);
-
-    return () => {
-      ctx.revert();
-    };
-  }, []);
+  const setSceneRef = (index: number) => (element: HTMLElement | null) => {
+    sceneRefs.current[index] = element;
+  };
 
   return (
     <main
-      ref={root}
-      id="cinematic-hero"
-      className="
-        relative
-        z-10
-        h-screen
-        w-full
-        overflow-hidden
-        bg-transparent
-        text-white
-      "
+      ref={rootRef}
+      className="relative h-screen overflow-hidden bg-[#f6f7f9] text-[#111318]"
     >
-      {/* FRONT WINDOW / COCKPIT FRAME */}
-      <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
-        {/* Top window frame */}
-        <div className="absolute left-0 right-0 top-0 h-[90px]">
-          {/* Main neon edge */}
-          <div
-            className="
-        absolute left-0 right-0 top-[54px] h-px
-        bg-cyan-300/70
-        shadow-[0_0_8px_rgba(34,211,238,0.8),0_0_24px_rgba(34,211,238,0.25)]
-      "
-          />
+      <GridBackground />
 
-          {/* Secondary line */}
-          <div
-            className="
-        absolute left-[8%] right-[8%] top-[58px] h-px
-        bg-violet-400/25
-        shadow-[0_0_10px_rgba(139,92,246,0.4)]
-      "
-          />
+      <CornerFrame />
 
-          {/* Left angled support */}
-          <div
-            className="
-        absolute left-0 top-[54px]
-        h-[35px] w-[14%]
-        border-r border-t border-cyan-300/40
-        [clip-path:polygon(0_0,100%_0,86%_100%,0_100%)]
-      "
-          />
+      {/* ------------------------------------------------------------------ */}
+      {/* SIDE PROGRESS                                                       */}
+      {/* ------------------------------------------------------------------ */}
 
-          {/* Right angled support */}
-          <div
-            className="
-        absolute right-0 top-[54px]
-        h-[35px] w-[14%]
-        border-l border-t border-cyan-300/40
-        [clip-path:polygon(0_0,100%_0,100%_100%,14%_100%)]
-      "
-          />
-
-          {/* Center window marker */}
-          <div
-            className="
-        absolute left-1/2 top-[48px]
-        h-[13px] w-[110px]
-        -translate-x-1/2
-        border-x border-cyan-300/50
-      "
-          >
-            <div className="absolute left-1/2 top-0 h-[2px] w-[42px] -translate-x-1/2 bg-cyan-300/80 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-          </div>
-
-          {/* Technical ticks */}
-          <div className="absolute left-[18%] top-[51px] flex gap-2">
-            <span className="h-[7px] w-px bg-cyan-300/50" />
-            <span className="h-[4px] w-px bg-cyan-300/30" />
-            <span className="h-[7px] w-px bg-cyan-300/50" />
-            <span className="h-[4px] w-px bg-cyan-300/30" />
-          </div>
-
-          <div className="absolute right-[18%] top-[51px] flex gap-2">
-            <span className="h-[4px] w-px bg-cyan-300/30" />
-            <span className="h-[7px] w-px bg-cyan-300/50" />
-            <span className="h-[4px] w-px bg-cyan-300/30" />
-            <span className="h-[7px] w-px bg-cyan-300/50" />
-          </div>
-        </div>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* TOP HUD                                                             */}
-        {/* ------------------------------------------------------------------ */}
-
-        <header className="absolute left-0 right-0 top-10 z-40 px-6 py-6 md:px-10">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="font-mono text-xs tracking-[0.45em] text-cyan-300">
-                RAMIL
-              </div>
-
-              <div className="mt-1 font-mono text-[8px] tracking-[0.35em] text-white/40">
-                EXPLORATION SYSTEM
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setAudioOn((value) => !value)}
-              className="
-              font-mono
-              text-[9px]
-              tracking-[0.25em]
-              text-white/50
-              transition
-              hover:text-cyan-300
-            "
-            >
-              AUDIO SYSTEM // {audioOn ? "ONLINE" : "OFFLINE"}
-            </button>
-          </div>
-        </header>
-
-        {/* Bottom window frame */}
-        <div className="absolute bottom-0 left-0 right-0 h-[120px]">
-          {/* Main bottom neon edge */}
-          <div
-            className="
-        absolute bottom-[55px] left-0 right-0 h-px
-        bg-cyan-300/60
-        shadow-[0_0_10px_rgba(34,211,238,0.7),0_0_30px_rgba(34,211,238,0.2)]
-      "
-          />
-
-          {/* Violet secondary line */}
-          <div
-            className="
-        absolute bottom-[51px] left-[10%] right-[10%] h-px
-        bg-violet-400/25
-        shadow-[0_0_12px_rgba(139,92,246,0.35)]
-      "
-          />
-
-          {/* Bottom cockpit structure */}
-          <div
-            className="
-        absolute bottom-0 left-0 right-0 h-[58px]
-        border-t border-white/5
-        bg-gradient-to-t from-black/60 to-transparent
-        backdrop-blur-[2px]
-      "
-          />
-
-          {/* Left angled support */}
-          <div
-            className="
-        absolute bottom-[55px] left-0
-        h-[42px] w-[18%]
-        border-r border-b border-cyan-300/35
-        [clip-path:polygon(0_0,100%_0,86%_100%,0_100%)]
-      "
-          />
-
-          {/* Right angled support */}
-          <div
-            className="
-        absolute bottom-[55px] right-0
-        h-[42px] w-[18%]
-        border-l border-b border-cyan-300/35
-        [clip-path:polygon(0_0,100%_0,100%_100%,14%_100%)]
-      "
-          />
-
-          {/* Center cockpit console seam */}
-          <div
-            className="
-        absolute bottom-[55px] left-1/2
-        h-[18px] w-[180px]
-        -translate-x-1/2
-        border-x border-cyan-300/30
-      "
-          >
-            <div
-              className="
-          absolute bottom-0 left-1/2
-          h-px w-[70px]
-          -translate-x-1/2
-          bg-cyan-300/70
-          shadow-[0_0_10px_rgba(34,211,238,0.9)]
-        "
-            />
-          </div>
-
-          {/* Bottom technical ticks */}
-          <div className="absolute bottom-[51px] left-[22%] flex gap-2">
-            <span className="h-[7px] w-px bg-cyan-300/40" />
-            <span className="h-[4px] w-px bg-cyan-300/25" />
-            <span className="h-[7px] w-px bg-cyan-300/40" />
-            <span className="h-[4px] w-px bg-cyan-300/25" />
-          </div>
-
-          <div className="absolute bottom-[51px] right-[22%] flex gap-2">
-            <span className="h-[4px] w-px bg-cyan-300/25" />
-            <span className="h-[7px] w-px bg-cyan-300/40" />
-            <span className="h-[4px] w-px bg-cyan-300/25" />
-            <span className="h-[7px] w-px bg-cyan-300/40" />
-          </div>
-        </div>
-
-        {/* Subtle glass reflection */}
+      <div className="pointer-events-none absolute right-6 top-1/2 z-50 hidden h-40 w-px -translate-y-1/2 bg-slate-200 sm:right-10 sm:block">
         <div
-          className="
-      absolute inset-0
-      bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.025)_42%,transparent_48%,transparent_100%)]
-      opacity-60
-    "
+          ref={progressRef}
+          className="absolute left-0 top-0 h-full w-full origin-top scale-y-0 bg-blue-500"
         />
       </div>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* SCAN                                                                 */}
+      {/* ------------------------------------------------------------------ */}
+
       <div
-        ref={gpsPanel}
-        className="
-    absolute bottom-[82px] left-1/2 z-30
-    hidden w-[420px]
-    -translate-x-1/2
-    md:block
-  "
-      >
-        <div
-          className="
-      relative
-      border border-white/10
-      bg-black/10
-      p-4
-      backdrop-blur-sm
-       left-1/2 top-[-100%] -translate-x-1/2 -translate-y-1/2
-    "
-        >
-          <HudCorners />
+        ref={scanRef}
+        className="pointer-events-none absolute left-0 top-[-100%] z-40 h-[30%] w-full bg-gradient-to-b from-transparent via-blue-400/[0.025] to-transparent"
+      />
 
-          {/* HEADER */}
-          <div className="flex items-center justify-between">
-            <HudLabel>NAVIGATION TELEMETRY</HudLabel>
+      {/* ================================================================== */}
+      {/* SCENE 01                                                            */}
+      {/* ================================================================== */}
 
-            <div className="flex items-center gap-2">
-              <span
-                className="
-            h-1.5 w-1.5 rounded-full
-            bg-cyan-300
-            shadow-[0_0_8px_rgba(34,211,238,0.9)]
-          "
-              />
+      <SceneContainer ref={setSceneRef(0)}>
+        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_.9fr]">
+          <div className="scene-copy">
+            <SceneLabel number="01" title="The Idea" />
 
-              <span className="font-mono text-[6px] tracking-[0.16em] text-cyan-300/70">
-                NAV ONLINE
-              </span>
+            <h1 className="scene-text max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
+              Every great website
+              <span className="block text-blue-600">starts with an idea.</span>
+            </h1>
+
+            <p className="scene-text mt-8 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+              Before the layouts, before the code, there is a reason to build. I
+              help turn that starting point into something people can
+              experience.
+            </p>
+
+            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
+              <span className="h-px w-8 bg-blue-500" />
+              start with purpose
             </div>
           </div>
 
-          {/* NAVIGATION VECTOR */}
-          <div ref={gpsCoordinates} className="mt-4">
-            <div className="font-mono text-[6px] tracking-[0.18em] text-white/30">
-              NAVIGATION VECTOR
-            </div>
-
-            <div className="mt-1 font-mono text-[11px] tracking-[0.14em] text-cyan-200">
-              NX-07&nbsp;&nbsp;/&nbsp;&nbsp;SECTOR
-              04&nbsp;&nbsp;/&nbsp;&nbsp;VECTOR 284.6°
-            </div>
-          </div>
-
-          {/* TELEMETRY */}
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            {/* HEADING */}
-            <div ref={gpsHeading} className="min-w-0">
-              <div className="font-mono text-[6px] tracking-[0.16em] text-white/30">
-                HEADING
-              </div>
-
-              <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-white/75">
-                284.6°
-              </div>
-            </div>
-
-            {/* ALTITUDE */}
-            <div ref={gpsAltitude} className="min-w-0">
-              <div className="font-mono text-[6px] tracking-[0.16em] text-white/30">
-                FLIGHT LEVEL
-              </div>
-
-              <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-white/75">
-                FL-184
-              </div>
-            </div>
-
-            {/* VELOCITY */}
-            <div ref={gpsVelocity} className="min-w-0">
-              <div className="font-mono text-[6px] tracking-[0.16em] text-white/30">
-                VELOCITY
-              </div>
-
-              <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-white/75">
-                0.00 KM/S
-              </div>
-            </div>
-          </div>
-
-          {/* NAVIGATION LOCK */}
-          <div ref={gpsLock} className="mt-4">
-            <div className="mb-1 flex items-center justify-between">
-              <span className="font-mono text-[6px] tracking-[0.18em] text-white/30">
-                NAVIGATION LOCK
-              </span>
-
-              <span className="font-mono text-[6px] tracking-[0.16em] text-cyan-300">
-                LOCKED
-              </span>
-            </div>
-
-            <div className="relative h-[2px] w-full overflow-hidden bg-white/10">
-              <div
-                ref={gpsScan}
-                className="
-            absolute inset-y-0 left-0
-            w-0
-            bg-cyan-400
-            shadow-[0_0_8px_rgba(34,211,238,0.8)]
-          "
-              />
-            </div>
-          </div>
-
-          {/* SYSTEM READOUT */}
-          <div className="mt-3 flex items-center justify-between">
-            <span className="font-mono text-[5px] tracking-[0.18em] text-white/20">
-              SAT-LINK 08
-            </span>
-
-            <span className="font-mono text-[5px] tracking-[0.18em] text-white/20">
-              SIGNAL 98%
-            </span>
-
-            <span className="font-mono text-[5px] tracking-[0.18em] text-white/20">
-              AUTO NAV
-            </span>
+          <div
+            ref={ideaGraphicRef}
+            className="flex justify-center lg:justify-end"
+          >
+            <IdeaGraphic />
           </div>
         </div>
-      </div>
+      </SceneContainer>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* CENTER TITLE                                                        */}
-      {/* ------------------------------------------------------------------ */}
+      {/* ================================================================== */}
+      {/* SCENE 02                                                            */}
+      {/* ================================================================== */}
 
-      <div className="absolute left-1/2 top-[11%] z-30 -translate-x-1/2 text-center">
-        <HudLabel>MISSION 001</HudLabel>
+      <SceneContainer ref={setSceneRef(1)}>
+        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="scene-copy">
+            <SceneLabel number="02" title="The Vision" />
 
-        <h1 className="mt-3 text-2xl font-light tracking-[0.35em] text-white/90 md:text-4xl">
-          BEYOND THE HORIZON
-        </h1>
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+              I turn ideas
+              <span className="block text-blue-600">into experiences.</span>
+            </h2>
 
-        <p className="mt-3 font-mono text-[9px] tracking-[0.3em] text-white/35">
-          DEEP SPACE EXPLORATION PROTOCOL
-        </p>
-      </div>
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+              The goal is more than making something look good. It is about
+              creating a clear visual direction that makes the purpose
+              immediately understandable.
+            </p>
+          </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* LEFT SYSTEM HUD                                                     */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        className="
-          absolute
-          left-6
-          top-1/2
-          z-30
-          hidden
-          w-[230px]
-          -translate-y-1/2
-          md:block
-        "
-      >
-        <div className="relative border border-white/10 bg-black/10 p-5 backdrop-blur-sm">
-          <HudCorners />
-
-          <HudLabel>SYSTEM STATUS</HudLabel>
-
-          <div className="mt-5 space-y-4">
-            {bootMessages.map((system, index) => (
-              <div key={`${system.name}-${index}`} className="system-row">
-                {/* System name + percentage */}
-                <div className="mb-1.5 flex items-center justify-between">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span
-                      className="
-              h-1.5
-              w-1.5
-              shrink-0
-              rounded-full
-              bg-cyan-300
-              shadow-[0_0_8px_#22d3ee]
-            "
-                    />
-
-                    <span className="truncate font-mono text-[7px] tracking-[0.12em] text-white/55">
-                      {system.name}
-                    </span>
-                  </div>
-
-                  <span className="ml-2 shrink-0 font-mono text-[7px] tracking-[0.1em] text-cyan-300/80">
-                    {system.percent}%
-                  </span>
-                </div>
-
-                {/* Animated diagnostic bar */}
-                <div className="flex items-center gap-2">
-                  <div className="relative h-[4px] flex-1 overflow-hidden bg-white/[0.06]">
-                    <div
-                      className="
-              system-bar
-              absolute
-              inset-y-0
-              left-0
-              bg-cyan-400/70
-              shadow-[0_0_8px_rgba(34,211,238,0.65)]
-            "
-                      style={{
-                        width: `${system.percent}%`,
-                        transformOrigin: "left center",
-                      }}
-                    />
-
-                    {/* Moving scanner */}
-                    <div
-                      className="
-              absolute
-              inset-y-0
-              left-0
-              w-[18px]
-              bg-white/60
-              blur-[3px]
-              animate-[systemScan_1.8s_linear_infinite]
-            "
-                    />
-                  </div>
-
-                  <span
-                    className={`
-            w-[42px]
-            text-right
-            font-mono
-            text-[6px]
-            tracking-[0.08em]
-            ${system.percent >= 95 ? "text-cyan-300" : "text-white/30"}
-          `}
-                  >
-                    {system.label}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div ref={visionGraphicRef}>
+            <VisionGraphic />
           </div>
         </div>
-      </div>
+      </SceneContainer>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* RIGHT DESTINATION HUD                                               */}
-      {/* ------------------------------------------------------------------ */}
+      {/* ================================================================== */}
+      {/* SCENE 03                                                            */}
+      {/* ================================================================== */}
 
-      <div
-        ref={destinationPanel}
-        className="
-    absolute right-6 top-1/2 z-30
-    hidden w-[230px] -translate-y-1/2
-    md:block
-  "
-      >
-        <div className="relative border border-white/10 bg-black/10 p-5 backdrop-blur-sm">
-          <HudCorners />
+      <SceneContainer ref={setSceneRef(2)}>
+        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[.75fr_1.25fr]">
+          <div className="scene-copy">
+            <SceneLabel number="03" title="The Build" />
 
-          <HudLabel>DESTINATION</HudLabel>
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+              Where ideas
+              <span className="block text-blue-600">become real.</span>
+            </h2>
 
-          {selectedDestination && (
-            <div className="mt-5">
-              {/* Destination name */}
-              <div
-                ref={destinationName}
-                className="
-            font-mono text-[13px] font-semibold
-            tracking-[0.18em] text-white
-          "
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+              This is where design becomes structure, interaction and a working
+              digital product.
+            </p>
+
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.2em] text-slate-400">
+              <Terminal className="h-3 w-3 text-blue-600" />
+              building the experience
+            </div>
+          </div>
+
+          <div ref={codeGraphicRef}>
+            <CodeGraphic />
+          </div>
+        </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* SCENE 04                                                            */}
+      {/* ================================================================== */}
+
+      <SceneContainer ref={setSceneRef(3)}>
+        <div className="w-full max-w-6xl">
+          <div className="grid items-center gap-12 lg:grid-cols-[.7fr_1.3fr]">
+            <div className="scene-copy">
+              <SceneLabel number="04" title="The Experience" />
+
+              <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+                A website
+                <span className="block text-blue-600">should feel alive.</span>
+              </h2>
+
+              <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+                Every movement, transition and interaction has a purpose. The
+                finished product should feel natural, intuitive and memorable.
+              </p>
+            </div>
+
+            <div ref={experienceGraphicRef}>
+              <ExperienceGraphic />
+            </div>
+          </div>
+        </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* SCENE 05                                                            */}
+      {/* ================================================================== */}
+
+      <SceneContainer ref={setSceneRef(4)}>
+        <div className="w-full max-w-6xl">
+          <div className="scene-copy mb-12 max-w-2xl">
+            <SceneLabel number="05" title="The Details" />
+
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+              Small details.
+              <span className="block text-blue-600">Big difference.</span>
+            </h2>
+
+            <p className="scene-text mt-6 max-w-xl text-base leading-7 text-slate-500">
+              The difference between a functional website and a great experience
+              often lives in the details.
+            </p>
+          </div>
+
+          <div ref={detailsGraphicRef}>
+            <DetailsGraphic />
+          </div>
+        </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* SCENE 06                                                            */}
+      {/* ================================================================== */}
+
+      <SceneContainer ref={setSceneRef(5)}>
+        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_.9fr]">
+          <div className="scene-copy">
+            <SceneLabel number="06" title="The Technology" />
+
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+              The right tools
+              <span className="block text-blue-600">
+                behind the experience.
+              </span>
+            </h2>
+
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+              Modern technologies give ideas the structure, flexibility and
+              performance they need to grow.
+            </p>
+
+            <div className="scene-meta mt-8 flex flex-wrap gap-2">
+              {technologies.slice(0, 5).map((tech) => (
+                <span
+                  key={tech.name}
+                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-mono text-[8px] uppercase tracking-wider text-slate-500"
+                >
+                  {tech.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div
+            ref={technologyGraphicRef}
+            className="flex justify-center lg:justify-end"
+          >
+            <TechnologyGraphic />
+          </div>
+        </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* SCENE 07                                                            */}
+      {/* ================================================================== */}
+
+      <SceneContainer ref={setSceneRef(6)}>
+        <div className="w-full max-w-6xl">
+          <div className="scene-copy mx-auto mb-14 max-w-2xl text-center">
+            <SceneLabel number="07" title="The Transformation" />
+
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+              From thought
+              <span className="text-blue-600"> to reality.</span>
+            </h2>
+
+            <p className="scene-text mx-auto mt-6 max-w-xl text-base leading-7 text-slate-500">
+              A simple process. One clear direction. A finished experience ready
+              to be shared with the world.
+            </p>
+          </div>
+
+          <div ref={transformationGraphicRef}>
+            <TransformationGraphic />
+          </div>
+        </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* SCENE 08                                                            */}
+      {/* ================================================================== */}
+
+      <SceneContainer ref={setSceneRef(7)}>
+        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="scene-copy">
+            <SceneLabel number="08" title="The Launch" />
+
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+              Built.
+              <span className="block text-blue-600">Refined.</span>
+              <span className="block">Ready.</span>
+            </h2>
+
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+              Once everything comes together, the experience is ready to leave
+              the development environment and meet its audience.
+            </p>
+          </div>
+
+          <div ref={launchGraphicRef}>
+            <LaunchGraphic />
+          </div>
+        </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* SCENE 09                                                            */}
+      {/* ================================================================== */}
+
+      <SceneContainer ref={setSceneRef(8)}>
+        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_.8fr]">
+          <div className="scene-copy">
+            <SceneLabel number="09" title="Let's Build It" />
+
+            <h2 className="scene-text text-6xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-7xl lg:text-8xl">
+              Have
+              <span className="block text-blue-600">an idea?</span>
+            </h2>
+
+            <p className="scene-text mt-8 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+              Let&apos;s turn it into something useful, beautiful and worth
+              remembering.
+            </p>
+
+            <div className="scene-action mt-10 flex flex-wrap gap-3">
+              <Link
+                href="/work"
+                className="group inline-flex items-center gap-3 rounded-full bg-slate-900 px-6 py-3 text-xs font-medium text-white transition-transform duration-300 hover:-translate-y-1"
               >
-                {selectedDestination.name}
-              </div>
+                View My Work
+                <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </Link>
 
-              {/* Destination code */}
-              <div
-                ref={destinationCode}
-                className="
-            mt-1 font-mono text-[7px]
-            tracking-[0.22em] text-cyan-300/60
-          "
+              <Link
+                href="/contact"
+                className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-6 py-3 text-xs font-medium text-slate-800 transition-transform duration-300 hover:-translate-y-1"
               >
-                TARGET // {selectedDestination.code}
-              </div>
-
-              {/* Distance */}
-              <div ref={destinationDistance} className="mt-5">
-                <div className="font-mono text-[7px] tracking-[0.18em] text-white/35">
-                  DISTANCE
-                </div>
-
-                <div className="mt-1 font-mono text-[18px] tracking-[0.08em] text-cyan-300">
-                  {selectedDestination.distance}
-                </div>
-              </div>
-
-              {/* Navigation scan bar */}
-              <div className="mt-5">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="font-mono text-[6px] tracking-[0.18em] text-white/35">
-                    NAVIGATION LOCK
-                  </span>
-
-                  <span
-                    ref={destinationStatus}
-                    className="
-                font-mono text-[6px]
-                tracking-[0.16em] text-cyan-300
-              "
-                  >
-                    {selectedDestination.status}
-                  </span>
-                </div>
-
-                <div className="relative h-[2px] w-full overflow-hidden bg-white/10">
-                  <div
-                    ref={destinationBar}
-                    className="
-                absolute inset-y-0 left-0
-                w-0 bg-cyan-400
-                shadow-[0_0_8px_rgba(34,211,238,0.8)]
-              "
-                  />
-                </div>
-              </div>
-
-              {/* Coordinate-style readout */}
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div>
-                  <div className="font-mono text-[6px] tracking-[0.15em] text-white/25">
-                    VECTOR
-                  </div>
-                  <div className="mt-1 font-mono text-[7px] tracking-[0.1em] text-white/60">
-                    LOCKED
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-mono text-[6px] tracking-[0.15em] text-white/25">
-                    COURSE
-                  </div>
-                  <div className="mt-1 font-mono text-[7px] tracking-[0.1em] text-white/60">
-                    AUTO
-                  </div>
-                </div>
-              </div>
+                Let&apos;s Talk
+                <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </Link>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* WELCOME                                                             */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        ref={welcomePassenger}
-        className="
-          absolute
-          left-1/2
-          top-1/2
-          z-[36]
-          -translate-x-1/2
-          -translate-y-1/2
-        "
-      >
-        <WelcomePassenger />
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* PILOT PROFILE                                                       */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        ref={pilotProfile}
-        className="
-          absolute
-          left-1/2
-          top-1/2
-          z-[35]
-          -translate-x-1/2
-          -translate-y-1/2
-        "
-      >
-        <PilotProfile />
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* HORIZON                                                             */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        ref={horizon}
-        className="
-          pointer-events-none
-          absolute
-          left-1/2
-          top-[68%]
-          z-10
-          h-[2px]
-          w-[70vw]
-          -translate-x-1/2
-          bg-gradient-to-r
-          from-transparent
-          via-cyan-300/40
-          to-transparent
-          blur-[1px]
-        "
-      />
-
-      {/* ------------------------------------------------------------------ */}
-      {/* SPACECRAFT                                                          */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        ref={ship}
-        className="
-          absolute
-          left-1/2
-          top-[57%]
-          z-20
-          -translate-x-1/2
-        "
-      >
-        <div
-          ref={shipGlow}
-          className="
-            absolute
-            inset-0
-            rounded-full
-            bg-cyan-400/10
-            blur-[70px]
-          "
-        />
-
-        <Spacecraft />
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* BOTTOM HUD                                                          */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div className="absolute bottom-20 left-0 right-0 z-40 px-6 md:px-10">
-        <div className="flex items-end justify-between">
-          <div>
-            <HudLabel>CRAFT</HudLabel>
-
-            <div className="mt-1 font-mono text-[10px] tracking-[0.25em] text-white/60">
-              EXPLORER // NX-01
+            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
+              <span className="h-px w-8 bg-blue-500" />
+              let&apos;s create something meaningful
             </div>
           </div>
 
-          {/* Scroll indicator */}
-          <div className="mx-auto mt-5 flex w-[160px] flex-col items-center">
-            <div className="font-mono text-[7px] tracking-[0.35em] text-white/25">
-              SCROLL TO LAUNCH
-            </div>
-
-            <div className="mt-3 h-[1px] w-full overflow-hidden bg-white/10">
-              <div
-                ref={scrollProgress}
-                className="
-                h-full
-                w-[4%]
-                bg-cyan-300/70
-                shadow-[0_0_8px_rgba(34,211,238,0.7)]
-              "
-              />
-            </div>
-          </div>
-
-          <div className="text-right">
-            <HudLabel violet>FLIGHT MODE</HudLabel>
-
-            <div className="mt-1 font-mono text-[10px] tracking-[0.25em] text-white/60">
-              STANDBY
-            </div>
+          <div
+            ref={finalGraphicRef}
+            className="flex justify-center lg:justify-end"
+          >
+            <FinalGraphic />
           </div>
         </div>
+      </SceneContainer>
+
+      {/* ================================================================== */}
+      {/* BOTTOM HUD                                                           */}
+      {/* ================================================================== */}
+
+      <div className="pointer-events-none absolute bottom-8 left-1/2 z-50 hidden -translate-x-1/2 items-center gap-3 sm:flex">
+        <ArrowDown className="h-3.5 w-3.5 text-blue-600" />
+
+        <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-slate-400">
+          Scroll to explore
+        </span>
       </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* CINEMATIC VIGNETTE                                                  */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        className="
-          pointer-events-none
-          absolute
-          inset-0
-          z-50
-          bg-[radial-gradient(circle_at_center,transparent_35%,rgba(0,0,0,.55)_100%)]
-        "
-      />
-
-      {/* ------------------------------------------------------------------ */}
-      {/* SCANLINES                                                           */}
-      {/* ------------------------------------------------------------------ */}
-
-      <div
-        className="
-          pointer-events-none
-          absolute
-          inset-0
-          z-50
-          opacity-[0.025]
-          [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px)]
-          [background-size:100%_4px]
-        "
-      />
     </main>
   );
 }
