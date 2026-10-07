@@ -20,20 +20,30 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   TYPES
+   ========================================================================== */
 
-type SceneLabelProps = {
-  number: string;
-  title: string;
+type SceneProps = {
+  children: ReactNode;
+  className?: string;
+  sceneRef: (element: HTMLElement | null) => void;
 };
 
-type IconType = typeof Code2;
+type OverlayProps = {
+  overlayRef: (element: HTMLDivElement | null) => void;
+};
 
-/* -------------------------------------------------------------------------- */
-/* DATA                                                                       */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   CONSTANTS
+   ========================================================================== */
+
+const CYAN = "#58C7EF";
+const GOLD = "#E1A934";
+
+/* ==========================================================================
+   DATA
+   ========================================================================== */
 
 const technologies = [
   { name: "JavaScript", short: "JS", angle: -90 },
@@ -46,69 +56,77 @@ const technologies = [
   { name: "Git", short: "GI", angle: 225 },
 ];
 
-const details: {
-  title: string;
-  description: string;
-  icon: IconType;
-}[] = [
+const detailItems = [
   {
-    title: "Interaction",
-    description: "Interfaces that respond naturally to every action.",
-    icon: MousePointer2,
+    number: "01",
+    title: "NAVIGATION",
+    description: "Clear paths",
+    icon: Globe2,
   },
   {
-    title: "Responsive",
-    description: "Experiences designed for every screen size.",
+    number: "02",
+    title: "STRUCTURE",
+    description: "Strong foundation",
     icon: Layers3,
   },
   {
-    title: "Performance",
-    description: "Fast, focused and built with purpose.",
+    number: "03",
+    title: "PERFORMANCE",
+    description: "Fast response",
     icon: Zap,
   },
   {
-    title: "Structure",
-    description: "Clean systems that remain easy to evolve.",
-    icon: Code2,
+    number: "04",
+    title: "PRECISION",
+    description: "Refined details",
+    icon: Cpu,
   },
 ];
 
-/* -------------------------------------------------------------------------- */
-/* SMALL COMPONENTS                                                           */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SCENE UI
+   ========================================================================== */
 
-function SceneLabel({ number, title }: SceneLabelProps) {
+function SceneLabel({ number, title }: { number: string; title: string }) {
   return (
-    <div className="scene-label mb-8 flex items-center gap-4 text-[10px] font-medium uppercase tracking-[0.28em] text-slate-400">
-      <span className="font-mono text-blue-600">{number}</span>
+    <div className="scene-label mb-7 flex items-center gap-4">
+      <span className="font-mono text-[9px] tracking-[0.3em] text-[#58C7EF]">
+        {number}
+      </span>
 
       <span className="h-px w-10 bg-slate-300" />
 
-      <span>{title}</span>
+      <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-slate-400">
+        {title}
+      </span>
     </div>
   );
 }
 
-function CornerFrame() {
+function Scene({ children, className = "", sceneRef }: SceneProps) {
   return (
-    <div className="pointer-events-none absolute inset-6 sm:inset-10">
-      <span className="absolute left-0 top-0 h-5 w-5 border-l border-t border-slate-300" />
-      <span className="absolute right-0 top-0 h-5 w-5 border-r border-t border-slate-300" />
-      <span className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-slate-300" />
-      <span className="absolute bottom-0 right-0 h-5 w-5 border-b border-r border-slate-300" />
-    </div>
+    <section
+      ref={sceneRef}
+      className={`scene absolute inset-0 flex min-h-screen items-center justify-center overflow-hidden px-6 sm:px-10 lg:px-16 ${className}`}
+    >
+      {children}
+    </section>
   );
 }
+
+/* ==========================================================================
+   BACKGROUND
+   ========================================================================== */
 
 function GridBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0 opacity-70"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px)
+            linear-gradient(rgba(15,23,42,.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15,23,42,.035) 1px, transparent 1px)
           `,
           backgroundSize: "48px 48px",
         }}
@@ -118,670 +136,988 @@ function GridBackground() {
         className="absolute inset-0 opacity-40"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(37,99,235,0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(124,58,237,0.025) 1px, transparent 1px)
+            linear-gradient(rgba(88,199,239,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(225,169,52,.025) 1px, transparent 1px)
           `,
           backgroundSize: "240px 240px",
         }}
       />
 
-      <div className="absolute left-1/2 top-1/2 h-[650px] w-[650px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/[0.035] blur-3xl" />
+      <div className="absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#58C7EF]/[0.035] blur-3xl" />
 
-      <div className="absolute left-[20%] top-[20%] h-[350px] w-[350px] rounded-full bg-violet-500/[0.025] blur-3xl" />
+      <div className="absolute right-[-10%] top-[-10%] h-[450px] w-[450px] rounded-full bg-[#E1A934]/[0.025] blur-3xl" />
     </div>
   );
 }
 
-function SceneContainer({
-  children,
-  className = "",
-  ref,
-}: {
-  children: ReactNode;
-  className?: string;
-  ref?: React.Ref<HTMLElement>;
-}) {
+function CornerFrame() {
   return (
-    <section
-      ref={ref}
-      className={`scene absolute inset-0 flex min-h-screen items-center justify-center overflow-hidden px-6 sm:px-10 lg:px-16 ${className}`}
+    <div className="pointer-events-none absolute inset-6 z-50 sm:inset-10">
+      <span className="absolute left-0 top-0 h-5 w-5 border-l border-t border-slate-300" />
+      <span className="absolute right-0 top-0 h-5 w-5 border-r border-t border-slate-300" />
+      <span className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-slate-300" />
+      <span className="absolute bottom-0 right-0 h-5 w-5 border-b border-r border-slate-300" />
+    </div>
+  );
+}
+
+/* ==========================================================================
+   CENTRAL PROFESSIONAL WIRE-FRAME ROCKET
+   ========================================================================== */
+
+function CentralRocket() {
+  return (
+    <svg
+      viewBox="0 0 280 500"
+      className="central-rocket h-full w-full overflow-visible"
+      fill="none"
+      aria-hidden="true"
     >
+      <defs>
+        <linearGradient
+          id="rocketStroke"
+          x1="0"
+          y1="0"
+          x2="280"
+          y2="500"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#58C7EF" />
+          <stop offset=".45" stopColor="#334155" />
+          <stop offset="1" stopColor="#E1A934" />
+        </linearGradient>
+
+        <filter id="rocketGlow">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* ================================================================
+          MAIN BODY
+      ================================================================ */}
+
+      <g
+        stroke="url(#rocketStroke)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {/* nose */}
+
+        <path
+          d="
+            M140 28
+            C108 55 88 100 82 150
+            V300
+            L101 328
+            H179
+            L198 300
+            V150
+            C192 100 172 55 140 28
+            Z
+          "
+          strokeWidth="2"
+        />
+
+        {/* secondary body contour */}
+
+        <path
+          d="
+            M111 67
+            C96 92 91 119 91 153
+            V281
+          "
+          strokeWidth="1"
+          opacity=".65"
+        />
+
+        <path
+          d="
+            M169 67
+            C184 92 189 119 189 153
+            V281
+          "
+          strokeWidth="1"
+          opacity=".65"
+        />
+
+        {/* cockpit housing */}
+
+        <circle cx="140" cy="143" r="34" strokeWidth="1.5" />
+
+        <circle cx="140" cy="143" r="24" stroke="#58C7EF" strokeWidth="1.5" />
+
+        <circle cx="140" cy="143" r="8" stroke="#E1A934" strokeWidth="1" />
+
+        <circle cx="140" cy="143" r="2.5" fill="#58C7EF" stroke="none" />
+
+        {/* cockpit crosshair */}
+
+        <path
+          d="M140 111 V175"
+          strokeWidth="1"
+          strokeDasharray="3 5"
+          opacity=".5"
+        />
+
+        <path
+          d="M108 143 H172"
+          strokeWidth="1"
+          strokeDasharray="3 5"
+          opacity=".5"
+        />
+
+        {/* upper body section */}
+
+        <path d="M89 195 H191" strokeWidth="1" opacity=".65" />
+
+        <path d="M86 224 H194" strokeWidth="1" opacity=".65" />
+
+        {/* center spine */}
+
+        <path
+          d="M140 28 V328"
+          stroke="#CBD5E1"
+          strokeWidth="1"
+          strokeDasharray="4 7"
+        />
+
+        {/* left wing */}
+
+        <path
+          d="
+            M82 220
+            L42 276
+            L42 306
+            L82 290
+          "
+          strokeWidth="2"
+        />
+
+        <path d="M82 245 L55 285" strokeWidth="1" />
+
+        {/* right wing */}
+
+        <path
+          d="
+            M198 220
+            L238 276
+            L238 306
+            L198 290
+          "
+          strokeWidth="2"
+        />
+
+        <path d="M198 245 L225 285" strokeWidth="1" />
+
+        {/* lower body */}
+
+        <path d="M91 300 H189" strokeWidth="1.5" />
+
+        {/* engine housing */}
+
+        <path
+          d="
+            M101 328
+            H179
+            L167 365
+            H113
+            Z
+          "
+          strokeWidth="2"
+        />
+
+        {/* engine chambers */}
+
+        <path d="M113 328 V360" strokeWidth="1" />
+
+        <path d="M140 328 V365" strokeWidth="1.5" />
+
+        <path d="M167 328 V360" strokeWidth="1" />
+
+        {/* engine core */}
+
+        <rect
+          x="128"
+          y="335"
+          width="24"
+          height="30"
+          rx="3"
+          stroke="#E1A934"
+          strokeWidth="1.5"
+        />
+
+        {/* lower technical rails */}
+
+        <path d="M104 382 H176" strokeWidth="1" />
+
+        <path d="M110 397 H170" strokeWidth="1" />
+
+        {/* tiny technical markers */}
+
+        <circle cx="102" cy="195" r="2" fill="#58C7EF" stroke="none" />
+
+        <circle cx="178" cy="195" r="2" fill="#E1A934" stroke="none" />
+
+        <circle cx="102" cy="224" r="1.5" fill="#58C7EF" stroke="none" />
+
+        <circle cx="178" cy="224" r="1.5" fill="#E1A934" stroke="none" />
+      </g>
+
+      {/* subtle illuminated technical core */}
+
+      <g filter="url(#rocketGlow)" opacity=".8">
+        <circle cx="140" cy="143" r="3" fill="#58C7EF" />
+
+        <circle cx="140" cy="350" r="3" fill="#E1A934" />
+      </g>
+    </svg>
+  );
+}
+
+/* ==========================================================================
+   SHARED ROCKET STAGE
+   ========================================================================== */
+
+function RocketStage({ children }: { children?: ReactNode }) {
+  return (
+    <div className="rocket-stage relative h-[560px] w-[560px] max-w-[92vw]">
+      {/* outer coordinate frame */}
+
+      <div className="absolute left-1/2 top-1/2 h-[500px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-slate-200" />
+
+      <div className="absolute left-1/2 top-1/2 h-[440px] w-[285px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#58C7EF]/20" />
+
+      {/* central crosshair */}
+
+      <div className="absolute left-1/2 top-1/2 h-[500px] w-px -translate-x-1/2 -translate-y-1/2 bg-slate-200/60" />
+
+      <div className="absolute left-1/2 top-1/2 h-px w-[500px] -translate-x-1/2 -translate-y-1/2 bg-slate-200/60" />
+
+      {/* rocket */}
+
+      <div className="rocket-core absolute left-1/2 top-1/2 h-[470px] w-[263px] -translate-x-1/2 -translate-y-1/2">
+        <CentralRocket />
+      </div>
+
       {children}
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* SCENE 01 — IDEA                                                           */
-/* -------------------------------------------------------------------------- */
-
-function IdeaGraphic() {
-  return (
-    <div className="idea-graphic relative h-[390px] w-[390px]">
-      <div className="absolute inset-10 rounded-full border border-slate-300" />
-      <div className="absolute inset-[70px] rounded-full border border-dashed border-blue-300" />
-      <div className="absolute inset-[105px] rounded-full border border-slate-200" />
-
-      <div className="absolute left-[18px] top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.4)]" />
-
-      <div className="absolute right-[18px] top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-violet-500" />
-
-      <div className="absolute left-1/2 top-[18px] h-2 w-2 -translate-x-1/2 rounded-full bg-slate-400" />
-
-      <div className="absolute bottom-[18px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-blue-300" />
-
-      <div className="idea-core absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-blue-200 bg-white/80 shadow-[0_20px_70px_rgba(37,99,235,0.12)] backdrop-blur">
-        <div className="text-center">
-          <Sparkles className="mx-auto mb-3 h-6 w-6 text-blue-600" />
-
-          <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-400">
-            concept
-          </div>
-
-          <div className="mt-1 text-lg font-semibold tracking-tight text-slate-900">
-            IDEA
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute left-1/2 top-0 h-[105px] w-px -translate-x-1/2 bg-gradient-to-b from-transparent to-slate-300" />
-
-      <div className="absolute bottom-0 left-1/2 h-[105px] w-px -translate-x-1/2 bg-gradient-to-t from-transparent to-slate-300" />
-
-      <div className="absolute left-0 top-1/2 h-px w-[105px] bg-gradient-to-r from-transparent to-slate-300" />
-
-      <div className="absolute right-0 top-1/2 h-px w-[105px] bg-gradient-to-l from-transparent to-slate-300" />
-
-      <div className="absolute left-0 top-8 font-mono text-[9px] uppercase tracking-widest text-slate-400">
-        POSSIBILITY
-      </div>
-
-      <div className="absolute bottom-8 right-0 font-mono text-[9px] uppercase tracking-widest text-slate-400">
-        DIRECTION
-      </div>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* SCENE 02 — VISION                                                          */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SCENE 01 — IDEA OVERLAY
+   ========================================================================== */
 
-function VisionGraphic() {
+function IdeaOverlay({ overlayRef }: OverlayProps) {
   return (
-    <div className="vision-graphic relative w-full max-w-[700px]">
-      <div className="absolute -inset-10 rounded-[40px] bg-blue-500/[0.035] blur-3xl" />
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      <div className="idea-orbit absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/30" />
 
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.10)]">
-        <div className="flex h-12 items-center border-b border-slate-200 px-4">
-          <div className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-          </div>
+      <div className="idea-orbit-2 absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/20" />
 
-          <div className="mx-auto flex h-6 w-64 items-center rounded-md bg-slate-50 px-3">
-            <span className="font-mono text-[8px] text-slate-400">
-              your-digital-experience.dev
-            </span>
-          </div>
-        </div>
+      {/* idea nodes */}
 
-        <div className="grid min-h-[350px] grid-cols-[1.25fr_.75fr] gap-8 p-8">
-          <div className="flex flex-col justify-center">
-            <div className="mb-4 h-2 w-20 rounded-full bg-blue-100" />
-
-            <div className="space-y-2">
-              <div className="h-6 w-[85%] rounded bg-slate-900" />
-              <div className="h-6 w-[62%] rounded bg-slate-900" />
-            </div>
-
-            <div className="mt-6 h-2 w-[75%] rounded bg-slate-100" />
-            <div className="mt-2 h-2 w-[65%] rounded bg-slate-100" />
-
-            <div className="mt-8 flex gap-3">
-              <div className="h-9 w-28 rounded-lg bg-slate-900" />
-              <div className="h-9 w-24 rounded-lg border border-slate-200" />
-            </div>
-          </div>
-
-          <div className="relative flex items-center justify-center">
-            <div className="absolute inset-4 rounded-2xl bg-gradient-to-br from-blue-50 to-violet-50" />
-
-            <div className="relative h-44 w-44 rounded-full border border-blue-200">
-              <div className="absolute inset-6 rounded-full border border-dashed border-violet-200" />
-
-              <div className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-lg">
-                <Globe2 className="m-auto mt-3 h-7 w-7 text-blue-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3">
-          <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
-            visual system
-          </span>
-
-          <span className="flex items-center gap-2 font-mono text-[8px] text-blue-600">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-            assembling
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* SCENE 03 — BUILD                                                           */
-/* -------------------------------------------------------------------------- */
-
-function CodeGraphic() {
-  return (
-    <div className="code-graphic w-full max-w-[700px]">
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#111318] shadow-[0_40px_100px_rgba(15,23,42,0.22)]">
-        <div className="flex h-12 items-center border-b border-white/[0.08] px-4">
-          <div className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-            <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-            <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-          </div>
-
-          <div className="ml-5 flex items-center gap-2 font-mono text-[9px] text-white/40">
-            <Code2 className="h-3 w-3" />
-            experience.tsx
-          </div>
-
-          <div className="ml-auto font-mono text-[8px] uppercase tracking-widest text-emerald-400">
-            live
-          </div>
-        </div>
-
-        <div className="grid grid-cols-[42px_1fr] py-6">
-          <div className="select-none border-r border-white/[0.06] text-right font-mono text-[10px] leading-7 text-white/20">
-            01
-            <br />
-            02
-            <br />
-            03
-            <br />
-            04
-            <br />
-            05
-            <br />
-            06
-            <br />
-            07
-            <br />
-            08
-          </div>
-
-          <div className="px-6 font-mono text-[11px] leading-7">
-            <div>
-              <span className="text-violet-400">const</span>{" "}
-              <span className="text-blue-300">experience</span>{" "}
-              <span className="text-white/50">=</span>{" "}
-              <span className="text-white/70">{"{"}</span>
-            </div>
-
-            <div className="pl-5">
-              <span className="text-white/40">design:</span>{" "}
-              <span className="text-emerald-300">"intentional"</span>,
-            </div>
-
-            <div className="pl-5">
-              <span className="text-white/40">interaction:</span>{" "}
-              <span className="text-emerald-300">"fluid"</span>,
-            </div>
-
-            <div className="pl-5">
-              <span className="text-white/40">performance:</span>{" "}
-              <span className="text-emerald-300">"optimized"</span>,
-            </div>
-
-            <div className="pl-5">
-              <span className="text-white/40">structure:</span>{" "}
-              <span className="text-emerald-300">"scalable"</span>,
-            </div>
-
-            <div>
-              <span className="text-white/70">{"}"}</span>;
-            </div>
-
-            <div className="mt-5 flex items-center gap-3 text-[9px] uppercase tracking-widest">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.7)]" />
-              <span className="text-white/40">compiling experience...</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-white/[0.06] px-5 py-3">
-          <span className="font-mono text-[8px] text-white/25">
-            main / production
-          </span>
-
-          <span className="font-mono text-[8px] text-emerald-400">
-            build complete
-          </span>
-        </div>
-      </div>
-
-      <div className="build-terminal ml-auto mt-[-20px] mr-6 w-[260px] overflow-hidden rounded-xl border border-slate-700 bg-[#181a20] shadow-xl">
-        <div className="border-b border-white/[0.06] px-4 py-2 font-mono text-[8px] text-white/30">
-          terminal
-        </div>
-
-        <div className="p-4 font-mono text-[9px] leading-5">
-          <div className="text-white/40">$ npm run build</div>
-          <div className="text-emerald-400">✓ compiled successfully</div>
-          <div className="text-white/30">ready in 1.84s</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* SCENE 04 — EXPERIENCE                                                       */
-/* -------------------------------------------------------------------------- */
-
-function ExperienceGraphic() {
-  return (
-    <div className="experience-graphic relative w-full max-w-[720px]">
-      <div className="absolute -inset-10 rounded-full bg-blue-500/[0.035] blur-3xl" />
-
-      <div className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_35px_100px_rgba(15,23,42,0.12)]">
-        <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
-          <div className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-          </div>
-
-          <div className="ml-3 h-6 flex-1 rounded-md bg-slate-50" />
-
-          <div className="h-6 w-6 rounded-md bg-slate-100" />
-        </div>
-
-        <div className="grid gap-4 p-5 sm:grid-cols-[1.4fr_.6fr]">
-          <div className="relative overflow-hidden rounded-xl bg-[#f5f7fa] p-7">
-            <div className="absolute right-[-20px] top-[-30px] h-36 w-36 rounded-full border border-blue-100" />
-            <div className="absolute right-[20px] top-[10px] h-20 w-20 rounded-full border border-dashed border-violet-200" />
-
-            <div className="relative">
-              <div className="mb-3 h-2 w-16 rounded-full bg-blue-200" />
-
-              <div className="space-y-2">
-                <div className="h-5 w-[80%] rounded bg-slate-900" />
-                <div className="h-5 w-[55%] rounded bg-slate-900" />
-              </div>
-
-              <div className="mt-5 max-w-[280px] text-[10px] leading-5 text-slate-400">
-                Design should communicate before the first interaction.
-              </div>
-
-              <div className="mt-6 h-9 w-28 rounded-lg bg-slate-900" />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="h-24 rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <div className="mb-3 h-2 w-10 rounded bg-blue-200" />
-              <div className="h-2 w-[70%] rounded bg-slate-200" />
-              <div className="mt-2 h-2 w-[50%] rounded bg-slate-200" />
-            </div>
-
-            <div className="h-24 rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <div className="mb-3 h-2 w-10 rounded bg-violet-200" />
-              <div className="h-2 w-[75%] rounded bg-slate-200" />
-              <div className="mt-2 h-2 w-[45%] rounded bg-slate-200" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-3">
-          <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
-            interaction layer
-          </span>
-
+      {[
+        {
+          x: "18%",
+          y: "25%",
+          label: "PURPOSE",
+          color: CYAN,
+        },
+        {
+          x: "78%",
+          y: "29%",
+          label: "VISION",
+          color: GOLD,
+        },
+        {
+          x: "15%",
+          y: "72%",
+          label: "NEED",
+          color: GOLD,
+        },
+        {
+          x: "81%",
+          y: "72%",
+          label: "VALUE",
+          color: CYAN,
+        },
+      ].map((node) => (
+        <div
+          key={node.label}
+          className="idea-node absolute"
+          style={{
+            left: node.x,
+            top: node.y,
+          }}
+        >
           <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: node.color }}
+            />
 
-            <span className="font-mono text-[8px] text-blue-600">
-              responsive
+            <span className="font-mono text-[6px] uppercase tracking-[0.25em] text-slate-400">
+              {node.label}
             </span>
           </div>
+
+          <div
+            className="mt-2 h-px w-14"
+            style={{
+              backgroundColor: node.color,
+              opacity: 0.25,
+            }}
+          />
+        </div>
+      ))}
+
+      <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400">
+        concept initialization
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SCENE 02 — VISION OVERLAY
+   ========================================================================== */
+
+function VisionOverlay({ overlayRef }: OverlayProps) {
+  return (
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      {/* blueprint grid */}
+
+      <div
+        className="absolute inset-[55px] rounded-[28px] border border-[#58C7EF]/20 opacity-70"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(88,199,239,.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(88,199,239,.08) 1px, transparent 1px)
+          `,
+          backgroundSize: "28px 28px",
+        }}
+      />
+
+      {/* blueprint corners */}
+
+      <div className="absolute left-[12%] top-[16%] h-5 w-5 border-l border-t border-[#58C7EF]/40" />
+
+      <div className="absolute right-[12%] top-[16%] h-5 w-5 border-r border-t border-[#58C7EF]/40" />
+
+      <div className="absolute bottom-[16%] left-[12%] h-5 w-5 border-b border-l border-[#58C7EF]/40" />
+
+      <div className="absolute bottom-[16%] right-[12%] h-5 w-5 border-b border-r border-[#58C7EF]/40" />
+
+      {/* dimensions */}
+
+      <div className="vision-dimension absolute left-[18%] top-[27%] h-[46%] w-px bg-[#58C7EF]/30" />
+
+      <div className="vision-dimension absolute right-[18%] top-[27%] h-[46%] w-px bg-[#58C7EF]/30" />
+
+      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+        structural axis
+      </div>
+
+      <div className="absolute left-[18%] top-[24%] font-mono text-[6px] uppercase tracking-widest text-[#58C7EF]">
+        01 / FRAME
+      </div>
+
+      <div className="absolute right-[18%] top-[24%] font-mono text-[6px] uppercase tracking-widest text-[#E1A934]">
+        REV.01
+      </div>
+
+      {/* trajectory */}
+
+      <div className="vision-trajectory absolute bottom-[10%] left-1/2 h-[125px] w-px -translate-x-1/2 border-l border-dashed border-[#E1A934]/50" />
+
+      <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-[#E1A934]">
+        direction
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SCENE 03 — BUILD OVERLAY
+   ========================================================================== */
+
+function BuildOverlay({ overlayRef }: OverlayProps) {
+  return (
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      {/* code editor */}
+
+      <div className="code-panel absolute left-[-8%] top-[9%] w-[225px] overflow-hidden rounded-xl border border-slate-800 bg-[#111318] shadow-[0_30px_80px_rgba(15,23,42,.18)]">
+        <div className="flex h-9 items-center border-b border-white/[.06] px-3">
+          <div className="flex gap-1">
+            <span className="h-2 w-2 rounded-full bg-white/20" />
+            <span className="h-2 w-2 rounded-full bg-white/20" />
+            <span className="h-2 w-2 rounded-full bg-white/20" />
+          </div>
+
+          <span className="ml-3 font-mono text-[7px] text-white/40">
+            experience.ts
+          </span>
+        </div>
+
+        <div className="p-4 font-mono text-[8px] leading-5">
+          <div>
+            <span className="text-[#E1A934]">const</span>{" "}
+            <span className="text-[#58C7EF]">experience</span>{" "}
+            <span className="text-white/30">=</span>
+          </div>
+
+          <div className="text-white/30">{"{"}</div>
+
+          <div className="pl-4 text-white/50">
+            structure: <span className="text-[#58C7EF]">&quot;clear&quot;</span>
+          </div>
+
+          <div className="pl-4 text-white/50">
+            interaction:{" "}
+            <span className="text-[#E1A934]">&quot;fluid&quot;</span>
+          </div>
+
+          <div className="pl-4 text-white/50">
+            performance:{" "}
+            <span className="text-[#58C7EF]">&quot;fast&quot;</span>
+          </div>
+
+          <div className="pl-4 text-white/50">
+            purpose: <span className="text-[#E1A934]">true</span>
+          </div>
+
+          <div className="text-white/30">{"}"}</div>
+        </div>
+
+        <div className="border-t border-white/[.06] px-4 py-2 font-mono text-[7px] text-[#58C7EF]">
+          $ compiling experience...
         </div>
       </div>
 
-      <div className="experience-cursor absolute bottom-[-15px] right-[18%]">
+      {/* component blocks */}
+
+      {[
+        { x: "72%", y: "14%", title: "CORE" },
+        { x: "82%", y: "39%", title: "UI" },
+        { x: "75%", y: "69%", title: "API" },
+        { x: "12%", y: "75%", title: "DATA" },
+      ].map((node, index) => (
+        <div
+          key={node.title}
+          className="build-node absolute"
+          style={{
+            left: node.x,
+            top: node.y,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#58C7EF]/30 bg-white font-mono text-[7px] text-[#58C7EF]">
+              0{index + 1}
+            </span>
+
+            <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-slate-400">
+              {node.title}
+            </span>
+          </div>
+
+          <div className="mt-1 h-px w-14 bg-[#58C7EF]/20" />
+        </div>
+      ))}
+
+      {/* terminal */}
+
+      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-slate-700 bg-[#181a20] px-4 py-3 font-mono text-[7px]">
+        <div className="text-white/30">$ build</div>
+
+        <div className="mt-1 text-[#58C7EF]">✓ modules compiled</div>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SCENE 04 — EXPERIENCE OVERLAY
+   ========================================================================== */
+
+function ExperienceOverlay({ overlayRef }: OverlayProps) {
+  return (
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      {/* ripple rings */}
+
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/20" />
+
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/25" />
+
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/10" />
+
+      {/* motion path */}
+
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 560 560"
+        fill="none"
+      >
+        <path
+          className="motion-path"
+          d="M70 160 C150 55 390 55 490 180"
+          stroke={CYAN}
+          strokeOpacity=".25"
+          strokeWidth="1"
+          strokeDasharray="5 9"
+        />
+
+        <path
+          className="motion-path"
+          d="M70 410 C180 500 390 500 490 370"
+          stroke={GOLD}
+          strokeOpacity=".25"
+          strokeWidth="1"
+          strokeDasharray="5 9"
+        />
+      </svg>
+
+      {/* cursor */}
+
+      <div className="experience-cursor absolute right-[9%] top-[19%]">
         <MousePointer2 className="h-8 w-8 fill-slate-900 text-white drop-shadow-lg" />
 
-        <div className="ml-5 mt-[-2px] rounded-full bg-slate-900 px-3 py-1 font-mono text-[8px] text-white">
+        <div className="ml-5 mt-[-2px] rounded-full bg-slate-900 px-3 py-1 font-mono text-[7px] text-white">
+          interact
+        </div>
+      </div>
+
+      {/* interaction labels */}
+
+      <div className="absolute left-[5%] top-[29%] rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+        <div className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
           interaction
         </div>
+
+        <div className="mt-1 text-[9px] font-semibold text-slate-800">
+          responsive
+        </div>
+      </div>
+
+      <div className="absolute bottom-[18%] right-[4%] rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+        <div className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+          motion
+        </div>
+
+        <div className="mt-1 text-[9px] font-semibold text-slate-800">
+          intentional
+        </div>
+      </div>
+
+      <div className="absolute bottom-[9%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+        movement with purpose
       </div>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* SCENE 05 — DETAILS                                                         */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SCENE 05 — DETAILS OVERLAY
+   ========================================================================== */
 
-function DetailsGraphic() {
+function DetailsOverlay({ overlayRef }: OverlayProps) {
   return (
-    <div className="details-graphic relative grid w-full max-w-[720px] grid-cols-2 gap-3 sm:grid-cols-4">
-      {details.map((item, index) => {
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      {/* callout lines */}
+
+      <div className="absolute left-[18%] top-[29%] h-[42%] w-px border-l border-dashed border-slate-300" />
+
+      <div className="absolute right-[18%] top-[29%] h-[42%] w-px border-r border-dashed border-slate-300" />
+
+      {detailItems.map((item, index) => {
         const Icon = item.icon;
+
+        const positions = [
+          "left-[1%] top-[12%]",
+          "right-[1%] top-[18%]",
+          "left-[1%] bottom-[13%]",
+          "right-[1%] bottom-[9%]",
+        ];
 
         return (
           <div
             key={item.title}
-            className="detail-card group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_15px_45px_rgba(15,23,42,0.06)]"
+            className={`detail-card absolute w-[145px] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_15px_50px_rgba(15,23,42,.06)] ${positions[index]}`}
           >
-            <div className="absolute right-[-25px] top-[-25px] h-20 w-20 rounded-full border border-slate-100 transition-transform duration-500 group-hover:scale-125" />
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[6px] text-slate-300">
+                {item.number}
+              </span>
 
-            <div className="relative">
-              <div className="mb-10 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
-                <Icon className="h-4 w-4 text-blue-600" />
-              </div>
-
-              <div className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
-                0{index + 1}
-              </div>
-
-              <div className="mt-2 text-sm font-semibold text-slate-900">
-                {item.title}
-              </div>
-
-              <div className="mt-3 text-[10px] leading-5 text-slate-400">
-                {item.description}
-              </div>
+              <Icon className="h-3 w-3 text-[#58C7EF]" />
             </div>
 
-            <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-500 transition-all duration-500 group-hover:w-full" />
+            <div className="mt-3 text-[8px] font-semibold tracking-wide text-slate-800">
+              {item.title}
+            </div>
+
+            <div className="mt-1 text-[7px] text-slate-400">
+              {item.description}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF]" />
+
+              <span className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+                verified
+              </span>
+            </div>
           </div>
         );
       })}
-
-      <div className="absolute -left-8 top-1/2 hidden h-px w-6 bg-slate-300 lg:block" />
-      <div className="absolute -right-8 top-1/2 hidden h-px w-6 bg-slate-300 lg:block" />
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* SCENE 06 — TECHNOLOGY                                                       */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SCENE 06 — TECHNOLOGY OVERLAY
+   ========================================================================== */
 
-function TechnologyGraphic() {
+function TechnologyOverlay({ overlayRef }: OverlayProps) {
   return (
-    <div className="technology-graphic relative h-[430px] w-[430px]">
-      <div className="absolute inset-8 rounded-full border border-slate-200" />
-      <div className="absolute inset-[70px] rounded-full border border-dashed border-blue-200" />
-      <div className="absolute inset-[125px] rounded-full border border-slate-100" />
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      {/* network lines */}
 
-      <div className="absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-blue-200 bg-white shadow-[0_20px_60px_rgba(37,99,235,0.12)]">
-        <Cpu className="mb-2 h-6 w-6 text-blue-600" />
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 560 560"
+        fill="none"
+      >
+        {technologies.map((tech) => {
+          const radius = 215;
 
-        <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
-          system
-        </div>
+          const x = 280 + Math.cos((tech.angle * Math.PI) / 180) * radius;
 
-        <div className="mt-1 text-sm font-semibold text-slate-900">STACK</div>
-      </div>
+          const y = 280 + Math.sin((tech.angle * Math.PI) / 180) * radius;
 
-      {technologies.map((technology) => {
-        const radius = 170;
+          return (
+            <line
+              key={tech.name}
+              className="technology-line"
+              x1="280"
+              y1="280"
+              x2={x}
+              y2={y}
+              stroke={CYAN}
+              strokeOpacity=".18"
+              strokeWidth="1"
+            />
+          );
+        })}
+      </svg>
 
-        const x = Math.cos((technology.angle * Math.PI) / 180) * radius;
+      {/* nodes */}
 
-        const y = Math.sin((technology.angle * Math.PI) / 180) * radius;
+      {technologies.map((tech) => {
+        const radius = 215;
+
+        const x = Math.cos((tech.angle * Math.PI) / 180) * radius;
+
+        const y = Math.sin((tech.angle * Math.PI) / 180) * radius;
 
         return (
           <div
-            key={technology.name}
-            className="tech-node absolute left-1/2 top-1/2"
+            key={tech.name}
+            className="technology-node absolute left-1/2 top-1/2"
             style={{
               transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
             }}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
-              <span className="font-mono text-[9px] font-semibold text-slate-600">
-                {technology.short}
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
+              <span className="font-mono text-[8px] font-semibold text-slate-600">
+                {tech.short}
               </span>
             </div>
 
-            <div className="mt-2 whitespace-nowrap text-center font-mono text-[7px] uppercase tracking-wider text-slate-400">
-              {technology.name}
+            <div className="mt-2 whitespace-nowrap text-center font-mono text-[6px] uppercase tracking-widest text-slate-400">
+              {tech.name}
             </div>
           </div>
         );
       })}
 
-      {technologies.map((technology) => (
-        <div
-          key={`line-${technology.name}`}
-          className="absolute left-1/2 top-1/2 h-px origin-left bg-slate-200"
-          style={{
-            width: "170px",
-            transform: `rotate(${technology.angle}deg)`,
-          }}
+      <div className="absolute left-1/2 top-[5%] -translate-x-1/2 font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400">
+        technology ecosystem
+      </div>
+
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 font-mono text-[6px] uppercase tracking-widest text-slate-400">
+        connected architecture
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SCENE 07 — TRANSFORMATION OVERLAY
+   ========================================================================== */
+
+function TransformationOverlay({ overlayRef }: OverlayProps) {
+  return (
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      <div className="system-ring absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/15" />
+
+      <div className="system-ring absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/25" />
+
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 560 560"
+        fill="none"
+      >
+        <path
+          className="system-connection"
+          d="M115 155 L280 280"
+          stroke={CYAN}
+          strokeOpacity=".25"
         />
-      ))}
-    </div>
-  );
-}
 
-/* -------------------------------------------------------------------------- */
-/* SCENE 07 — TRANSFORMATION                                                   */
-/* -------------------------------------------------------------------------- */
+        <path
+          className="system-connection"
+          d="M445 155 L280 280"
+          stroke={GOLD}
+          strokeOpacity=".25"
+        />
 
-function TransformationGraphic() {
-  const items = [
-    { label: "IDEA", icon: Sparkles },
-    { label: "DESIGN", icon: Layers3 },
-    { label: "CODE", icon: Code2 },
-    { label: "EXPERIENCE", icon: Globe2 },
-  ];
+        <path
+          className="system-connection"
+          d="M115 405 L280 280"
+          stroke={GOLD}
+          strokeOpacity=".25"
+        />
 
-  return (
-    <div className="transformation-graphic w-full max-w-[800px]">
-      <div className="relative">
-        <div className="absolute left-[10%] right-[10%] top-1/2 hidden h-px bg-slate-200 sm:block" />
+        <path
+          className="system-connection"
+          d="M445 405 L280 280"
+          stroke={CYAN}
+          strokeOpacity=".25"
+        />
+      </svg>
 
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-          {items.map((item, index) => {
-            const Icon = item.icon;
-
-            return (
-              <div
-                key={item.label}
-                className="transformation-node relative flex flex-col items-center text-center"
-              >
-                <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-[0_15px_40px_rgba(15,23,42,0.07)]">
-                  <Icon className="h-6 w-6 text-blue-600" />
-
-                  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 font-mono text-[7px] text-white">
-                    0{index + 1}
-                  </span>
-                </div>
-
-                <div className="mt-5 font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-700">
-                  {item.label}
-                </div>
-
-                <div className="mt-2 h-1 w-8 rounded-full bg-slate-100" />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-12 text-center">
-        <div className="font-mono text-[8px] uppercase tracking-[0.35em] text-slate-400">
-          one continuous process
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* SCENE 08 — LAUNCH                                                          */
-/* -------------------------------------------------------------------------- */
-
-function LaunchGraphic() {
-  return (
-    <div className="launch-graphic relative w-full max-w-[560px]">
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_35px_100px_rgba(15,23,42,0.12)]">
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
-              <Terminal className="h-4 w-4 text-blue-600" />
+      {[
+        {
+          label: "DESIGN",
+          number: "01",
+          x: "8%",
+          y: "20%",
+        },
+        {
+          label: "CODE",
+          number: "02",
+          x: "76%",
+          y: "20%",
+        },
+        {
+          label: "CONTENT",
+          number: "03",
+          x: "74%",
+          y: "72%",
+        },
+        {
+          label: "EXPERIENCE",
+          number: "04",
+          x: "7%",
+          y: "72%",
+        },
+      ].map((node) => (
+        <div
+          key={node.label}
+          className="system-node absolute"
+          style={{
+            left: node.x,
+            top: node.y,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white font-mono text-[7px] text-[#58C7EF] shadow-sm">
+              {node.number}
             </div>
 
-            <div>
-              <div className="text-xs font-semibold text-slate-900">
-                Deployment
-              </div>
-
-              <div className="font-mono text-[7px] uppercase tracking-widest text-slate-400">
-                production system
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-
-            <span className="font-mono text-[7px] uppercase tracking-widest text-emerald-600">
-              ready
+            <span className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+              {node.label}
             </span>
           </div>
         </div>
+      ))}
 
-        <div className="space-y-4 p-6">
-          {["Design", "Development", "Optimization", "Deployment"].map(
-            (item) => (
-              <div key={item} className="flex items-center gap-4">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50">
-                  <Check className="h-3 w-3 text-emerald-600" />
-                </div>
-
-                <div className="flex-1">
-                  <div className="text-xs font-medium text-slate-700">
-                    {item}
-                  </div>
-
-                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100">
-                    <div className="launch-progress h-full w-full rounded-full bg-emerald-400" />
-                  </div>
-                </div>
-
-                <span className="font-mono text-[7px] text-emerald-600">
-                  100%
-                </span>
-              </div>
-            ),
-          )}
-        </div>
-
-        <div className="border-t border-slate-100 bg-slate-50/70 px-6 py-5">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
-                experience
-              </div>
-
-              <div className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
-                READY
-              </div>
-            </div>
-
-            <div className="text-right">
-              <div className="font-mono text-[7px] text-slate-400">RELEASE</div>
-
-              <div className="font-mono text-xs text-blue-600">01.0.0</div>
-            </div>
-          </div>
-        </div>
+      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-full border border-slate-200 bg-white px-5 py-2 font-mono text-[7px] uppercase tracking-[0.25em] text-slate-400">
+        system integrated
       </div>
-
-      <div className="absolute -bottom-8 left-1/2 h-16 w-px -translate-x-1/2 bg-gradient-to-b from-blue-400 to-transparent" />
-
-      <div className="absolute -bottom-10 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,.5)]" />
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* SCENE 09 — CTA                                                             */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SCENE 08 — LAUNCH OVERLAY
+   ========================================================================== */
 
-function FinalGraphic() {
+function LaunchOverlay({ overlayRef }: OverlayProps) {
   return (
-    <div className="final-graphic relative h-[360px] w-[360px]">
-      <div className="absolute inset-0 rounded-full border border-slate-200" />
-      <div className="absolute inset-10 rounded-full border border-dashed border-blue-200" />
-      <div className="absolute inset-20 rounded-full border border-slate-100" />
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      {/* vertical trajectory */}
 
-      <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.10)]">
-        <div className="flex h-full flex-col items-center justify-center">
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
-            <Code2 className="h-5 w-5 text-white" />
-          </div>
+      <div className="launch-trajectory absolute left-1/2 top-[3%] h-[94%] w-px -translate-x-1/2 border-l border-dashed border-[#58C7EF]/30" />
 
-          <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
-            start
-          </div>
+      <div className="absolute left-1/2 top-[3%] h-2 w-2 -translate-x-1/2 rounded-full bg-[#E1A934] shadow-[0_0_18px_rgba(225,169,52,.65)]" />
 
-          <div className="mt-1 text-sm font-semibold text-slate-900">BUILD</div>
+      {/* launch status */}
+
+      <div className="launch-status absolute left-1/2 top-[7%] -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-5 py-2 shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
+
+          <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-slate-400">
+            launch system
+          </span>
+
+          <span className="font-mono text-[7px] font-semibold text-[#58C7EF]">
+            ONLINE
+          </span>
         </div>
       </div>
 
-      <div className="absolute left-1/2 top-[-2px] h-3 w-3 -translate-x-1/2 rounded-full bg-blue-500" />
+      {/* status panels */}
 
-      <div className="absolute bottom-[-2px] left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-violet-500" />
+      {[
+        {
+          side: "left",
+          top: "35%",
+          title: "STRUCTURE",
+          number: "01",
+          color: CYAN,
+        },
+        {
+          side: "left",
+          top: "55%",
+          title: "NAVIGATION",
+          number: "02",
+          color: CYAN,
+        },
+        {
+          side: "right",
+          top: "35%",
+          title: "WEB SYSTEM",
+          number: "03",
+          color: GOLD,
+        },
+        {
+          side: "right",
+          top: "55%",
+          title: "PERFORMANCE",
+          number: "04",
+          color: GOLD,
+        },
+      ].map((item) => (
+        <div
+          key={item.title}
+          className={`launch-card absolute w-[135px] rounded-xl border border-slate-200 bg-white p-3 shadow-sm ${
+            item.side === "left" ? "left-[1%]" : "right-[1%]"
+          }`}
+          style={{
+            top: item.top,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-full"
+              style={{
+                backgroundColor: `${item.color}15`,
+              }}
+            >
+              <Check className="h-3 w-3" style={{ color: item.color }} />
+            </div>
 
-      <div className="absolute left-[-2px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-slate-400" />
+            <div>
+              <div className="font-mono text-[6px] text-slate-300">
+                {item.number}
+              </div>
 
-      <div className="absolute right-[-2px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-blue-300" />
+              <div className="text-[7px] font-semibold text-slate-700">
+                {item.title}
+              </div>
+            </div>
+          </div>
 
-      <div className="absolute left-8 top-8 font-mono text-[7px] uppercase tracking-widest text-slate-400">
-        YOUR IDEA
-      </div>
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="launch-progress h-full w-0 rounded-full"
+              style={{
+                backgroundColor: item.color,
+              }}
+            />
+          </div>
+        </div>
+      ))}
 
-      <div className="absolute bottom-8 right-8 font-mono text-[7px] uppercase tracking-widest text-slate-400">
-        YOUR NEXT STEP
+      <div className="absolute bottom-[4%] left-1/2 -translate-x-1/2 text-center">
+        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+          final status
+        </div>
+
+        <div className="mt-1 text-sm font-semibold tracking-[0.2em] text-slate-900">
+          READY
+        </div>
       </div>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* MAIN COMPONENT                                                             */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SCENE 09 — FINAL OVERLAY
+   ========================================================================== */
+
+function FinalOverlay({ overlayRef }: OverlayProps) {
+  return (
+    <div ref={overlayRef} className="scene-overlay absolute inset-0">
+      <div className="final-orbit absolute left-1/2 top-1/2 h-[500px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#58C7EF]/20" />
+
+      <div className="final-orbit absolute left-1/2 top-1/2 h-[420px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#E1A934]/20" />
+
+      <div className="final-label absolute left-[10%] top-[14%]">
+        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+          your idea
+        </div>
+
+        <div className="mt-2 h-px w-14 bg-[#E1A934]" />
+      </div>
+
+      <div className="final-label absolute right-[10%] top-[14%] text-right">
+        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-[#58C7EF]">
+          your product
+        </div>
+
+        <div className="ml-auto mt-2 h-px w-14 bg-[#58C7EF]" />
+      </div>
+
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-5 py-2 font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+        next mission ready
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   MAIN CINEMATIC HERO
+   ========================================================================== */
 
 export default function CinematicHero() {
   const rootRef = useRef<HTMLDivElement>(null);
 
   const sceneRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const progressRef = useRef<HTMLDivElement>(null);
-  const scanRef = useRef<HTMLDivElement>(null);
+  const overlayRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const ideaGraphicRef = useRef<HTMLDivElement>(null);
-  const visionGraphicRef = useRef<HTMLDivElement>(null);
-  const codeGraphicRef = useRef<HTMLDivElement>(null);
-  const experienceGraphicRef = useRef<HTMLDivElement>(null);
-  const detailsGraphicRef = useRef<HTMLDivElement>(null);
-  const technologyGraphicRef = useRef<HTMLDivElement>(null);
-  const transformationGraphicRef = useRef<HTMLDivElement>(null);
-  const launchGraphicRef = useRef<HTMLDivElement>(null);
-  const finalGraphicRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  const scanRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -791,32 +1127,12 @@ export default function CinematicHero() {
     const ctx = gsap.context(() => {
       const scenes = sceneRefs.current.filter(Boolean) as HTMLElement[];
 
+      const overlays = overlayRefs.current.filter(Boolean) as HTMLDivElement[];
+
       if (!scenes.length) return;
 
       /* ================================================================
-         UNIVERSAL TEXT TRANSITION
-      ================================================================ */
-
-      const TEXT_FROM = {
-        opacity: 0,
-        x: 70,
-        filter: "blur(8px)",
-      };
-
-      const TEXT_IN = {
-        opacity: 1,
-        x: 0,
-        filter: "blur(0px)",
-      };
-
-      const TEXT_OUT = {
-        opacity: 0,
-        x: -70,
-        filter: "blur(8px)",
-      };
-
-      /* ================================================================
-         INITIAL SCENE STATE
+         INITIAL STATES
       ================================================================ */
 
       gsap.set(scenes, {
@@ -827,50 +1143,30 @@ export default function CinematicHero() {
         autoAlpha: 1,
       });
 
-      /*
-       * Every text element starts from exactly the same
-       * hidden state.
-       */
-      const allText = root.querySelectorAll(
+      const textElements = root.querySelectorAll(
         ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
       );
 
-      gsap.set(allText, TEXT_FROM);
-
-      /*
-       * Scene 01 text starts visible.
-       */
-      const firstText = scenes[0].querySelectorAll(
-        ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
-      );
-
-      gsap.set(firstText, TEXT_IN);
-
-      /* ================================================================
-         GRAPHICS INITIAL STATE
-      ================================================================ */
+      gsap.set(textElements, {
+        opacity: 0,
+        x: 70,
+        filter: "blur(8px)",
+      });
 
       gsap.set(
-        [
-          visionGraphicRef.current,
-          codeGraphicRef.current,
-          experienceGraphicRef.current,
-          detailsGraphicRef.current,
-          technologyGraphicRef.current,
-          transformationGraphicRef.current,
-          launchGraphicRef.current,
-          finalGraphicRef.current,
-        ],
+        scenes[0].querySelectorAll(
+          ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
+        ),
         {
-          opacity: 0,
-          y: 50,
-          scale: 0.94,
+          opacity: 1,
+          x: 0,
+          filter: "blur(0px)",
         },
       );
 
-      gsap.set(ideaGraphicRef.current, {
+      gsap.set(overlays, {
         opacity: 0,
-        y: 50,
+        y: 45,
         scale: 0.94,
       });
 
@@ -878,11 +1174,27 @@ export default function CinematicHero() {
          AMBIENT SCAN
       ================================================================ */
 
-      gsap.to(scanRef.current, {
-        yPercent: 100,
-        duration: 5,
+      if (scanRef.current) {
+        gsap.to(scanRef.current, {
+          yPercent: 100,
+          duration: 5,
+          repeat: -1,
+          ease: "none",
+        });
+      }
+
+      /* ================================================================
+         ROCKET FLOAT
+      ================================================================ */
+
+      const rocketCores = root.querySelectorAll(".rocket-core");
+
+      gsap.to(rocketCores, {
+        y: -5,
+        duration: 2.8,
         repeat: -1,
-        ease: "none",
+        yoyo: true,
+        ease: "sine.inOut",
       });
 
       /* ================================================================
@@ -902,47 +1214,92 @@ export default function CinematicHero() {
       });
 
       /* ================================================================
-         TEXT TRANSITION HELPER
+         HELPERS
       ================================================================ */
 
-      const animateSceneText = (scene: HTMLElement, isFirst = false) => {
-        const textElements = scene.querySelectorAll(
+      const sceneText = (scene: HTMLElement) =>
+        scene.querySelectorAll(
           ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
         );
 
-        if (!textElements.length) return;
+      const showScene = (
+        scene: HTMLElement,
+        overlay: HTMLDivElement | null,
+      ) => {
+        tl.set(scene, {
+          autoAlpha: 1,
+        });
 
-        if (!isFirst) {
-          gsap.set(textElements, TEXT_FROM);
+        const text = sceneText(scene);
 
-          tl.to(textElements, {
-            ...TEXT_IN,
-            duration: 0.9,
-            stagger: 0.12,
+        tl.fromTo(
+          text,
+          {
+            opacity: 0,
+            x: 70,
+            filter: "blur(8px)",
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: "blur(0px)",
+            duration: 0.85,
+            stagger: 0.08,
             ease: "power3.out",
-          });
-        } else {
-          tl.to(textElements, {
-            ...TEXT_IN,
-            duration: 0.9,
-            stagger: 0.12,
-            ease: "power3.out",
-          });
+          },
+        );
+
+        if (overlay) {
+          tl.fromTo(
+            overlay,
+            {
+              opacity: 0,
+              y: 45,
+              scale: 0.94,
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.95,
+              ease: "power3.out",
+            },
+            "<0.1",
+          );
         }
       };
 
-      const exitSceneText = (scene: HTMLElement) => {
-        const textElements = scene.querySelectorAll(
-          ".scene-copy, .scene-label, .scene-text, .scene-action, .scene-meta",
-        );
+      const hideScene = (
+        scene: HTMLElement,
+        overlay: HTMLDivElement | null,
+      ) => {
+        const text = sceneText(scene);
 
-        if (!textElements.length) return;
-
-        tl.to(textElements, {
-          ...TEXT_OUT,
-          duration: 0.9,
-          stagger: 0.08,
+        tl.to(text, {
+          opacity: 0,
+          x: -65,
+          filter: "blur(8px)",
+          duration: 0.7,
+          stagger: 0.05,
           ease: "power2.in",
+        });
+
+        if (overlay) {
+          tl.to(
+            overlay,
+            {
+              opacity: 0,
+              y: -35,
+              scale: 0.97,
+              duration: 0.7,
+              ease: "power2.in",
+            },
+            "<",
+          );
+        }
+
+        tl.set(scene, {
+          autoAlpha: 0,
         });
       };
 
@@ -950,412 +1307,366 @@ export default function CinematicHero() {
          SCENE 01
       ================================================================ */
 
-      tl.to(ideaGraphicRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 1,
-        ease: "power3.out",
-      });
+      const idea = overlays[0];
 
-      tl.to(
-        ideaGraphicRef.current,
-        {
-          rotate: 5,
-          duration: 1.8,
-          ease: "none",
-        },
-        "<",
-      );
+      if (idea) {
+        tl.to(
+          idea.querySelectorAll(".idea-node"),
+          {
+            opacity: 1,
+            scale: 1,
+            stagger: 0.12,
+            duration: 0.35,
+            ease: "back.out(1.5)",
+          },
+          "+=0.2",
+        );
 
-      tl.to({}, { duration: 0.8 });
+        tl.to(
+          idea.querySelector(".idea-orbit"),
+          {
+            rotation: 360,
+            duration: 2,
+            ease: "none",
+          },
+          "<",
+        );
 
-      exitSceneText(scenes[0]);
+        tl.fromTo(
+          idea.querySelector(".idea-orbit-2"),
+          {
+            scale: 0.5,
+            opacity: 0,
+          },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          },
+          "<",
+        );
+      }
 
-      tl.to(
-        ideaGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
+      tl.to({}, { duration: 0.7 });
 
-      tl.set(scenes[0], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[0], overlays[0]);
 
       /* ================================================================
          SCENE 02
       ================================================================ */
 
-      tl.set(scenes[1], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[1], overlays[1]);
 
-      animateSceneText(scenes[1]);
+      const vision = overlays[1];
 
-      tl.to(
-        visionGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
+      if (vision) {
+        tl.fromTo(
+          vision.querySelectorAll(".vision-dimension"),
+          {
+            scaleY: 0,
+            transformOrigin: "top center",
+          },
+          {
+            scaleY: 1,
+            duration: 0.65,
+            stagger: 0.15,
+            ease: "power2.out",
+          },
+          "-=0.45",
+        );
 
-      tl.to({}, { duration: 0.9 });
+        tl.fromTo(
+          vision.querySelector(".vision-trajectory"),
+          {
+            scaleY: 0,
+            transformOrigin: "top center",
+          },
+          {
+            scaleY: 1,
+            duration: 0.7,
+            ease: "power2.out",
+          },
+          "-=0.3",
+        );
+      }
 
-      exitSceneText(scenes[1]);
+      tl.to({}, { duration: 0.75 });
 
-      tl.to(
-        visionGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[1], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[1], overlays[1]);
 
       /* ================================================================
          SCENE 03
       ================================================================ */
 
-      tl.set(scenes[2], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[2], overlays[2]);
 
-      animateSceneText(scenes[2]);
+      const build = overlays[2];
 
-      tl.to(
-        codeGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
+      if (build) {
+        tl.fromTo(
+          build.querySelector(".code-panel"),
+          {
+            x: -45,
+            opacity: 0,
+          },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.6,
+            ease: "power3.out",
+          },
+          "-=0.45",
+        );
 
-      const codeLines = codeGraphicRef.current?.querySelectorAll(
-        ".px-6.font-mono > div",
-      );
-
-      if (codeLines) {
         tl.from(
-          codeLines,
+          build.querySelectorAll(".build-node"),
           {
             opacity: 0,
-            y: 15,
-            stagger: 0.08,
-            duration: 0.35,
-            ease: "power2.out",
+            scale: 0.7,
+            stagger: 0.1,
+            duration: 0.4,
+            ease: "back.out(1.6)",
           },
-          "-=0.55",
+          "-=0.3",
+        );
+
+        tl.fromTo(
+          build.querySelector(".build-terminal"),
+          {
+            y: 20,
+            opacity: 0,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.45,
+          },
+          "-=0.25",
         );
       }
 
       tl.to({}, { duration: 0.8 });
 
-      exitSceneText(scenes[2]);
-
-      tl.to(
-        codeGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[2], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[2], overlays[2]);
 
       /* ================================================================
          SCENE 04
       ================================================================ */
 
-      tl.set(scenes[3], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[3], overlays[3]);
 
-      animateSceneText(scenes[3]);
+      const experience = overlays[3];
 
-      tl.to(
-        experienceGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
+      if (experience) {
+        tl.from(
+          experience.querySelectorAll(".interaction-ring"),
+          {
+            scale: 0.5,
+            opacity: 0,
+            stagger: 0.12,
+            duration: 0.7,
+            ease: "power3.out",
+          },
+          "-=0.5",
+        );
 
-      tl.fromTo(
-        experienceGraphicRef.current?.querySelector(".experience-cursor"),
-        {
-          x: -70,
-          y: 40,
-          opacity: 0,
-        },
-        {
-          x: 0,
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "power3.out",
-        },
-        "-=0.5",
-      );
+        tl.fromTo(
+          experience.querySelector(".experience-cursor"),
+          {
+            x: -45,
+            y: 30,
+            opacity: 0,
+          },
+          {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            duration: 0.65,
+            ease: "power3.out",
+          },
+          "-=0.4",
+        );
 
-      tl.to({}, { duration: 0.8 });
+        tl.to(
+          experience.querySelectorAll(".motion-path"),
+          {
+            strokeDashoffset: -80,
+            duration: 1.2,
+            ease: "none",
+          },
+          "-=0.5",
+        );
+      }
 
-      exitSceneText(scenes[3]);
+      tl.to({}, { duration: 0.75 });
 
-      tl.to(
-        experienceGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[3], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[3], overlays[3]);
 
       /* ================================================================
          SCENE 05
       ================================================================ */
 
-      tl.set(scenes[4], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[4], overlays[4]);
 
-      animateSceneText(scenes[4]);
+      const details = overlays[4];
 
-      tl.to(
-        detailsGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
-
-      const detailCards =
-        detailsGraphicRef.current?.querySelectorAll(".detail-card");
-
-      if (detailCards) {
+      if (details) {
         tl.from(
-          detailCards,
+          details.querySelectorAll(".detail-card"),
           {
             opacity: 0,
             y: 25,
-            scale: 0.95,
-            stagger: 0.1,
-            duration: 0.45,
-            ease: "power2.out",
+            scale: 0.92,
+            stagger: 0.14,
+            duration: 0.5,
+            ease: "power3.out",
           },
-          "-=0.5",
+          "-=0.45",
         );
       }
 
-      tl.to({}, { duration: 0.8 });
+      tl.to({}, { duration: 0.75 });
 
-      exitSceneText(scenes[4]);
-
-      tl.to(
-        detailsGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[4], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[4], overlays[4]);
 
       /* ================================================================
          SCENE 06
       ================================================================ */
 
-      tl.set(scenes[5], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[5], overlays[5]);
 
-      animateSceneText(scenes[5]);
+      const technology = overlays[5];
 
-      tl.to(
-        technologyGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
-
-      const techNodes =
-        technologyGraphicRef.current?.querySelectorAll(".tech-node");
-
-      if (techNodes) {
+      if (technology) {
         tl.from(
-          techNodes,
+          technology.querySelectorAll(".technology-node"),
           {
             opacity: 0,
-            scale: 0.8,
+            scale: 0.55,
+            stagger: 0.07,
+            duration: 0.45,
+            ease: "back.out(1.5)",
+          },
+          "-=0.5",
+        );
+
+        tl.from(
+          technology.querySelectorAll(".technology-line"),
+          {
+            opacity: 0,
+            scaleX: 0,
+            transformOrigin: "center",
             stagger: 0.06,
             duration: 0.4,
-            ease: "power2.out",
           },
           "-=0.5",
         );
       }
 
-      tl.to({}, { duration: 0.8 });
+      tl.to({}, { duration: 0.75 });
 
-      exitSceneText(scenes[5]);
-
-      tl.to(
-        technologyGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[5], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[5], overlays[5]);
 
       /* ================================================================
          SCENE 07
       ================================================================ */
 
-      tl.set(scenes[6], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[6], overlays[6]);
 
-      animateSceneText(scenes[6]);
+      const transformation = overlays[6];
 
-      tl.to(
-        transformationGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
-
-      const transformationNodes =
-        transformationGraphicRef.current?.querySelectorAll(
-          ".transformation-node",
-        );
-
-      if (transformationNodes) {
+      if (transformation) {
         tl.from(
-          transformationNodes,
+          transformation.querySelectorAll(".system-node"),
           {
             opacity: 0,
-            y: 25,
-            scale: 0.95,
+            scale: 0.7,
             stagger: 0.12,
-            duration: 0.45,
+            duration: 0.5,
+            ease: "back.out(1.5)",
+          },
+          "-=0.45",
+        );
+
+        tl.fromTo(
+          transformation.querySelectorAll(".system-connection"),
+          {
+            strokeDasharray: 300,
+            strokeDashoffset: 300,
+          },
+          {
+            strokeDashoffset: 0,
+            stagger: 0.12,
+            duration: 0.55,
             ease: "power2.out",
+          },
+          "-=0.35",
+        );
+
+        tl.to(
+          transformation.querySelectorAll(".system-ring"),
+          {
+            rotation: 360,
+            duration: 2,
+            stagger: 0.15,
+            ease: "none",
           },
           "-=0.5",
         );
       }
 
-      tl.to({}, { duration: 0.8 });
+      tl.to({}, { duration: 0.75 });
 
-      exitSceneText(scenes[6]);
-
-      tl.to(
-        transformationGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[6], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[6], overlays[6]);
 
       /* ================================================================
          SCENE 08
       ================================================================ */
 
-      tl.set(scenes[7], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[7], overlays[7]);
 
-      animateSceneText(scenes[7]);
+      const launch = overlays[7];
 
-      tl.to(
-        launchGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
+      if (launch) {
+        tl.fromTo(
+          launch.querySelector(".launch-trajectory"),
+          {
+            scaleY: 0,
+            transformOrigin: "bottom center",
+          },
+          {
+            scaleY: 1,
+            duration: 0.9,
+            ease: "power2.out",
+          },
+          "-=0.45",
+        );
 
-      const progressBars =
-        launchGraphicRef.current?.querySelectorAll(".launch-progress");
+        tl.from(
+          launch.querySelector(".launch-status"),
+          {
+            y: -20,
+            opacity: 0,
+            duration: 0.5,
+          },
+          "-=0.55",
+        );
 
-      if (progressBars) {
+        tl.from(
+          launch.querySelectorAll(".launch-card"),
+          {
+            opacity: 0,
+            x: 25,
+            stagger: 0.1,
+            duration: 0.4,
+            ease: "power2.out",
+          },
+          "-=0.35",
+        );
+
+        const progressBars = launch.querySelectorAll(".launch-progress");
+
         gsap.set(progressBars, {
           width: "0%",
         });
@@ -1364,65 +1675,52 @@ export default function CinematicHero() {
           progressBars,
           {
             width: "100%",
-            stagger: 0.15,
-            duration: 0.5,
+            stagger: 0.12,
+            duration: 0.55,
             ease: "power2.inOut",
           },
-          "-=0.5",
+          "-=0.25",
         );
       }
 
       tl.to({}, { duration: 0.8 });
 
-      exitSceneText(scenes[7]);
-
-      tl.to(
-        launchGraphicRef.current,
-        {
-          opacity: 0,
-          y: -50,
-          scale: 0.96,
-          duration: 0.9,
-          ease: "power2.in",
-        },
-        "<",
-      );
-
-      tl.set(scenes[7], {
-        autoAlpha: 0,
-      });
+      hideScene(scenes[7], overlays[7]);
 
       /* ================================================================
          SCENE 09
       ================================================================ */
 
-      tl.set(scenes[8], {
-        autoAlpha: 1,
-      });
+      showScene(scenes[8], overlays[8]);
 
-      animateSceneText(scenes[8]);
+      const final = overlays[8];
 
-      tl.to(
-        finalGraphicRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "<0.15",
-      );
+      if (final) {
+        tl.from(
+          final.querySelectorAll(".final-label"),
+          {
+            opacity: 0,
+            y: 15,
+            stagger: 0.15,
+            duration: 0.5,
+            ease: "power2.out",
+          },
+          "-=0.45",
+        );
 
-      tl.to(
-        finalGraphicRef.current,
-        {
-          rotate: -5,
-          duration: 1.8,
-          ease: "none",
-        },
-        "<",
-      );
+        tl.to(
+          final.querySelectorAll(".final-orbit"),
+          {
+            rotation: 360,
+            duration: 2.4,
+            stagger: 0.15,
+            ease: "none",
+          },
+          "-=0.35",
+        );
+      }
+
+      tl.to({}, { duration: 1.5 });
 
       /* ================================================================
          PROGRESS INDICATOR
@@ -1433,21 +1731,28 @@ export default function CinematicHero() {
         start: "top top",
         end: "+=12000",
         scrub: true,
+
         onUpdate: (self) => {
-          if (progressRef.current) {
-            gsap.set(progressRef.current, {
-              scaleY: self.progress,
-            });
-          }
+          if (!progressRef.current) return;
+
+          gsap.set(progressRef.current, {
+            scaleY: self.progress,
+          });
         },
       });
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   const setSceneRef = (index: number) => (element: HTMLElement | null) => {
     sceneRefs.current[index] = element;
+  };
+
+  const setOverlayRef = (index: number) => (element: HTMLDivElement | null) => {
+    overlayRefs.current[index] = element;
   };
 
   return (
@@ -1459,38 +1764,54 @@ export default function CinematicHero() {
 
       <CornerFrame />
 
-      {/* ------------------------------------------------------------------ */}
-      {/* SIDE PROGRESS                                                       */}
-      {/* ------------------------------------------------------------------ */}
+      {/* ================================================================
+         TOP HUD
+      ================================================================ */}
 
-      <div className="pointer-events-none absolute right-6 top-1/2 z-50 hidden h-40 w-px -translate-y-1/2 bg-slate-200 sm:right-10 sm:block">
+      <div className="pointer-events-none absolute left-8 top-8 z-[60] hidden items-center gap-3 sm:flex">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
+
+        <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400">
+          exploration system / online
+        </span>
+      </div>
+
+      <div className="pointer-events-none absolute right-8 top-8 z-[60] hidden font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400 sm:block">
+        RAMIL / WEB SYSTEMS
+      </div>
+
+      {/* ================================================================
+         SCROLL PROGRESS
+      ================================================================ */}
+
+      <div className="pointer-events-none absolute right-6 top-1/2 z-[60] hidden h-40 w-px -translate-y-1/2 bg-slate-200 sm:right-10 sm:block">
         <div
           ref={progressRef}
-          className="absolute left-0 top-0 h-full w-full origin-top scale-y-0 bg-blue-500"
+          className="absolute left-0 top-0 h-full w-full origin-top scale-y-0 bg-[#58C7EF]"
         />
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* SCAN                                                                 */}
-      {/* ------------------------------------------------------------------ */}
+      {/* ================================================================
+         SCAN
+      ================================================================ */}
 
       <div
         ref={scanRef}
-        className="pointer-events-none absolute left-0 top-[-100%] z-40 h-[30%] w-full bg-gradient-to-b from-transparent via-blue-400/[0.025] to-transparent"
+        className="pointer-events-none absolute left-0 top-[-30%] z-50 h-[25%] w-full bg-gradient-to-b from-transparent via-[#58C7EF]/[0.025] to-transparent"
       />
 
-      {/* ================================================================== */}
-      {/* SCENE 01                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 01 — IDEA
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(0)}>
-        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_.9fr]">
+      <Scene sceneRef={setSceneRef(0)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div className="scene-copy">
             <SceneLabel number="01" title="The Idea" />
 
-            <h1 className="scene-text max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="scene-text max-w-2xl text-5xl font-semibold leading-[.98] tracking-[-.055em] text-slate-950 sm:text-6xl lg:text-7xl">
               Every great website
-              <span className="block text-blue-600">starts with an idea.</span>
+              <span className="block text-[#58C7EF]">starts with an idea.</span>
             </h1>
 
             <p className="scene-text mt-8 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
@@ -1499,150 +1820,165 @@ export default function CinematicHero() {
               experience.
             </p>
 
-            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
-              <span className="h-px w-8 bg-blue-500" />
+            <div className="scene-meta mt-9 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <span className="h-px w-8 bg-[#E1A934]" />
               start with purpose
             </div>
           </div>
 
-          <div
-            ref={ideaGraphicRef}
-            className="flex justify-center lg:justify-end"
-          >
-            <IdeaGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <IdeaOverlay overlayRef={setOverlayRef(0)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 02                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 02 — VISION
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(1)}>
-        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[.8fr_1.2fr]">
+      <Scene sceneRef={setSceneRef(1)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.8fr_1.2fr]">
           <div className="scene-copy">
             <SceneLabel number="02" title="The Vision" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               I turn ideas
-              <span className="block text-blue-600">into experiences.</span>
+              <span className="block text-[#58C7EF]">into experiences.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
               The goal is more than making something look good. It is about
               creating a clear visual direction that makes the purpose
               immediately understandable.
             </p>
+
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <Sparkles className="h-3 w-3 text-[#E1A934]" />
+              shaping the direction
+            </div>
           </div>
 
-          <div ref={visionGraphicRef}>
-            <VisionGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <VisionOverlay overlayRef={setOverlayRef(1)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 03                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 03 — BUILD
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(2)}>
-        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[.75fr_1.25fr]">
+      <Scene sceneRef={setSceneRef(2)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.8fr_1.2fr]">
           <div className="scene-copy">
             <SceneLabel number="03" title="The Build" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               Where ideas
-              <span className="block text-blue-600">become real.</span>
+              <span className="block text-[#58C7EF]">become real.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
               This is where design becomes structure, interaction and a working
               digital product.
             </p>
 
-            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.2em] text-slate-400">
-              <Terminal className="h-3 w-3 text-blue-600" />
-              building the experience
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <Terminal className="h-3 w-3 text-[#E1A934]" />
+              building the system
             </div>
           </div>
 
-          <div ref={codeGraphicRef}>
-            <CodeGraphic />
-          </div>
-        </div>
-      </SceneContainer>
-
-      {/* ================================================================== */}
-      {/* SCENE 04                                                            */}
-      {/* ================================================================== */}
-
-      <SceneContainer ref={setSceneRef(3)}>
-        <div className="w-full max-w-6xl">
-          <div className="grid items-center gap-12 lg:grid-cols-[.7fr_1.3fr]">
-            <div className="scene-copy">
-              <SceneLabel number="04" title="The Experience" />
-
-              <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
-                A website
-                <span className="block text-blue-600">should feel alive.</span>
-              </h2>
-
-              <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
-                Every movement, transition and interaction has a purpose. The
-                finished product should feel natural, intuitive and memorable.
-              </p>
-            </div>
-
-            <div ref={experienceGraphicRef}>
-              <ExperienceGraphic />
-            </div>
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <BuildOverlay overlayRef={setOverlayRef(2)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 05                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 04 — EXPERIENCE
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(4)}>
-        <div className="w-full max-w-6xl">
-          <div className="scene-copy mb-12 max-w-2xl">
-            <SceneLabel number="05" title="The Details" />
+      <Scene sceneRef={setSceneRef(3)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="scene-copy">
+            <SceneLabel number="04" title="The Experience" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
-              Small details.
-              <span className="block text-blue-600">Big difference.</span>
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
+              A website
+              <span className="block text-[#58C7EF]">should feel alive.</span>
             </h2>
 
-            <p className="scene-text mt-6 max-w-xl text-base leading-7 text-slate-500">
-              The difference between a functional website and a great experience
-              often lives in the details.
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+              Every movement, transition and interaction has a purpose. The
+              finished product should feel natural, intuitive and memorable.
             </p>
           </div>
 
-          <div ref={detailsGraphicRef}>
-            <DetailsGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <ExperienceOverlay overlayRef={setOverlayRef(3)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 06                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 05 — DETAILS
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(5)}>
-        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_.9fr]">
+      <Scene sceneRef={setSceneRef(4)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="scene-copy">
+            <SceneLabel number="05" title="The Details" />
+
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
+              Small details.
+              <span className="block text-[#58C7EF]">Big difference.</span>
+            </h2>
+
+            <p className="scene-text mt-7 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+              The difference between a functional website and a great experience
+              often lives in the details.
+            </p>
+
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <Check className="h-3 w-3 text-[#58C7EF]" />
+              refined and verified
+            </div>
+          </div>
+
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <DetailsOverlay overlayRef={setOverlayRef(4)} />
+            </RocketStage>
+          </div>
+        </div>
+      </Scene>
+
+      {/* ================================================================
+         SCENE 06 — TECHNOLOGY
+      ================================================================ */}
+
+      <Scene sceneRef={setSceneRef(5)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div className="scene-copy">
             <SceneLabel number="06" title="The Technology" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               The right tools
-              <span className="block text-blue-600">
+              <span className="block text-[#58C7EF]">
                 behind the experience.
               </span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
               Modern technologies give ideas the structure, flexibility and
               performance they need to grow.
             </p>
@@ -1659,80 +1995,93 @@ export default function CinematicHero() {
             </div>
           </div>
 
-          <div
-            ref={technologyGraphicRef}
-            className="flex justify-center lg:justify-end"
-          >
-            <TechnologyGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <TechnologyOverlay overlayRef={setOverlayRef(5)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 07                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 07 — TRANSFORMATION
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(6)}>
-        <div className="w-full max-w-6xl">
-          <div className="scene-copy mx-auto mb-14 max-w-2xl text-center">
+      <Scene sceneRef={setSceneRef(6)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="scene-copy">
             <SceneLabel number="07" title="The Transformation" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               From thought
-              <span className="text-blue-600"> to reality.</span>
+              <span className="block text-[#58C7EF]">to reality.</span>
             </h2>
 
-            <p className="scene-text mx-auto mt-6 max-w-xl text-base leading-7 text-slate-500">
+            <p className="scene-text mt-7 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
               A simple process. One clear direction. A finished experience ready
               to be shared with the world.
             </p>
+
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <Layers3 className="h-3 w-3 text-[#E1A934]" />
+              systems integrated
+            </div>
           </div>
 
-          <div ref={transformationGraphicRef}>
-            <TransformationGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <TransformationOverlay overlayRef={setOverlayRef(6)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 08                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 08 — LAUNCH
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(7)}>
-        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[.8fr_1.2fr]">
+      <Scene sceneRef={setSceneRef(7)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[.8fr_1.2fr]">
           <div className="scene-copy">
             <SceneLabel number="08" title="The Launch" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[.95] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               Built.
-              <span className="block text-blue-600">Refined.</span>
+              <span className="block text-[#58C7EF]">Refined.</span>
               <span className="block">Ready.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
               Once everything comes together, the experience is ready to leave
               the development environment and meet its audience.
             </p>
+
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <Zap className="h-3 w-3 text-[#E1A934]" />
+              system ready
+            </div>
           </div>
 
-          <div ref={launchGraphicRef}>
-            <LaunchGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <LaunchOverlay overlayRef={setOverlayRef(7)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* SCENE 09                                                            */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         SCENE 09 — FINAL
+      ================================================================ */}
 
-      <SceneContainer ref={setSceneRef(8)}>
-        <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_.8fr]">
+      <Scene sceneRef={setSceneRef(8)}>
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1fr_.9fr]">
           <div className="scene-copy">
             <SceneLabel number="09" title="Let's Build It" />
 
-            <h2 className="scene-text text-6xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-7xl lg:text-8xl">
+            <h2 className="scene-text text-6xl font-semibold leading-[.92] tracking-[-.06em] sm:text-7xl lg:text-8xl">
               Have
-              <span className="block text-blue-600">an idea?</span>
+              <span className="block text-[#58C7EF]">an idea?</span>
             </h2>
 
             <p className="scene-text mt-8 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
@@ -1758,29 +2107,28 @@ export default function CinematicHero() {
               </Link>
             </div>
 
-            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.25em] text-slate-400">
-              <span className="h-px w-8 bg-blue-500" />
+            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+              <span className="h-px w-8 bg-[#E1A934]" />
               let&apos;s create something meaningful
             </div>
           </div>
 
-          <div
-            ref={finalGraphicRef}
-            className="flex justify-center lg:justify-end"
-          >
-            <FinalGraphic />
+          <div className="flex justify-center lg:justify-end">
+            <RocketStage>
+              <FinalOverlay overlayRef={setOverlayRef(8)} />
+            </RocketStage>
           </div>
         </div>
-      </SceneContainer>
+      </Scene>
 
-      {/* ================================================================== */}
-      {/* BOTTOM HUD                                                           */}
-      {/* ================================================================== */}
+      {/* ================================================================
+         BOTTOM HUD
+      ================================================================ */}
 
-      <div className="pointer-events-none absolute bottom-8 left-1/2 z-50 hidden -translate-x-1/2 items-center gap-3 sm:flex">
-        <ArrowDown className="h-3.5 w-3.5 text-blue-600" />
+      <div className="pointer-events-none absolute bottom-8 left-1/2 z-[60] hidden -translate-x-1/2 items-center gap-3 sm:flex">
+        <ArrowDown className="h-3.5 w-3.5 text-[#58C7EF]" />
 
-        <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-slate-400">
+        <span className="font-mono text-[8px] uppercase tracking-[.3em] text-slate-400">
           Scroll to explore
         </span>
       </div>
