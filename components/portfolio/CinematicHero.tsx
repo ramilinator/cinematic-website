@@ -98,7 +98,7 @@ function SceneLabel({ number, title }: { number: string; title: string }) {
 
       <span className="h-px w-10 bg-slate-300" />
 
-      <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-slate-400">
+      <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/40">
         {title}
       </span>
     </div>
@@ -123,31 +123,41 @@ function Scene({ children, className = "", sceneRef }: SceneProps) {
 function GridBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Fine engineering grid */}
       <div
-        className="absolute inset-0 opacity-70"
+        className="absolute inset-0 opacity-40"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(15,23,42,.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(15,23,42,.035) 1px, transparent 1px)
+            linear-gradient(rgba(148,163,184,.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148,163,184,.045) 1px, transparent 1px)
           `,
           backgroundSize: "48px 48px",
         }}
       />
 
+      {/* Major grid */}
       <div
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0 opacity-30"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(88,199,239,.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(225,169,52,.025) 1px, transparent 1px)
+            linear-gradient(rgba(88,199,239,.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(88,199,239,.07) 1px, transparent 1px)
           `,
           backgroundSize: "240px 240px",
         }}
       />
 
+      {/* Central atmosphere */}
       <div className="absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#58C7EF]/[0.035] blur-3xl" />
 
-      <div className="absolute right-[-10%] top-[-10%] h-[450px] w-[450px] rounded-full bg-[#E1A934]/[0.025] blur-3xl" />
+      {/* Secondary atmosphere */}
+      <div className="absolute right-[-10%] top-[-10%] h-[450px] w-[450px] rounded-full bg-[#E1A934]/[0.018] blur-3xl" />
+
+      {/* Technical horizontal scan */}
+      <div className="absolute left-0 top-1/2 h-px w-full bg-[#58C7EF]/[0.06]" />
+
+      {/* Technical vertical axis */}
+      <div className="absolute left-1/2 top-0 h-full w-px bg-[#58C7EF]/[0.04]" />
     </div>
   );
 }
@@ -155,10 +165,15 @@ function GridBackground() {
 function CornerFrame() {
   return (
     <div className="pointer-events-none absolute inset-6 z-50 sm:inset-10">
-      <span className="absolute left-0 top-0 h-5 w-5 border-l border-t border-slate-300" />
-      <span className="absolute right-0 top-0 h-5 w-5 border-r border-t border-slate-300" />
-      <span className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-slate-300" />
-      <span className="absolute bottom-0 right-0 h-5 w-5 border-b border-r border-slate-300" />
+      <span className="absolute left-0 top-0 h-7 w-7 border-l border-t border-[#58C7EF]/40" />
+      <span className="absolute right-0 top-0 h-7 w-7 border-r border-t border-[#58C7EF]/40" />
+      <span className="absolute bottom-0 left-0 h-7 w-7 border-b border-l border-[#58C7EF]/40" />
+      <span className="absolute bottom-0 right-0 h-7 w-7 border-b border-r border-[#58C7EF]/40" />
+
+      <span className="absolute left-8 top-0 h-px w-16 bg-[#58C7EF]/30" />
+      <span className="absolute right-8 top-0 h-px w-16 bg-[#58C7EF]/30" />
+      <span className="absolute bottom-0 left-8 h-px w-16 bg-[#58C7EF]/30" />
+      <span className="absolute bottom-0 right-8 h-px w-16 bg-[#58C7EF]/30" />
     </div>
   );
 }
@@ -170,57 +185,80 @@ function CornerFrame() {
 function RocketStage({ children }: { children?: ReactNode }) {
   return (
     <div className="rocket-stage relative flex h-[520px] w-[520px] items-center justify-center">
-      {/* Central rocket visual */}
+      {/* Technical environment */}
+      <div className="pointer-events-none absolute inset-8 rounded-full border border-[#58C7EF]/10" />
+
+      <div className="pointer-events-none absolute inset-16 rounded-full border border-dashed border-[#E1A934]/10" />
+
+      {/* Axis */}
+      <div className="pointer-events-none absolute left-1/2 top-4 h-[calc(100%-2rem)] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#58C7EF]/10 to-transparent" />
+
+      <div className="pointer-events-none absolute left-4 top-1/2 h-px w-[calc(100%-2rem)] -translate-y-1/2 bg-gradient-to-r from-transparent via-[#58C7EF]/10 to-transparent" />
+
+      {/* Central rocket */}
       <div className="rocket-visual relative z-10 flex h-full w-full items-center justify-center">
         <WireframeRocket className="h-[420px] w-[420px] text-[#58C7EF]" />
       </div>
 
-      {/* Scene-specific HUD / information */}
+      {/* Scene-specific futuristic HUD */}
       <div className="pointer-events-none absolute inset-0 z-20">
         {children}
       </div>
     </div>
   );
 }
+
 /* ==========================================================================
    SCENE 01 — IDEA OVERLAY
    ========================================================================== */
 
 function IdeaOverlay({ overlayRef }: OverlayProps) {
+  const nodes = [
+    {
+      x: "14%",
+      y: "22%",
+      label: "PURPOSE",
+      code: "SYS.01",
+      color: CYAN,
+    },
+    {
+      x: "78%",
+      y: "24%",
+      label: "VISION",
+      code: "SYS.02",
+      color: GOLD,
+    },
+    {
+      x: "14%",
+      y: "72%",
+      label: "NEED",
+      code: "SYS.03",
+      color: GOLD,
+    },
+    {
+      x: "78%",
+      y: "72%",
+      label: "VALUE",
+      code: "SYS.04",
+      color: CYAN,
+    },
+  ];
+
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      <div className="idea-orbit absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/30" />
+      {/* Primary system ring */}
+      <div className="idea-orbit absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/15" />
 
-      <div className="idea-orbit-2 absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/20" />
+      {/* Secondary ring */}
+      <div className="idea-orbit-2 absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/20" />
 
-      {/* idea nodes */}
+      {/* Center crosshair */}
+      <div className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2">
+        <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[#58C7EF]/25" />
+        <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-[#58C7EF]/25" />
+      </div>
 
-      {[
-        {
-          x: "18%",
-          y: "25%",
-          label: "PURPOSE",
-          color: CYAN,
-        },
-        {
-          x: "78%",
-          y: "29%",
-          label: "VISION",
-          color: GOLD,
-        },
-        {
-          x: "15%",
-          y: "72%",
-          label: "NEED",
-          color: GOLD,
-        },
-        {
-          x: "81%",
-          y: "72%",
-          label: "VALUE",
-          color: CYAN,
-        },
-      ].map((node) => (
+      {nodes.map((node) => (
         <div
           key={node.label}
           className="idea-node absolute"
@@ -229,19 +267,28 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
             top: node.y,
           }}
         >
-          <div className="flex items-center gap-2">
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: node.color }}
-            />
+          <div className="rounded-md border border-white/[0.08] bg-[#080B10]/80 px-3 py-2 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{
+                  backgroundColor: node.color,
+                  boxShadow: `0 0 10px ${node.color}`,
+                }}
+              />
 
-            <span className="font-mono text-[6px] uppercase tracking-[0.25em] text-slate-400">
+              <span className="font-mono text-[6px] tracking-[0.25em] text-white/60">
+                {node.code}
+              </span>
+            </div>
+
+            <div className="mt-1 font-mono text-[7px] tracking-[0.2em] text-white/90">
               {node.label}
-            </span>
+            </div>
           </div>
 
           <div
-            className="mt-2 h-px w-14"
+            className="mt-1 h-px w-16"
             style={{
               backgroundColor: node.color,
               opacity: 0.25,
@@ -250,13 +297,12 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
         </div>
       ))}
 
-      <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400">
-        concept initialization
+      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[6px] uppercase tracking-[0.35em] text-white/30">
+        CONCEPT INITIALIZATION // 001
       </div>
     </div>
   );
 }
-
 /* ==========================================================================
    SCENE 02 — VISION OVERLAY
    ========================================================================== */
@@ -267,7 +313,7 @@ function VisionOverlay({ overlayRef }: OverlayProps) {
       {/* blueprint grid */}
 
       <div
-        className="absolute inset-[55px] rounded-[28px] border border-[#58C7EF]/20 opacity-70"
+        className="absolute inset-[55px] rounded-[28px] border border-[#58C7EF]/15 bg-[#58C7EF]/[0.015] opacity-70"
         style={{
           backgroundImage: `
             linear-gradient(rgba(88,199,239,.08) 1px, transparent 1px),
@@ -293,7 +339,7 @@ function VisionOverlay({ overlayRef }: OverlayProps) {
 
       <div className="vision-dimension absolute right-[18%] top-[27%] h-[46%] w-px bg-[#58C7EF]/30" />
 
-      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
         structural axis
       </div>
 
@@ -325,12 +371,12 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
       {/* code editor */}
 
-      <div className="code-panel absolute left-[-8%] top-[9%] w-[225px] overflow-hidden rounded-xl border border-slate-800 bg-[#111318] shadow-[0_30px_80px_rgba(15,23,42,.18)]">
+      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-[#58C7EF]/15 bg-[#080B10]/90 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.4)]">
         <div className="flex h-9 items-center border-b border-white/[.06] px-3">
           <div className="flex gap-1">
-            <span className="h-2 w-2 rounded-full bg-white/20" />
-            <span className="h-2 w-2 rounded-full bg-white/20" />
-            <span className="h-2 w-2 rounded-full bg-white/20" />
+            <span className="h-2 w-2 rounded-full bg-[#080B10]/20" />
+            <span className="h-2 w-2 rounded-full bg-[#080B10]/20" />
+            <span className="h-2 w-2 rounded-full bg-[#080B10]/20" />
           </div>
 
           <span className="ml-3 font-mono text-[7px] text-white/40">
@@ -351,9 +397,8 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
             structure: <span className="text-[#58C7EF]">&quot;clear&quot;</span>
           </div>
 
-          <div className="pl-4 text-white/50">
-            interaction:{" "}
-            <span className="text-[#E1A934]">&quot;fluid&quot;</span>
+          <div className="font-mono text-[6px] uppercase tracking-widest text-[#58C7EF]/50">
+            interaction
           </div>
 
           <div className="pl-4 text-white/50">
@@ -390,11 +435,11 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
           }}
         >
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#58C7EF]/30 bg-white font-mono text-[7px] text-[#58C7EF]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#58C7EF]/30 bg-[#080B10] font-mono text-[7px] text-[#58C7EF]">
               0{index + 1}
             </span>
 
-            <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-slate-400">
+            <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/40">
               {node.title}
             </span>
           </div>
@@ -405,7 +450,7 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
 
       {/* terminal */}
 
-      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-slate-700 bg-[#181a20] px-4 py-3 font-mono text-[7px]">
+      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-[#58C7EF]/15 bg-[#080B10]/90 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.4)]">
         <div className="text-white/30">$ build</div>
 
         <div className="mt-1 text-[#58C7EF]">✓ modules compiled</div>
@@ -423,7 +468,7 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
       {/* ripple rings */}
 
-      <div className="interaction-ring absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/20" />
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/15 bg-[#58C7EF]/[0.015]" />
 
       <div className="interaction-ring absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/25" />
 
@@ -458,7 +503,7 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
       {/* cursor */}
 
       <div className="experience-cursor absolute right-[9%] top-[19%]">
-        <MousePointer2 className="h-8 w-8 fill-slate-900 text-white drop-shadow-lg" />
+        <MousePointer2 className="h-8 w-8 text-[#58C7EF] drop-shadow-[0_0_12px_rgba(88,199,239,.5)]" />
 
         <div className="ml-5 mt-[-2px] rounded-full bg-slate-900 px-3 py-1 font-mono text-[7px] text-white">
           interact
@@ -467,27 +512,27 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
 
       {/* interaction labels */}
 
-      <div className="absolute left-[5%] top-[29%] rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
-        <div className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+      <div className="absolute left-[5%] top-[29%] rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md">
+        <div className="font-mono text-[6px] uppercase tracking-widest text-[#58C7EF]/50">
           interaction
         </div>
 
-        <div className="mt-1 text-[9px] font-semibold text-slate-800">
-          responsive
+        <div className="mt-1 font-mono text-[9px] font-medium text-white/80">
+          RESPONSIVE
         </div>
       </div>
 
-      <div className="absolute bottom-[18%] right-[4%] rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
-        <div className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+      <div className="absolute bottom-[18%] right-[4%] rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md ">
+        <div className="font-mono text-[6px] uppercase tracking-widest text-white/40">
           motion
         </div>
 
-        <div className="mt-1 text-[9px] font-semibold text-slate-800">
+        <div className="mt-1 text-[9px] font-semibold text-white/80">
           intentional
         </div>
       </div>
 
-      <div className="absolute bottom-[9%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+      <div className="absolute bottom-[9%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
         movement with purpose
       </div>
     </div>
@@ -520,28 +565,28 @@ function DetailsOverlay({ overlayRef }: OverlayProps) {
         return (
           <div
             key={item.title}
-            className={`detail-card absolute w-[145px] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_15px_50px_rgba(15,23,42,.06)] ${positions[index]}`}
+            className={`detail-card absolute w-[145px] rounded-xl border border-[#58C7EF]/10 bg-[#080B10]/90 p-3 shadow-[0_20px_60px_rgba(0,0,0,.45)] backdrop-blur-md ${positions[index]}`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-mono text-[6px] text-slate-300">
+              <span className="font-mono text-[6px] text-white/35">
                 {item.number}
               </span>
 
               <Icon className="h-3 w-3 text-[#58C7EF]" />
             </div>
 
-            <div className="mt-3 text-[8px] font-semibold tracking-wide text-slate-800">
+            <div className="mt-3 text-[8px] font-semibold tracking-wide text-white/80">
               {item.title}
             </div>
 
-            <div className="mt-1 text-[7px] text-slate-400">
+            <div className="mt-1 text-[7px] text-white/40">
               {item.description}
             </div>
 
             <div className="mt-3 flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF]" />
 
-              <span className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+              <span className="font-mono text-[6px] uppercase tracking-widest text-white/40">
                 verified
               </span>
             </div>
@@ -606,24 +651,26 @@ function TechnologyOverlay({ overlayRef }: OverlayProps) {
               transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
             }}
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
-              <span className="font-mono text-[8px] font-semibold text-slate-600">
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-[#58C7EF]/20 bg-[#080B10]/95 shadow-[0_0_25px_rgba(88,199,239,.05)]">
+              <span className="absolute inset-0 rounded-lg border border-[#58C7EF]/5" />
+
+              <span className="font-mono text-[8px] font-semibold text-[#58C7EF]">
                 {tech.short}
               </span>
             </div>
 
-            <div className="mt-2 whitespace-nowrap text-center font-mono text-[6px] uppercase tracking-widest text-slate-400">
+            <div className="mt-2 whitespace-nowrap text-center font-mono text-[6px] uppercase tracking-widest text-white/40">
               {tech.name}
             </div>
           </div>
         );
       })}
 
-      <div className="absolute left-1/2 top-[5%] -translate-x-1/2 font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400">
+      <div className="absolute left-1/2 top-[5%] -translate-x-1/2 font-mono text-[7px] uppercase tracking-[0.3em] text-white/40">
         technology ecosystem
       </div>
 
-      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 font-mono text-[6px] uppercase tracking-widest text-slate-400">
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-4 py-2 font-mono text-[6px] uppercase tracking-widest text-white/40">
         connected architecture
       </div>
     </div>
@@ -710,19 +757,19 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
           }}
         >
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white font-mono text-[7px] text-[#58C7EF] shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md border border-[#58C7EF]/25 bg-[#080B10] font-mono text-[7px] text-[#58C7EF]">
               {node.number}
             </div>
 
-            <span className="font-mono text-[6px] uppercase tracking-widest text-slate-400">
+            <span className="font-mono text-[6px] uppercase tracking-widest text-white/40">
               {node.label}
             </span>
           </div>
         </div>
       ))}
 
-      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-full border border-slate-200 bg-white px-5 py-2 font-mono text-[7px] uppercase tracking-[0.25em] text-slate-400">
-        system integrated
+      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 font-mono text-[7px] uppercase tracking-[0.25em] text-[#58C7EF]/60 backdrop-blur-md">
+        SYSTEM INTEGRATED
       </div>
     </div>
   );
@@ -743,11 +790,11 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
 
       {/* launch status */}
 
-      <div className="launch-status absolute left-1/2 top-[7%] -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-5 py-2 shadow-sm">
+      <div className="launch-status absolute left-1/2 top-[7%] -translate-x-1/2 whitespace-nowrap rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 shadow-[0_15px_50px_rgba(0,0,0,.35)] backdrop-blur-md">
         <div className="flex items-center gap-3">
           <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
 
-          <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-slate-400">
+          <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/40">
             launch system
           </span>
 
@@ -791,7 +838,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
       ].map((item) => (
         <div
           key={item.title}
-          className={`launch-card absolute w-[135px] rounded-xl border border-slate-200 bg-white p-3 shadow-sm ${
+          className={`launch-card absolute w-[135px] rounded-lg border border-[#58C7EF]/10 bg-[#080B10]/90 p-3 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md ${
             item.side === "left" ? "left-[1%]" : "right-[1%]"
           }`}
           style={{
@@ -809,7 +856,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
             </div>
 
             <div>
-              <div className="font-mono text-[6px] text-slate-300">
+              <div className="font-mono text-[6px] text-white/35">
                 {item.number}
               </div>
 
@@ -819,7 +866,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
             </div>
           </div>
 
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/[0.06]">
             <div
               className="launch-progress h-full w-0 rounded-full"
               style={{
@@ -831,7 +878,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
       ))}
 
       <div className="absolute bottom-[4%] left-1/2 -translate-x-1/2 text-center">
-        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
           final status
         </div>
 
@@ -850,12 +897,12 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
 function FinalOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      <div className="final-orbit absolute left-1/2 top-1/2 h-[500px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#58C7EF]/20" />
+      <div className="final-orbit absolute left-1/2 top-1/2 h-[500px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#58C7EF]/15 bg-[#58C7EF]/[0.015]" />
 
       <div className="final-orbit absolute left-1/2 top-1/2 h-[420px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#E1A934]/20" />
 
       <div className="final-label absolute left-[10%] top-[14%]">
-        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
+        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
           your idea
         </div>
 
@@ -870,8 +917,8 @@ function FinalOverlay({ overlayRef }: OverlayProps) {
         <div className="ml-auto mt-2 h-px w-14 bg-[#58C7EF]" />
       </div>
 
-      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-5 py-2 font-mono text-[6px] uppercase tracking-[0.3em] text-slate-400">
-        next mission ready
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 font-mono text-[6px] uppercase tracking-[0.3em] text-[#58C7EF]/60 backdrop-blur-md">
+        NEXT MISSION READY
       </div>
     </div>
   );
@@ -1527,7 +1574,7 @@ export default function CinematicHero() {
   return (
     <main
       ref={rootRef}
-      className="relative h-screen overflow-hidden transparent text-[#111318]"
+      className="relative h-screen overflow-hidden bg-[#05070A] text-white"
     >
       <GridBackground />
 
@@ -1540,12 +1587,12 @@ export default function CinematicHero() {
       <div className="pointer-events-none absolute left-8 top-8 z-[60] hidden items-center gap-3 sm:flex">
         <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
 
-        <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400">
+        <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/40">
           exploration system / online
         </span>
       </div>
 
-      <div className="pointer-events-none absolute right-8 top-8 z-[60] hidden font-mono text-[7px] uppercase tracking-[0.3em] text-slate-400 sm:block">
+      <div className="pointer-events-none absolute right-8 top-8 z-[60] hidden font-mono text-[7px] uppercase tracking-[0.3em] text-white/40 sm:block">
         RAMIL / WEB SYSTEMS
       </div>
 
@@ -1578,18 +1625,18 @@ export default function CinematicHero() {
           <div className="scene-copy">
             <SceneLabel number="01" title="The Idea" />
 
-            <h1 className="scene-text text-white max-w-2xl text-5xl font-semibold leading-[.98] tracking-[-.055em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="scene-text max-w-2xl text-5xl font-semibold leading-[.98] tracking-[-.055em] text-white sm:text-6xl lg:text-7xl">
               Every great website
               <span className="block text-[#58C7EF]">starts with an idea.</span>
             </h1>
 
-            <p className="scene-text mt-8 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
               Before the layouts, before the code, there is a reason to build. I
               help turn that starting point into something people can
               experience.
             </p>
 
-            <div className="scene-meta mt-9 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-9 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <span className="h-px w-8 bg-[#E1A934]" />
               start with purpose
             </div>
@@ -1617,13 +1664,13 @@ export default function CinematicHero() {
               <span className="block text-[#58C7EF]">into experiences.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
               The goal is more than making something look good. It is about
               creating a clear visual direction that makes the purpose
               immediately understandable.
             </p>
 
-            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <Sparkles className="h-3 w-3 text-[#E1A934]" />
               shaping the direction
             </div>
@@ -1651,12 +1698,12 @@ export default function CinematicHero() {
               <span className="block text-[#58C7EF]">become real.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
               This is where design becomes structure, interaction and a working
               digital product.
             </p>
 
-            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <Terminal className="h-3 w-3 text-[#E1A934]" />
               building the system
             </div>
@@ -1684,7 +1731,7 @@ export default function CinematicHero() {
               <span className="block text-[#58C7EF]">should feel alive.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
               Every movement, transition and interaction has a purpose. The
               finished product should feel natural, intuitive and memorable.
             </p>
@@ -1712,12 +1759,12 @@ export default function CinematicHero() {
               <span className="block text-[#58C7EF]">Big difference.</span>
             </h2>
 
-            <p className="scene-text mt-7 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-7 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
               The difference between a functional website and a great experience
               often lives in the details.
             </p>
 
-            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <Check className="h-3 w-3 text-[#58C7EF]" />
               refined and verified
             </div>
@@ -1747,7 +1794,7 @@ export default function CinematicHero() {
               </span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
               Modern technologies give ideas the structure, flexibility and
               performance they need to grow.
             </p>
@@ -1756,7 +1803,7 @@ export default function CinematicHero() {
               {technologies.slice(0, 5).map((tech) => (
                 <span
                   key={tech.name}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-mono text-[8px] uppercase tracking-wider text-slate-500"
+                  className="rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-3 py-1.5 font-mono text-[8px] uppercase tracking-wider text-white/45"
                 >
                   {tech.name}
                 </span>
@@ -1786,12 +1833,12 @@ export default function CinematicHero() {
               <span className="block text-[#58C7EF]">to reality.</span>
             </h2>
 
-            <p className="scene-text mt-7 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-7 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
               A simple process. One clear direction. A finished experience ready
               to be shared with the world.
             </p>
 
-            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <Layers3 className="h-3 w-3 text-[#E1A934]" />
               systems integrated
             </div>
@@ -1820,12 +1867,12 @@ export default function CinematicHero() {
               <span className="block">Ready.</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
               Once everything comes together, the experience is ready to leave
               the development environment and meet its audience.
             </p>
 
-            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <Zap className="h-3 w-3 text-[#E1A934]" />
               system ready
             </div>
@@ -1853,7 +1900,7 @@ export default function CinematicHero() {
               <span className="block text-[#58C7EF]">an idea?</span>
             </h2>
 
-            <p className="scene-text mt-8 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
+            <p className="scene-text mt-8 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
               Let&apos;s turn it into something useful, beautiful and worth
               remembering.
             </p>
@@ -1869,14 +1916,14 @@ export default function CinematicHero() {
 
               <Link
                 href="/contact"
-                className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-6 py-3 text-xs font-medium text-slate-800 transition-transform duration-300 hover:-translate-y-1"
+                className="group inline-flex items-center gap-3 rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-6 py-3 text-xs font-medium text-white/80 transition-transform duration-300 hover:-translate-y-1"
               >
                 Let&apos;s Talk
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
               </Link>
             </div>
 
-            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-slate-400">
+            <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
               <span className="h-px w-8 bg-[#E1A934]" />
               let&apos;s create something meaningful
             </div>
@@ -1897,7 +1944,7 @@ export default function CinematicHero() {
       <div className="pointer-events-none absolute bottom-8 left-1/2 z-[60] hidden -translate-x-1/2 items-center gap-3 sm:flex">
         <ArrowDown className="h-3.5 w-3.5 text-[#58C7EF]" />
 
-        <span className="font-mono text-[8px] uppercase tracking-[.3em] text-slate-400">
+        <span className="font-mono text-[8px] uppercase tracking-[.3em] text-white/40">
           Scroll to explore
         </span>
       </div>
