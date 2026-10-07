@@ -170,19 +170,15 @@ function CornerFrame() {
 function RocketStage({ children }: { children?: ReactNode }) {
   return (
     <div className="rocket-stage relative flex h-[520px] w-[520px] items-center justify-center">
-      {/* ================================================================
-         CENTRAL WIRE-FRAME ROCKET
-      ================================================================ */}
-
-      <div className="rocket-visual absolute inset-0 z-10 flex items-center justify-center">
+      {/* Central rocket visual */}
+      <div className="rocket-visual relative z-10 flex h-full w-full items-center justify-center">
         <WireframeRocket className="h-[420px] w-[420px] text-[#58C7EF]" />
       </div>
 
-      {/* ================================================================
-         SCENE OVERLAY
-      ================================================================ */}
-
-      <div className="absolute inset-0 z-20">{children}</div>
+      {/* Scene-specific HUD / information */}
+      <div className="pointer-events-none absolute inset-0 z-20">
+        {children}
+      </div>
     </div>
   );
 }
@@ -1531,7 +1527,7 @@ export default function CinematicHero() {
   return (
     <main
       ref={rootRef}
-      className="relative h-screen overflow-hidden bg-[#f6f7f9] text-[#111318]"
+      className="relative h-screen overflow-hidden transparent text-[#111318]"
     >
       <GridBackground />
 
@@ -1582,7 +1578,7 @@ export default function CinematicHero() {
           <div className="scene-copy">
             <SceneLabel number="01" title="The Idea" />
 
-            <h1 className="scene-text max-w-2xl text-5xl font-semibold leading-[.98] tracking-[-.055em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="scene-text text-white max-w-2xl text-5xl font-semibold leading-[.98] tracking-[-.055em] text-slate-950 sm:text-6xl lg:text-7xl">
               Every great website
               <span className="block text-[#58C7EF]">starts with an idea.</span>
             </h1>
@@ -1616,7 +1612,7 @@ export default function CinematicHero() {
           <div className="scene-copy">
             <SceneLabel number="02" title="The Vision" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
+            <h2 className="scene-text text-white text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               I turn ideas
               <span className="block text-[#58C7EF]">into experiences.</span>
             </h2>
@@ -1650,7 +1646,7 @@ export default function CinematicHero() {
           <div className="scene-copy">
             <SceneLabel number="03" title="The Build" />
 
-            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
+            <h2 className="scene-text text-white text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               Where ideas
               <span className="block text-[#58C7EF]">become real.</span>
             </h2>

@@ -44,6 +44,7 @@ export default function About() {
               <Image
                 src="/images/profile.png"
                 alt="Ramil Aoanan"
+                loading="eager"
                 fill
                 className="relative object-cover object-center"
                 sizes="(max-width: 1024px) 100vw, 400px"
