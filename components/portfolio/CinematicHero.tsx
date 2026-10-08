@@ -4,10 +4,8 @@ import WireframeRocket, { type WireframeRocketHandle } from "./WireframeRocket";
 
 import Link from "next/link";
 import {
-  ArrowDown,
   ArrowUpRight,
   Check,
-  Code2,
   Cpu,
   Globe2,
   Layers3,
@@ -116,7 +114,7 @@ function Scene({ children, className = "", sceneRef }: SceneProps) {
   return (
     <section
       ref={sceneRef}
-      className={`scene absolute inset-0 flex min-h-screen items-center justify-center overflow-hidden px-6 sm:px-10 lg:px-16 ${className}`}
+      className={`scene absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden px-6 sm:px-10 lg:px-16 ${className}`}
     >
       {children}
     </section>
@@ -1575,27 +1573,9 @@ export default function CinematicHero() {
   return (
     <main
       ref={rootRef}
-      className="relative h-screen overflow-hidden bg-[#05070A] text-white"
+      className="relative min-h-screen h-[100svh] w-full overflow-hidden bg-[#05070A] text-white"
     >
       <GridBackground />
-
-      <CornerFrame />
-
-      {/* ================================================================
-         TOP HUD
-      ================================================================ */}
-
-      <div className="pointer-events-none absolute left-8 top-8 z-[60] hidden items-center gap-3 sm:flex">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
-
-        <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/40">
-          exploration system / online
-        </span>
-      </div>
-
-      <div className="pointer-events-none absolute right-8 top-8 z-[60] hidden font-mono text-[7px] uppercase tracking-[0.3em] text-white/40 sm:block">
-        RAMIL / WEB SYSTEMS
-      </div>
 
       {/* ================================================================
          SCROLL PROGRESS
@@ -1937,18 +1917,6 @@ export default function CinematicHero() {
           </div>
         </div>
       </Scene>
-
-      {/* ================================================================
-         BOTTOM HUD
-      ================================================================ */}
-
-      <div className="pointer-events-none absolute bottom-8 left-1/2 z-[60] hidden -translate-x-1/2 items-center gap-3 sm:flex">
-        <ArrowDown className="h-3.5 w-3.5 text-[#58C7EF]" />
-
-        <span className="font-mono text-[8px] uppercase tracking-[.3em] text-white/40">
-          Scroll to explore
-        </span>
-      </div>
     </main>
   );
 }
