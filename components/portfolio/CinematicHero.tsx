@@ -42,6 +42,13 @@ type OverlayProps = {
 
 const CYAN = "#58C7EF";
 const GOLD = "#E1A934";
+const OVERLAY_TEXT = {
+  primary: "text-[8px]",
+  secondary: "text-[7px]",
+  tiny: "text-[6px]",
+  tracking: "tracking-[0.2em]",
+  trackingWide: "tracking-[0.3em]",
+};
 
 /* ==========================================================================
    DATA
@@ -277,12 +284,12 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
                 }}
               />
 
-              <span className="font-mono text-[6px] tracking-[0.25em] text-white/60">
+              <span className="font-mono text-[7px] tracking-[0.2em] text-white/60">
                 {node.code}
               </span>
             </div>
 
-            <div className="mt-1 font-mono text-[7px] tracking-[0.2em] text-white/90">
+            <div className="mt-1 font-mono text-[8px] tracking-[0.2em] text-white/90">
               {node.label}
             </div>
           </div>
@@ -339,15 +346,15 @@ function VisionOverlay({ overlayRef }: OverlayProps) {
 
       <div className="vision-dimension absolute right-[18%] top-[27%] h-[46%] w-px bg-[#58C7EF]/30" />
 
-      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
+      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.25em] text-white/40">
         structural axis
       </div>
 
-      <div className="absolute left-[18%] top-[24%] font-mono text-[6px] uppercase tracking-widest text-[#58C7EF]">
+      <div className="absolute left-[18%] top-[24%] font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]">
         01 / FRAME
       </div>
 
-      <div className="absolute right-[18%] top-[24%] font-mono text-[6px] uppercase tracking-widest text-[#E1A934]">
+      <div className="absolute right-[18%] top-[24%] font-mono text-[7px] uppercase tracking-[0.2em] text-[#E1A934]">
         REV.01
       </div>
 
@@ -371,20 +378,20 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
       {/* code editor */}
 
-      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-[#58C7EF]/15 bg-[#080B10]/90 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.4)]">
+      <div className="build-terminal absolute top[7%] left-[-20] rounded-lg border border-[#58C7EF]/15 bg-[#080B10]/90 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.4)]">
         <div className="flex h-9 items-center border-b border-white/[.06] px-3">
           <div className="flex gap-1">
-            <span className="h-2 w-2 rounded-full bg-[#080B10]/20" />
-            <span className="h-2 w-2 rounded-full bg-[#080B10]/20" />
-            <span className="h-2 w-2 rounded-full bg-[#080B10]/20" />
+            <span className="h-2 w-2 rounded-full border border-[#58C7EF]/30 bg-[#080B10]" />
+            <span className="h-2 w-2 rounded-full border border-[#58C7EF]/30 bg-[#080B10]" />
+            <span className="h-2 w-2 rounded-full border border-[#58C7EF]/30 bg-[#080B10]" />
           </div>
 
-          <span className="ml-3 font-mono text-[7px] text-white/40">
+          <span className="ml-3 text-left font-mono text-[7px] text-white/40">
             experience.ts
           </span>
         </div>
 
-        <div className="p-4 font-mono text-[8px] leading-5">
+        <div className="p-4 font-mono text-[7px] leading-5">
           <div>
             <span className="text-[#E1A934]">const</span>{" "}
             <span className="text-[#58C7EF]">experience</span>{" "}
@@ -397,7 +404,7 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
             structure: <span className="text-[#58C7EF]">&quot;clear&quot;</span>
           </div>
 
-          <div className="font-mono text-[6px] uppercase tracking-widest text-[#58C7EF]/50">
+          <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/50">
             interaction
           </div>
 
@@ -439,12 +446,10 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
               0{index + 1}
             </span>
 
-            <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/40">
+            <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">
               {node.title}
             </span>
           </div>
-
-          <div className="mt-1 h-px w-14 bg-[#58C7EF]/20" />
         </div>
       ))}
 
@@ -513,22 +518,22 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
       {/* interaction labels */}
 
       <div className="absolute left-[5%] top-[29%] rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md">
-        <div className="font-mono text-[6px] uppercase tracking-widest text-[#58C7EF]/50">
+        <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/50">
           interaction
         </div>
 
-        <div className="mt-1 font-mono text-[9px] font-medium text-white/80">
+        <div className="mt-1 font-mono text-[8px] font-medium text-white/80">
           RESPONSIVE
         </div>
       </div>
 
       <div className="absolute bottom-[18%] right-[4%] rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md ">
-        <div className="font-mono text-[6px] uppercase tracking-widest text-white/40">
+        <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/50">
           motion
         </div>
 
-        <div className="mt-1 text-[9px] font-semibold text-white/80">
-          intentional
+        <div className="mt-1 font-mono text-[8px] font-semibold text-white/80">
+          INTENTIONAL
         </div>
       </div>
 
@@ -568,14 +573,14 @@ function DetailsOverlay({ overlayRef }: OverlayProps) {
             className={`detail-card absolute w-[145px] rounded-xl border border-[#58C7EF]/10 bg-[#080B10]/90 p-3 shadow-[0_20px_60px_rgba(0,0,0,.45)] backdrop-blur-md ${positions[index]}`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-mono text-[6px] text-white/35">
+              <span className="font-mono text-[7px] text-white/35">
                 {item.number}
               </span>
 
               <Icon className="h-3 w-3 text-[#58C7EF]" />
             </div>
 
-            <div className="mt-3 text-[8px] font-semibold tracking-wide text-white/80">
+            <div className="mt-3 text-[8px] font-semibold tracking-[0.12em] text-white/80">
               {item.title}
             </div>
 
@@ -586,7 +591,7 @@ function DetailsOverlay({ overlayRef }: OverlayProps) {
             <div className="mt-3 flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF]" />
 
-              <span className="font-mono text-[6px] uppercase tracking-widest text-white/40">
+              <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/40">
                 verified
               </span>
             </div>
@@ -659,16 +664,12 @@ function TechnologyOverlay({ overlayRef }: OverlayProps) {
               </span>
             </div>
 
-            <div className="mt-2 whitespace-nowrap text-center font-mono text-[6px] uppercase tracking-widest text-white/40">
+            <div className="mt-2 whitespace-nowrap text-center font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">
               {tech.name}
             </div>
           </div>
         );
       })}
-
-      <div className="absolute left-1/2 top-[5%] -translate-x-1/2 font-mono text-[7px] uppercase tracking-[0.3em] text-white/40">
-        technology ecosystem
-      </div>
 
       <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-4 py-2 font-mono text-[6px] uppercase tracking-widest text-white/40">
         connected architecture
@@ -761,14 +762,14 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
               {node.number}
             </div>
 
-            <span className="font-mono text-[6px] uppercase tracking-widest text-white/40">
+            <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">
               {node.label}
             </span>
           </div>
         </div>
       ))}
 
-      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 font-mono text-[7px] uppercase tracking-[0.25em] text-[#58C7EF]/60 backdrop-blur-md">
+      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/60 backdrop-blur-md">
         SYSTEM INTEGRATED
       </div>
     </div>
@@ -794,7 +795,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
         <div className="flex items-center gap-3">
           <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
 
-          <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/40">
+          <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">
             launch system
           </span>
 
@@ -860,7 +861,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
                 {item.number}
               </div>
 
-              <div className="text-[7px] font-semibold text-slate-700">
+              <div className="text-[8px] font-semibold tracking-[0.08em] text-white/80">
                 {item.title}
               </div>
             </div>
@@ -882,7 +883,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
           final status
         </div>
 
-        <div className="mt-1 text-sm font-semibold tracking-[0.2em] text-slate-900">
+        <div className="mt-1 text-[8px] font-semibold tracking-[0.2em] text-white/80">
           READY
         </div>
       </div>
