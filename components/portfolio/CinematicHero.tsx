@@ -35,18 +35,16 @@ type OverlayProps = {
 };
 
 /* ==========================================================================
-   CONSTANTS
+   BRAND COLORS
    ========================================================================== */
 
-const CYAN = "#58C7EF";
-const GOLD = "#E1A934";
-const OVERLAY_TEXT = {
-  primary: "text-[8px]",
-  secondary: "text-[7px]",
-  tiny: "text-[6px]",
-  tracking: "tracking-[0.2em]",
-  trackingWide: "tracking-[0.3em]",
-};
+const BLUE = "#60A5FA";
+const CYAN = "#A5F3FC";
+const CYAN_BRIGHT = "#67E8F9";
+const VIOLET = "#A78BFA";
+
+const NAVY = "#03040D";
+const PANEL = "#080B16";
 
 /* ==========================================================================
    DATA
@@ -97,11 +95,14 @@ const detailItems = [
 function SceneLabel({ number, title }: { number: string; title: string }) {
   return (
     <div className="scene-label mb-7 flex items-center gap-4">
-      <span className="font-mono text-[9px] tracking-[0.3em] text-[#58C7EF]">
+      <span
+        className="font-mono text-[9px] tracking-[0.3em]"
+        style={{ color: CYAN }}
+      >
         {number}
       </span>
 
-      <span className="h-px w-10 bg-slate-300" />
+      <span className="h-px w-10 bg-white/20" />
 
       <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/40">
         {title}
@@ -133,52 +134,72 @@ function GridBackground() {
         className="absolute inset-0 opacity-40"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(148,163,184,.045) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(148,163,184,.045) 1px, transparent 1px)
+            linear-gradient(rgba(148,163,184,.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148,163,184,.035) 1px, transparent 1px)
           `,
           backgroundSize: "48px 48px",
         }}
       />
 
-      {/* Major grid */}
+      {/* Major blue grid */}
       <div
         className="absolute inset-0 opacity-30"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(88,199,239,.07) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(88,199,239,.07) 1px, transparent 1px)
+            linear-gradient(rgba(96,165,250,.055) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(96,165,250,.055) 1px, transparent 1px)
           `,
           backgroundSize: "240px 240px",
         }}
       />
 
-      {/* Central atmosphere */}
-      <div className="absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#58C7EF]/[0.035] blur-3xl" />
+      {/* Central blue atmosphere */}
+      <div className="absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/[0.045] blur-3xl" />
 
-      {/* Secondary atmosphere */}
-      <div className="absolute right-[-10%] top-[-10%] h-[450px] w-[450px] rounded-full bg-[#E1A934]/[0.018] blur-3xl" />
+      {/* Central cyan glow */}
+      <div className="absolute left-[40%] top-[42%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300/[0.018] blur-[120px]" />
 
-      {/* Technical horizontal scan */}
-      <div className="absolute left-0 top-1/2 h-px w-full bg-[#58C7EF]/[0.06]" />
+      {/* Violet atmosphere */}
+      <div className="absolute right-[-10%] top-[-10%] h-[450px] w-[450px] rounded-full bg-violet-500/[0.035] blur-3xl" />
+
+      {/* Lower violet atmosphere */}
+      <div className="absolute bottom-[-15%] left-[-8%] h-[380px] w-[380px] rounded-full bg-violet-500/[0.018] blur-3xl" />
+
+      {/* Technical horizontal axis */}
+      <div className="absolute left-0 top-1/2 h-px w-full bg-cyan-300/[0.045]" />
 
       {/* Technical vertical axis */}
-      <div className="absolute left-1/2 top-0 h-full w-px bg-[#58C7EF]/[0.04]" />
+      <div className="absolute left-1/2 top-0 h-full w-px bg-blue-400/[0.035]" />
+
+      {/* Subtle center glow */}
+      <div
+        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          backgroundColor: CYAN_BRIGHT,
+          boxShadow: `0 0 30px ${CYAN_BRIGHT}`,
+          opacity: 0.15,
+        }}
+      />
     </div>
   );
 }
 
+/* ==========================================================================
+   CORNER FRAME
+   ========================================================================== */
+
 function CornerFrame() {
   return (
     <div className="pointer-events-none absolute inset-6 z-50 sm:inset-10">
-      <span className="absolute left-0 top-0 h-7 w-7 border-l border-t border-[#58C7EF]/40" />
-      <span className="absolute right-0 top-0 h-7 w-7 border-r border-t border-[#58C7EF]/40" />
-      <span className="absolute bottom-0 left-0 h-7 w-7 border-b border-l border-[#58C7EF]/40" />
-      <span className="absolute bottom-0 right-0 h-7 w-7 border-b border-r border-[#58C7EF]/40" />
+      <span className="absolute left-0 top-0 h-7 w-7 border-l border-t border-cyan-300/25" />
+      <span className="absolute right-0 top-0 h-7 w-7 border-r border-t border-cyan-300/25" />
+      <span className="absolute bottom-0 left-0 h-7 w-7 border-b border-l border-cyan-300/25" />
+      <span className="absolute bottom-0 right-0 h-7 w-7 border-b border-r border-cyan-300/25" />
 
-      <span className="absolute left-8 top-0 h-px w-16 bg-[#58C7EF]/30" />
-      <span className="absolute right-8 top-0 h-px w-16 bg-[#58C7EF]/30" />
-      <span className="absolute bottom-0 left-8 h-px w-16 bg-[#58C7EF]/30" />
-      <span className="absolute bottom-0 right-8 h-px w-16 bg-[#58C7EF]/30" />
+      <span className="absolute left-8 top-0 h-px w-16 bg-blue-400/20" />
+      <span className="absolute right-8 top-0 h-px w-16 bg-blue-400/20" />
+      <span className="absolute bottom-0 left-8 h-px w-16 bg-blue-400/20" />
+      <span className="absolute bottom-0 right-8 h-px w-16 bg-blue-400/20" />
     </div>
   );
 }
@@ -190,16 +211,6 @@ function CornerFrame() {
 function RocketStage({ children }: { children?: ReactNode }) {
   return (
     <div className="rocket-stage relative flex h-[520px] w-[520px] items-center justify-center">
-      {/* Technical environment */}
-      <div className="pointer-events-none absolute inset-8 rounded-full border border-[#58C7EF]/10" />
-
-      <div className="pointer-events-none absolute inset-16 rounded-full border border-dashed border-[#E1A934]/10" />
-
-      {/* Axis */}
-      <div className="pointer-events-none absolute left-1/2 top-4 h-[calc(100%-2rem)] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#58C7EF]/10 to-transparent" />
-
-      <div className="pointer-events-none absolute left-4 top-1/2 h-px w-[calc(100%-2rem)] -translate-y-1/2 bg-gradient-to-r from-transparent via-[#58C7EF]/10 to-transparent" />
-
       {/* Central rocket */}
       <div className="rocket-visual relative z-10 flex h-full w-full items-center justify-center">
         <WireframeRocket className="absolute left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2" />
@@ -214,7 +225,7 @@ function RocketStage({ children }: { children?: ReactNode }) {
 }
 
 /* ==========================================================================
-   SCENE 01 — IDEA OVERLAY
+   SCENE 01 — IDEA
    ========================================================================== */
 
 function IdeaOverlay({ overlayRef }: OverlayProps) {
@@ -231,36 +242,48 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
       y: "24%",
       label: "VISION",
       code: "SYS.02",
-      color: GOLD,
+      color: VIOLET,
     },
     {
       x: "14%",
       y: "72%",
       label: "NEED",
       code: "SYS.03",
-      color: GOLD,
+      color: VIOLET,
     },
     {
       x: "78%",
       y: "72%",
       label: "VALUE",
       code: "SYS.04",
-      color: CYAN,
+      color: BLUE,
     },
   ];
 
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
       {/* Primary system ring */}
-      <div className="idea-orbit absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/15" />
+      <div
+        className="idea-orbit absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border"
+        style={{ borderColor: `${CYAN}26` }}
+      />
 
-      {/* Secondary ring */}
-      <div className="idea-orbit-2 absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/20" />
+      {/* Secondary violet ring */}
+      <div
+        className="idea-orbit-2 absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed"
+        style={{ borderColor: `${VIOLET}30` }}
+      />
 
       {/* Center crosshair */}
       <div className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2">
-        <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[#58C7EF]/25" />
-        <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-[#58C7EF]/25" />
+        <span
+          className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2"
+          style={{ backgroundColor: `${CYAN}40` }}
+        />
+        <span
+          className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2"
+          style={{ backgroundColor: `${CYAN}40` }}
+        />
       </div>
 
       {nodes.map((node) => (
@@ -272,7 +295,7 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
             top: node.y,
           }}
         >
-          <div className="rounded-md border border-white/[0.08] bg-[#080B10]/80 px-3 py-2 backdrop-blur-sm">
+          <div className="rounded-md border border-white/[0.08] bg-[#080B16]/85 px-3 py-2 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <span
                 className="h-1.5 w-1.5 rounded-full"
@@ -282,12 +305,12 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
                 }}
               />
 
-              <span className="font-mono text-[7px] tracking-[0.2em] text-white/60">
+              <span className="font-mono text-[7px] tracking-[0.2em] text-white/50">
                 {node.code}
               </span>
             </div>
 
-            <div className="mt-1 font-mono text-[8px] tracking-[0.2em] text-white/90">
+            <div className="mt-1 font-mono text-[8px] tracking-[0.2em] text-white/85">
               {node.label}
             </div>
           </div>
@@ -296,71 +319,68 @@ function IdeaOverlay({ overlayRef }: OverlayProps) {
             className="mt-1 h-px w-16"
             style={{
               backgroundColor: node.color,
-              opacity: 0.25,
+              opacity: 0.3,
             }}
           />
         </div>
       ))}
 
-      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[6px] uppercase tracking-[0.35em] text-white/30">
+      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[6px] uppercase tracking-[0.35em] text-white/25">
         CONCEPT INITIALIZATION // 001
       </div>
     </div>
   );
 }
+
 /* ==========================================================================
-   SCENE 02 — VISION OVERLAY
+   SCENE 02 — VISION
    ========================================================================== */
 
 function VisionOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      {/* blueprint grid */}
-
+      {/* Blueprint grid */}
       <div
-        className="absolute inset-[55px] rounded-[28px] border border-[#58C7EF]/15 bg-[#58C7EF]/[0.015] opacity-70"
+        className="absolute inset-[55px] rounded-[28px] border border-blue-400/15 bg-blue-400/[0.012] opacity-70"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(88,199,239,.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(88,199,239,.08) 1px, transparent 1px)
+            linear-gradient(rgba(96,165,250,.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(96,165,250,.07) 1px, transparent 1px)
           `,
           backgroundSize: "28px 28px",
         }}
       />
 
-      {/* blueprint corners */}
+      {/* Blueprint corners */}
+      <div className="absolute left-[12%] top-[16%] h-5 w-5 border-l border-t border-cyan-300/35" />
 
-      <div className="absolute left-[12%] top-[16%] h-5 w-5 border-l border-t border-[#58C7EF]/40" />
+      <div className="absolute right-[12%] top-[16%] h-5 w-5 border-r border-t border-cyan-300/35" />
 
-      <div className="absolute right-[12%] top-[16%] h-5 w-5 border-r border-t border-[#58C7EF]/40" />
+      <div className="absolute bottom-[16%] left-[12%] h-5 w-5 border-b border-l border-cyan-300/35" />
 
-      <div className="absolute bottom-[16%] left-[12%] h-5 w-5 border-b border-l border-[#58C7EF]/40" />
+      <div className="absolute bottom-[16%] right-[12%] h-5 w-5 border-b border-r border-cyan-300/35" />
 
-      <div className="absolute bottom-[16%] right-[12%] h-5 w-5 border-b border-r border-[#58C7EF]/40" />
+      {/* Dimensions */}
+      <div className="vision-dimension absolute left-[18%] top-[27%] h-[46%] w-px bg-cyan-300/25" />
 
-      {/* dimensions */}
+      <div className="vision-dimension absolute right-[18%] top-[27%] h-[46%] w-px bg-cyan-300/25" />
 
-      <div className="vision-dimension absolute left-[18%] top-[27%] h-[46%] w-px bg-[#58C7EF]/30" />
-
-      <div className="vision-dimension absolute right-[18%] top-[27%] h-[46%] w-px bg-[#58C7EF]/30" />
-
-      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.25em] text-white/40">
+      <div className="absolute left-[13%] top-[49%] rotate-[-90deg] font-mono text-[6px] uppercase tracking-[0.25em] text-white/35">
         structural axis
       </div>
 
-      <div className="absolute left-[18%] top-[24%] font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]">
+      <div className="absolute left-[18%] top-[24%] font-mono text-[7px] uppercase tracking-[0.2em] text-cyan-300">
         01 / FRAME
       </div>
 
-      <div className="absolute right-[18%] top-[24%] font-mono text-[7px] uppercase tracking-[0.2em] text-[#E1A934]">
+      <div className="absolute right-[18%] top-[24%] font-mono text-[7px] uppercase tracking-[0.2em] text-violet-300">
         REV.01
       </div>
 
-      {/* trajectory */}
+      {/* Trajectory */}
+      <div className="vision-trajectory absolute bottom-[10%] left-1/2 h-[125px] w-px -translate-x-1/2 border-l border-dashed border-violet-400/45" />
 
-      <div className="vision-trajectory absolute bottom-[10%] left-1/2 h-[125px] w-px -translate-x-1/2 border-l border-dashed border-[#E1A934]/50" />
-
-      <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-[#E1A934]">
+      <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-violet-300">
         direction
       </div>
     </div>
@@ -368,20 +388,19 @@ function VisionOverlay({ overlayRef }: OverlayProps) {
 }
 
 /* ==========================================================================
-   SCENE 03 — BUILD OVERLAY
+   SCENE 03 — BUILD
    ========================================================================== */
 
 function BuildOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      {/* code editor */}
-
-      <div className="build-terminal absolute top[7%] left-[-20] rounded-lg border border-[#58C7EF]/15 bg-[#080B10]/90 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.4)]">
+      {/* Code editor */}
+      <div className="code-panel absolute left-[-20px] top-[7%] rounded-lg border border-cyan-300/15 bg-[#080B16]/95 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.5)]">
         <div className="flex h-9 items-center border-b border-white/[.06] px-3">
           <div className="flex gap-1">
-            <span className="h-2 w-2 rounded-full border border-[#58C7EF]/30 bg-[#080B10]" />
-            <span className="h-2 w-2 rounded-full border border-[#58C7EF]/30 bg-[#080B10]" />
-            <span className="h-2 w-2 rounded-full border border-[#58C7EF]/30 bg-[#080B10]" />
+            <span className="h-2 w-2 rounded-full border border-cyan-300/30 bg-[#080B16]" />
+            <span className="h-2 w-2 rounded-full border border-cyan-300/30 bg-[#080B16]" />
+            <span className="h-2 w-2 rounded-full border border-cyan-300/30 bg-[#080B16]" />
           </div>
 
           <span className="ml-3 text-left font-mono text-[7px] text-white/40">
@@ -391,40 +410,38 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
 
         <div className="p-4 font-mono text-[7px] leading-5">
           <div>
-            <span className="text-[#E1A934]">const</span>{" "}
-            <span className="text-[#58C7EF]">experience</span>{" "}
+            <span className="text-violet-300">const</span>{" "}
+            <span className="text-cyan-300">experience</span>{" "}
             <span className="text-white/30">=</span>
           </div>
 
           <div className="text-white/30">{"{"}</div>
 
           <div className="pl-4 text-white/50">
-            structure: <span className="text-[#58C7EF]">&quot;clear&quot;</span>
+            structure: <span className="text-cyan-300">&quot;clear&quot;</span>
           </div>
 
-          <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/50">
+          <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-cyan-300/50">
             interaction
           </div>
 
           <div className="pl-4 text-white/50">
-            performance:{" "}
-            <span className="text-[#58C7EF]">&quot;fast&quot;</span>
+            performance: <span className="text-cyan-300">&quot;fast&quot;</span>
           </div>
 
           <div className="pl-4 text-white/50">
-            purpose: <span className="text-[#E1A934]">true</span>
+            purpose: <span className="text-violet-300">true</span>
           </div>
 
           <div className="text-white/30">{"}"}</div>
         </div>
 
-        <div className="border-t border-white/[.06] px-4 py-2 font-mono text-[7px] text-[#58C7EF]">
+        <div className="border-t border-white/[.06] px-4 py-2 font-mono text-[7px] text-cyan-300">
           $ compiling experience...
         </div>
       </div>
 
-      {/* component blocks */}
-
+      {/* Component blocks */}
       {[
         { x: "72%", y: "14%", title: "CORE" },
         { x: "82%", y: "39%", title: "UI" },
@@ -440,7 +457,7 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
           }}
         >
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#58C7EF]/30 bg-[#080B10] font-mono text-[7px] text-[#58C7EF]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-300/25 bg-[#080B16] font-mono text-[7px] text-cyan-300">
               0{index + 1}
             </span>
 
@@ -451,34 +468,31 @@ function BuildOverlay({ overlayRef }: OverlayProps) {
         </div>
       ))}
 
-      {/* terminal */}
-
-      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-[#58C7EF]/15 bg-[#080B10]/90 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.4)]">
+      {/* Terminal */}
+      <div className="build-terminal absolute bottom-[7%] right-[3%] rounded-lg border border-cyan-300/15 bg-[#080B16]/95 px-4 py-3 font-mono text-[7px] shadow-[0_20px_60px_rgba(0,0,0,.5)]">
         <div className="text-white/30">$ build</div>
 
-        <div className="mt-1 text-[#58C7EF]">✓ modules compiled</div>
+        <div className="mt-1 text-cyan-300">✓ modules compiled</div>
       </div>
     </div>
   );
 }
 
 /* ==========================================================================
-   SCENE 04 — EXPERIENCE OVERLAY
+   SCENE 04 — EXPERIENCE
    ========================================================================== */
 
 function ExperienceOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      {/* ripple rings */}
+      {/* Ripple rings */}
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/15 bg-cyan-300/[0.012]" />
 
-      <div className="interaction-ring absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/15 bg-[#58C7EF]/[0.015]" />
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-violet-400/25" />
 
-      <div className="interaction-ring absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/25" />
+      <div className="interaction-ring absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-400/10" />
 
-      <div className="interaction-ring absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/10" />
-
-      {/* motion path */}
-
+      {/* Motion path */}
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 560 560"
@@ -488,7 +502,7 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
           className="motion-path"
           d="M70 160 C150 55 390 55 490 180"
           stroke={CYAN}
-          strokeOpacity=".25"
+          strokeOpacity=".22"
           strokeWidth="1"
           strokeDasharray="5 9"
         />
@@ -496,27 +510,25 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
         <path
           className="motion-path"
           d="M70 410 C180 500 390 500 490 370"
-          stroke={GOLD}
-          strokeOpacity=".25"
+          stroke={VIOLET}
+          strokeOpacity=".22"
           strokeWidth="1"
           strokeDasharray="5 9"
         />
       </svg>
 
-      {/* cursor */}
-
+      {/* Cursor */}
       <div className="experience-cursor absolute right-[9%] top-[19%]">
-        <MousePointer2 className="h-8 w-8 text-[#58C7EF] drop-shadow-[0_0_12px_rgba(88,199,239,.5)]" />
+        <MousePointer2 className="h-8 w-8 text-cyan-300 drop-shadow-[0_0_12px_rgba(165,243,252,.45)]" />
 
-        <div className="ml-5 mt-[-2px] rounded-full bg-slate-900 px-3 py-1 font-mono text-[7px] text-white">
+        <div className="ml-5 mt-[-2px] rounded-full bg-[#080B16] px-3 py-1 font-mono text-[7px] text-white">
           interact
         </div>
       </div>
 
-      {/* interaction labels */}
-
-      <div className="absolute left-[5%] top-[29%] rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md">
-        <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/50">
+      {/* Interaction labels */}
+      <div className="absolute left-[5%] top-[29%] rounded-md border border-cyan-300/15 bg-[#080B16]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md">
+        <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-cyan-300/50">
           interaction
         </div>
 
@@ -525,8 +537,8 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-[18%] right-[4%] rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md ">
-        <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/50">
+      <div className="absolute bottom-[18%] right-[4%] rounded-md border border-violet-400/15 bg-[#080B16]/90 px-3 py-2 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md">
+        <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-violet-300/50">
           motion
         </div>
 
@@ -535,7 +547,7 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-[9%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
+      <div className="absolute bottom-[9%] left-1/2 -translate-x-1/2 font-mono text-[6px] uppercase tracking-[0.3em] text-white/30">
         movement with purpose
       </div>
     </div>
@@ -543,17 +555,16 @@ function ExperienceOverlay({ overlayRef }: OverlayProps) {
 }
 
 /* ==========================================================================
-   SCENE 05 — DETAILS OVERLAY
+   SCENE 05 — DETAILS
    ========================================================================== */
 
 function DetailsOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      {/* callout lines */}
+      {/* Callout lines */}
+      <div className="absolute left-[18%] top-[29%] h-[42%] w-px border-l border-dashed border-white/20" />
 
-      <div className="absolute left-[18%] top-[29%] h-[42%] w-px border-l border-dashed border-slate-300" />
-
-      <div className="absolute right-[18%] top-[29%] h-[42%] w-px border-r border-dashed border-slate-300" />
+      <div className="absolute right-[18%] top-[29%] h-[42%] w-px border-r border-dashed border-white/20" />
 
       {detailItems.map((item, index) => {
         const Icon = item.icon;
@@ -568,14 +579,14 @@ function DetailsOverlay({ overlayRef }: OverlayProps) {
         return (
           <div
             key={item.title}
-            className={`detail-card absolute w-[145px] rounded-xl border border-[#58C7EF]/10 bg-[#080B10]/90 p-3 shadow-[0_20px_60px_rgba(0,0,0,.45)] backdrop-blur-md ${positions[index]}`}
+            className={`detail-card absolute w-[145px] rounded-xl border border-cyan-300/10 bg-[#080B16]/95 p-3 shadow-[0_20px_60px_rgba(0,0,0,.45)] backdrop-blur-md ${positions[index]}`}
           >
             <div className="flex items-center justify-between">
               <span className="font-mono text-[7px] text-white/35">
                 {item.number}
               </span>
 
-              <Icon className="h-3 w-3 text-[#58C7EF]" />
+              <Icon className="h-3 w-3 text-cyan-300" />
             </div>
 
             <div className="mt-3 text-[8px] font-semibold tracking-[0.12em] text-white/80">
@@ -587,7 +598,7 @@ function DetailsOverlay({ overlayRef }: OverlayProps) {
             </div>
 
             <div className="mt-3 flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_rgba(165,243,252,.6)]" />
 
               <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/40">
                 verified
@@ -601,14 +612,13 @@ function DetailsOverlay({ overlayRef }: OverlayProps) {
 }
 
 /* ==========================================================================
-   SCENE 06 — TECHNOLOGY OVERLAY
+   SCENE 06 — TECHNOLOGY
    ========================================================================== */
 
 function TechnologyOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      {/* network lines */}
-
+      {/* Network lines */}
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 560 560"
@@ -630,21 +640,23 @@ function TechnologyOverlay({ overlayRef }: OverlayProps) {
               x2={x}
               y2={y}
               stroke={CYAN}
-              strokeOpacity=".18"
+              strokeOpacity=".16"
               strokeWidth="1"
             />
           );
         })}
       </svg>
 
-      {/* nodes */}
-
-      {technologies.map((tech) => {
+      {/* Nodes */}
+      {technologies.map((tech, index) => {
         const radius = 215;
 
         const x = Math.cos((tech.angle * Math.PI) / 180) * radius;
 
         const y = Math.sin((tech.angle * Math.PI) / 180) * radius;
+
+        const nodeColor =
+          index % 3 === 0 ? BLUE : index % 3 === 1 ? CYAN : VIOLET;
 
         return (
           <div
@@ -654,10 +666,23 @@ function TechnologyOverlay({ overlayRef }: OverlayProps) {
               transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
             }}
           >
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-[#58C7EF]/20 bg-[#080B10]/95 shadow-[0_0_25px_rgba(88,199,239,.05)]">
-              <span className="absolute inset-0 rounded-lg border border-[#58C7EF]/5" />
+            <div
+              className="relative flex h-11 w-11 items-center justify-center rounded-lg border bg-[#080B16]/95 shadow-[0_0_25px_rgba(96,165,250,.05)]"
+              style={{
+                borderColor: `${nodeColor}35`,
+              }}
+            >
+              <span
+                className="absolute inset-0 rounded-lg border"
+                style={{
+                  borderColor: `${nodeColor}10`,
+                }}
+              />
 
-              <span className="font-mono text-[8px] font-semibold text-[#58C7EF]">
+              <span
+                className="font-mono text-[8px] font-semibold"
+                style={{ color: nodeColor }}
+              >
                 {tech.short}
               </span>
             </div>
@@ -669,7 +694,7 @@ function TechnologyOverlay({ overlayRef }: OverlayProps) {
         );
       })}
 
-      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-4 py-2 font-mono text-[6px] uppercase tracking-widest text-white/40">
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-cyan-300/15 bg-[#080B16] px-4 py-2 font-mono text-[6px] uppercase tracking-widest text-white/40">
         connected architecture
       </div>
     </div>
@@ -677,15 +702,15 @@ function TechnologyOverlay({ overlayRef }: OverlayProps) {
 }
 
 /* ==========================================================================
-   SCENE 07 — TRANSFORMATION OVERLAY
+   SCENE 07 — TRANSFORMATION
    ========================================================================== */
 
 function TransformationOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      <div className="system-ring absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#58C7EF]/15" />
+      <div className="system-ring absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/15" />
 
-      <div className="system-ring absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#E1A934]/25" />
+      <div className="system-ring absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-violet-400/25" />
 
       <svg
         className="absolute inset-0 h-full w-full"
@@ -696,28 +721,28 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
           className="system-connection"
           d="M115 155 L280 280"
           stroke={CYAN}
-          strokeOpacity=".25"
+          strokeOpacity=".22"
         />
 
         <path
           className="system-connection"
           d="M445 155 L280 280"
-          stroke={GOLD}
-          strokeOpacity=".25"
+          stroke={VIOLET}
+          strokeOpacity=".22"
         />
 
         <path
           className="system-connection"
           d="M115 405 L280 280"
-          stroke={GOLD}
-          strokeOpacity=".25"
+          stroke={VIOLET}
+          strokeOpacity=".22"
         />
 
         <path
           className="system-connection"
           d="M445 405 L280 280"
-          stroke={CYAN}
-          strokeOpacity=".25"
+          stroke={BLUE}
+          strokeOpacity=".22"
         />
       </svg>
 
@@ -727,24 +752,28 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
           number: "01",
           x: "8%",
           y: "20%",
+          color: CYAN,
         },
         {
           label: "CODE",
           number: "02",
           x: "76%",
           y: "20%",
+          color: BLUE,
         },
         {
           label: "CONTENT",
           number: "03",
           x: "74%",
           y: "72%",
+          color: VIOLET,
         },
         {
           label: "EXPERIENCE",
           number: "04",
           x: "7%",
           y: "72%",
+          color: CYAN,
         },
       ].map((node) => (
         <div
@@ -756,8 +785,14 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
           }}
         >
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md border border-[#58C7EF]/25 bg-[#080B10] font-mono text-[7px] text-[#58C7EF]">
-              {node.number}
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-md border bg-[#080B16]"
+              style={{
+                borderColor: `${node.color}40`,
+                color: node.color,
+              }}
+            >
+              <span className="font-mono text-[7px]">{node.number}</span>
             </div>
 
             <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">
@@ -767,7 +802,7 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
         </div>
       ))}
 
-      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 font-mono text-[7px] uppercase tracking-[0.2em] text-[#58C7EF]/60 backdrop-blur-md">
+      <div className="absolute bottom-[7%] left-1/2 -translate-x-1/2 rounded-md border border-cyan-300/15 bg-[#080B16]/90 px-5 py-2 font-mono text-[7px] uppercase tracking-[0.2em] text-cyan-200/60 backdrop-blur-md">
         SYSTEM INTEGRATED
       </div>
     </div>
@@ -775,36 +810,33 @@ function TransformationOverlay({ overlayRef }: OverlayProps) {
 }
 
 /* ==========================================================================
-   SCENE 08 — LAUNCH OVERLAY
+   SCENE 08 — LAUNCH
    ========================================================================== */
 
 function LaunchOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      {/* vertical trajectory */}
+      {/* Vertical trajectory */}
+      <div className="launch-trajectory absolute left-1/2 top-[3%] h-[94%] w-px -translate-x-1/2 border-l border-dashed border-cyan-300/30" />
 
-      <div className="launch-trajectory absolute left-1/2 top-[3%] h-[94%] w-px -translate-x-1/2 border-l border-dashed border-[#58C7EF]/30" />
+      <div className="absolute left-1/2 top-[3%] h-2 w-2 -translate-x-1/2 rounded-full bg-violet-300 shadow-[0_0_18px_rgba(167,139,250,.65)]" />
 
-      <div className="absolute left-1/2 top-[3%] h-2 w-2 -translate-x-1/2 rounded-full bg-[#E1A934] shadow-[0_0_18px_rgba(225,169,52,.65)]" />
-
-      {/* launch status */}
-
-      <div className="launch-status absolute left-1/2 top-[7%] -translate-x-1/2 whitespace-nowrap rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 shadow-[0_15px_50px_rgba(0,0,0,.35)] backdrop-blur-md">
+      {/* Launch status */}
+      <div className="launch-status absolute left-1/2 top-[7%] -translate-x-1/2 whitespace-nowrap rounded-md border border-cyan-300/15 bg-[#080B16]/90 px-5 py-2 shadow-[0_15px_50px_rgba(0,0,0,.35)] backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#58C7EF] shadow-[0_0_12px_rgba(88,199,239,.8)]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(165,243,252,.8)]" />
 
           <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">
             launch system
           </span>
 
-          <span className="font-mono text-[7px] font-semibold text-[#58C7EF]">
+          <span className="font-mono text-[7px] font-semibold text-cyan-200">
             ONLINE
           </span>
         </div>
       </div>
 
-      {/* status panels */}
-
+      {/* Status panels */}
       {[
         {
           side: "left",
@@ -825,19 +857,19 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
           top: "35%",
           title: "WEB SYSTEM",
           number: "03",
-          color: GOLD,
+          color: VIOLET,
         },
         {
           side: "right",
           top: "55%",
           title: "PERFORMANCE",
           number: "04",
-          color: GOLD,
+          color: BLUE,
         },
       ].map((item) => (
         <div
           key={item.title}
-          className={`launch-card absolute w-[135px] rounded-lg border border-[#58C7EF]/10 bg-[#080B10]/90 p-3 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md ${
+          className={`launch-card absolute w-[135px] rounded-lg border border-cyan-300/10 bg-[#080B16]/90 p-3 shadow-[0_15px_50px_rgba(0,0,0,.4)] backdrop-blur-md ${
             item.side === "left" ? "left-[1%]" : "right-[1%]"
           }`}
           style={{
@@ -881,7 +913,7 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
           final status
         </div>
 
-        <div className="mt-1 text-[8px] font-semibold tracking-[0.2em] text-white/80">
+        <div className="mt-1 text-[8px] font-semibold tracking-[0.2em] text-cyan-100">
           READY
         </div>
       </div>
@@ -890,33 +922,33 @@ function LaunchOverlay({ overlayRef }: OverlayProps) {
 }
 
 /* ==========================================================================
-   SCENE 09 — FINAL OVERLAY
+   SCENE 09 — FINAL
    ========================================================================== */
 
 function FinalOverlay({ overlayRef }: OverlayProps) {
   return (
     <div ref={overlayRef} className="scene-overlay absolute inset-0">
-      <div className="final-orbit absolute left-1/2 top-1/2 h-[500px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#58C7EF]/15 bg-[#58C7EF]/[0.015]" />
+      <div className="final-orbit absolute left-1/2 top-1/2 h-[500px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-cyan-300/15 bg-cyan-300/[0.012]" />
 
-      <div className="final-orbit absolute left-1/2 top-1/2 h-[420px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#E1A934]/20" />
+      <div className="final-orbit absolute left-1/2 top-1/2 h-[420px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-violet-400/20" />
 
       <div className="final-label absolute left-[10%] top-[14%]">
         <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-white/40">
           your idea
         </div>
 
-        <div className="mt-2 h-px w-14 bg-[#E1A934]" />
+        <div className="mt-2 h-px w-14 bg-violet-400" />
       </div>
 
       <div className="final-label absolute right-[10%] top-[14%] text-right">
-        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-[#58C7EF]">
+        <div className="font-mono text-[6px] uppercase tracking-[0.3em] text-cyan-300">
           your product
         </div>
 
-        <div className="ml-auto mt-2 h-px w-14 bg-[#58C7EF]" />
+        <div className="ml-auto mt-2 h-px w-14 bg-cyan-300" />
       </div>
 
-      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#58C7EF]/15 bg-[#080B10]/90 px-5 py-2 font-mono text-[6px] uppercase tracking-[0.3em] text-[#58C7EF]/60 backdrop-blur-md">
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-cyan-300/15 bg-[#080B16]/90 px-5 py-2 font-mono text-[6px] uppercase tracking-[0.3em] text-cyan-200/60 backdrop-blur-md">
         NEXT MISSION READY
       </div>
     </div>
@@ -1573,18 +1605,24 @@ export default function CinematicHero() {
   return (
     <main
       ref={rootRef}
-      className="relative min-h-screen h-[100svh] w-full overflow-hidden bg-[#05070A] text-white"
+      className="relative h-[100svh] min-h-screen w-full overflow-hidden bg-[#03040D] text-white"
     >
       <GridBackground />
+
+      {/* ================================================================
+         CORNER FRAME
+      ================================================================ */}
+
+      <CornerFrame />
 
       {/* ================================================================
          SCROLL PROGRESS
       ================================================================ */}
 
-      <div className="pointer-events-none absolute right-6 top-1/2 z-[60] hidden h-40 w-px -translate-y-1/2 bg-slate-200 sm:right-10 sm:block">
+      <div className="pointer-events-none absolute right-6 top-1/2 z-[60] hidden h-40 w-px -translate-y-1/2 bg-white/10 sm:right-10 sm:block">
         <div
           ref={progressRef}
-          className="absolute left-0 top-0 h-full w-full origin-top scale-y-0 bg-[#58C7EF]"
+          className="absolute left-0 top-0 h-full w-full origin-top scale-y-0 bg-gradient-to-b from-blue-400 via-cyan-300 to-violet-400"
         />
       </div>
 
@@ -1594,7 +1632,7 @@ export default function CinematicHero() {
 
       <div
         ref={scanRef}
-        className="pointer-events-none absolute left-0 top-[-30%] z-50 h-[25%] w-full bg-gradient-to-b from-transparent via-[#58C7EF]/[0.025] to-transparent"
+        className="pointer-events-none absolute left-0 top-[-30%] z-50 h-[25%] w-full bg-gradient-to-b from-transparent via-cyan-300/[0.025] to-transparent"
       />
 
       {/* ================================================================
@@ -1608,7 +1646,9 @@ export default function CinematicHero() {
 
             <h1 className="scene-text max-w-2xl text-5xl font-semibold leading-[.98] tracking-[-.055em] text-white sm:text-6xl lg:text-7xl">
               Every great website
-              <span className="block text-[#58C7EF]">starts with an idea.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                starts with an idea.
+              </span>
             </h1>
 
             <p className="scene-text mt-8 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
@@ -1618,7 +1658,7 @@ export default function CinematicHero() {
             </p>
 
             <div className="scene-meta mt-9 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <span className="h-px w-8 bg-[#E1A934]" />
+              <span className="h-px w-8 bg-violet-400" />
               start with purpose
             </div>
           </div>
@@ -1640,9 +1680,11 @@ export default function CinematicHero() {
           <div className="scene-copy">
             <SceneLabel number="02" title="The Vision" />
 
-            <h2 className="scene-text text-white text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] text-white sm:text-6xl lg:text-7xl">
               I turn ideas
-              <span className="block text-[#58C7EF]">into experiences.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                into experiences.
+              </span>
             </h2>
 
             <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
@@ -1652,7 +1694,7 @@ export default function CinematicHero() {
             </p>
 
             <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <Sparkles className="h-3 w-3 text-[#E1A934]" />
+              <Sparkles className="h-3 w-3 text-violet-300" />
               shaping the direction
             </div>
           </div>
@@ -1674,9 +1716,11 @@ export default function CinematicHero() {
           <div className="scene-copy">
             <SceneLabel number="03" title="The Build" />
 
-            <h2 className="scene-text text-white text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
+            <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] text-white sm:text-6xl lg:text-7xl">
               Where ideas
-              <span className="block text-[#58C7EF]">become real.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                become real.
+              </span>
             </h2>
 
             <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
@@ -1685,7 +1729,7 @@ export default function CinematicHero() {
             </p>
 
             <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <Terminal className="h-3 w-3 text-[#E1A934]" />
+              <Terminal className="h-3 w-3 text-cyan-300" />
               building the system
             </div>
           </div>
@@ -1709,7 +1753,9 @@ export default function CinematicHero() {
 
             <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               A website
-              <span className="block text-[#58C7EF]">should feel alive.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                should feel alive.
+              </span>
             </h2>
 
             <p className="scene-text mt-8 max-w-lg text-base leading-7 text-white/45 sm:text-lg">
@@ -1737,7 +1783,9 @@ export default function CinematicHero() {
 
             <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               Small details.
-              <span className="block text-[#58C7EF]">Big difference.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                Big difference.
+              </span>
             </h2>
 
             <p className="scene-text mt-7 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
@@ -1746,7 +1794,7 @@ export default function CinematicHero() {
             </p>
 
             <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <Check className="h-3 w-3 text-[#58C7EF]" />
+              <Check className="h-3 w-3 text-cyan-300" />
               refined and verified
             </div>
           </div>
@@ -1770,7 +1818,7 @@ export default function CinematicHero() {
 
             <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               The right tools
-              <span className="block text-[#58C7EF]">
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
                 behind the experience.
               </span>
             </h2>
@@ -1784,7 +1832,7 @@ export default function CinematicHero() {
               {technologies.slice(0, 5).map((tech) => (
                 <span
                   key={tech.name}
-                  className="rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-3 py-1.5 font-mono text-[8px] uppercase tracking-wider text-white/45"
+                  className="rounded-full border border-cyan-300/15 bg-cyan-300/[0.03] px-3 py-1.5 font-mono text-[8px] uppercase tracking-wider text-white/45"
                 >
                   {tech.name}
                 </span>
@@ -1811,7 +1859,9 @@ export default function CinematicHero() {
 
             <h2 className="scene-text text-5xl font-semibold leading-[1] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               From thought
-              <span className="block text-[#58C7EF]">to reality.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                to reality.
+              </span>
             </h2>
 
             <p className="scene-text mt-7 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
@@ -1820,7 +1870,7 @@ export default function CinematicHero() {
             </p>
 
             <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <Layers3 className="h-3 w-3 text-[#E1A934]" />
+              <Layers3 className="h-3 w-3 text-violet-300" />
               systems integrated
             </div>
           </div>
@@ -1844,7 +1894,9 @@ export default function CinematicHero() {
 
             <h2 className="scene-text text-5xl font-semibold leading-[.95] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               Built.
-              <span className="block text-[#58C7EF]">Refined.</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                Refined.
+              </span>
               <span className="block">Ready.</span>
             </h2>
 
@@ -1854,7 +1906,7 @@ export default function CinematicHero() {
             </p>
 
             <div className="scene-meta mt-8 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <Zap className="h-3 w-3 text-[#E1A934]" />
+              <Zap className="h-3 w-3 text-cyan-300" />
               system ready
             </div>
           </div>
@@ -1878,7 +1930,9 @@ export default function CinematicHero() {
 
             <h2 className="scene-text text-6xl font-semibold leading-[.92] tracking-[-.06em] sm:text-7xl lg:text-8xl">
               Have
-              <span className="block text-[#58C7EF]">an idea?</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-400 bg-clip-text text-transparent">
+                an idea?
+              </span>
             </h2>
 
             <p className="scene-text mt-8 max-w-xl text-base leading-7 text-white/45 sm:text-lg">
@@ -1889,7 +1943,7 @@ export default function CinematicHero() {
             <div className="scene-action mt-10 flex flex-wrap gap-3">
               <Link
                 href="/work"
-                className="group inline-flex items-center gap-3 rounded-full bg-slate-900 px-6 py-3 text-xs font-medium text-white transition-transform duration-300 hover:-translate-y-1"
+                className="group inline-flex items-center gap-3 rounded-full border border-cyan-300/30 bg-cyan-300/5 px-6 py-3 text-xs font-medium text-cyan-100 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-200/70 hover:bg-cyan-300/10"
               >
                 View My Work
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
@@ -1897,7 +1951,7 @@ export default function CinematicHero() {
 
               <Link
                 href="/contact"
-                className="group inline-flex items-center gap-3 rounded-full border border-[#58C7EF]/15 bg-[#080B10] px-6 py-3 text-xs font-medium text-white/80 transition-transform duration-300 hover:-translate-y-1"
+                className="group inline-flex items-center gap-3 rounded-full border border-violet-400/20 bg-violet-400/5 px-6 py-3 text-xs font-medium text-white/80 transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/50 hover:bg-violet-400/10"
               >
                 Let&apos;s Talk
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
@@ -1905,7 +1959,7 @@ export default function CinematicHero() {
             </div>
 
             <div className="scene-meta mt-10 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[.25em] text-white/40">
-              <span className="h-px w-8 bg-[#E1A934]" />
+              <span className="h-px w-8 bg-violet-400" />
               let&apos;s create something meaningful
             </div>
           </div>
