@@ -215,6 +215,31 @@ function Engine() {
   );
 }
 
+function EngineExhaust() {
+  return (
+    <mesh position={[0, -2.18, 0]}>
+      <cylinderGeometry
+        args={[
+          0.46, // top radius
+          0.34, // bottom radius
+          0.42, // height
+          12, // radial segments
+          1,
+          true,
+        ]}
+      />
+
+      <meshBasicMaterial
+        color="#8B5CF6"
+        wireframe
+        transparent
+        opacity={0.82}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
 function EngineFlame() {
   const flameRef = useRef<THREE.Group>(null);
 
@@ -232,10 +257,10 @@ function EngineFlame() {
   });
 
   return (
-    <group ref={flameRef} position={[0, -2.75, 0]} rotation={[Math.PI, 0, 0]}>
-      {/* Outer violet exhaust */}
+    <group ref={flameRef} position={[0, -3, 0]} rotation={[Math.PI, 0, 0]}>
+      {/* Outer violet exhaust flame */}
       <mesh>
-        <coneGeometry args={[0.42, 1.65, 10, 1, true]} />
+        <coneGeometry args={[0.34, 1.45, 10, 1, true]} />
 
         <meshBasicMaterial
           color="#7C3AED"
@@ -246,9 +271,9 @@ function EngineFlame() {
         />
       </mesh>
 
-      {/* Inner violet flame */}
+      {/* Inner flame */}
       <mesh position={[0, -0.08, 0]}>
-        <coneGeometry args={[0.24, 1.25, 8, 1, true]} />
+        <coneGeometry args={[0.2, 1.1, 8, 1, true]} />
 
         <meshBasicMaterial
           color="#A78BFA"
@@ -259,14 +284,14 @@ function EngineFlame() {
         />
       </mesh>
 
-      {/* Pale violet core */}
-      <mesh position={[0, -0.12, 0]}>
-        <coneGeometry args={[0.11, 0.9, 6, 1, true]} />
+      {/* Core */}
+      <mesh position={[0, -0.1, 0]}>
+        <coneGeometry args={[0.09, 0.75, 6, 1, true]} />
 
         <meshBasicMaterial
           color="#DDD6FE"
           transparent
-          opacity={0.55}
+          opacity={0.5}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
         />
@@ -274,6 +299,7 @@ function EngineFlame() {
     </group>
   );
 }
+
 /* =======================================================
    ROCKET MODEL
 ======================================================= */
@@ -299,6 +325,7 @@ function RocketModel() {
       <RocketFin rotation={(Math.PI * 3) / 2} />
 
       <Engine />
+      <EngineExhaust />
 
       <EngineFlame />
     </group>
