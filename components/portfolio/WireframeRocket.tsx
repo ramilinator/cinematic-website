@@ -41,18 +41,18 @@ function RocketFin({ rotation }: { rotation: number }) {
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
 
-    shape.moveTo(0.62, 0.05);
-    shape.lineTo(1.05, -0.12);
+    shape.moveTo(0.82, 0.05);
+    shape.lineTo(1.25, -0.12);
 
     // Wider lower section
-    shape.lineTo(1.12, -0.75);
+    shape.lineTo(1.32, -0.75);
 
     // Wide bottom
-    shape.lineTo(0.82, -1.55);
+    shape.lineTo(1.02, -1.55);
 
-    shape.lineTo(0.48, -1.42);
+    shape.lineTo(0.68, -1.42);
 
-    shape.lineTo(0.58, -0.55);
+    shape.lineTo(0.78, -0.55);
 
     shape.closePath();
 
@@ -79,23 +79,22 @@ function RocketFin({ rotation }: { rotation: number }) {
     </mesh>
   );
 }
-
 /* =======================================================
    ROCKET BODY
 ======================================================= */
 function RocketBody() {
   const geometry = useMemo(() => {
     const points: THREE.Vector2[] = [
-      new THREE.Vector2(0.82, -1.55),
-      new THREE.Vector2(0.82, -0.25),
-      new THREE.Vector2(0.82, 0.45),
-      new THREE.Vector2(0.8, 0.65),
-      new THREE.Vector2(0.74, 0.82),
-      new THREE.Vector2(0.65, 0.98),
-      new THREE.Vector2(0.52, 1.14),
-      new THREE.Vector2(0.35, 1.28),
-      new THREE.Vector2(0.18, 1.38),
-      new THREE.Vector2(0, 1.45),
+      new THREE.Vector2(0.82, -1.75),
+      new THREE.Vector2(0.82, -0.3),
+      new THREE.Vector2(0.82, 0.5),
+      new THREE.Vector2(0.8, 0.72),
+      new THREE.Vector2(0.74, 0.9),
+      new THREE.Vector2(0.65, 1.08),
+      new THREE.Vector2(0.52, 1.28),
+      new THREE.Vector2(0.35, 1.42),
+      new THREE.Vector2(0.18, 1.52),
+      new THREE.Vector2(0, 1.6),
     ];
 
     return new THREE.LatheGeometry(points, 12);
@@ -124,7 +123,7 @@ function RocketBody() {
       const y = position.getY(i);
 
       // Bottom = cyan, top = violet
-      const t = THREE.MathUtils.clamp((y + 1.55) / 3, 0, 1);
+      const t = THREE.MathUtils.clamp((y + 1.75) / 3.35, 0, 1);
 
       const color = violet.clone().lerp(cyan, t);
 
@@ -150,13 +149,13 @@ function BodyStructure() {
       const points = [
         new THREE.Vector3(
           Math.cos(angle) * radius,
-          -1.52,
+          -1.72,
           Math.sin(angle) * radius,
         ),
 
         new THREE.Vector3(
           Math.cos(angle) * radius,
-          0.45,
+          0.5,
           Math.sin(angle) * radius,
         ),
       ];
@@ -187,7 +186,7 @@ function Engine() {
   return (
     <group>
       {/* Wide engine base */}
-      <mesh position={[0, -1.68, 0]}>
+      <mesh position={[0, -1.88, 0]}>
         <cylinderGeometry args={[0.76, 0.68, 0.28, 12, 1, true]} />
 
         <meshBasicMaterial
@@ -200,7 +199,7 @@ function Engine() {
       </mesh>
 
       {/* Tapered engine nozzle */}
-      <mesh position={[0, -1.98, 0]}>
+      <mesh position={[0, -2.18, 0]}>
         <cylinderGeometry args={[0.62, 0.46, 0.38, 12, 1, true]} />
 
         <meshBasicMaterial
@@ -218,9 +217,9 @@ function Engine() {
 function EngineExhaust() {
   return (
     <group>
-      {/* Original exhaust */}
-      <mesh position={[0, -2.18, 0]}>
-        <cylinderGeometry args={[0.46, 0.34, 0.42, 12, 1, true]} />
+      {/* Exhaust */}
+      <mesh position={[0, -2.48, 0]}>
+        <cylinderGeometry args={[0.39, 0.29, 0.36, 12, 1, true]} />
 
         <meshBasicMaterial
           color="#22D3A6"
@@ -231,9 +230,9 @@ function EngineExhaust() {
         />
       </mesh>
 
-      {/* Narrow exhaust tip */}
-      <mesh position={[0, -2.48, 0]} rotation={[Math.PI, 0, 0]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.22, 12, 1, true]} />
+      {/* Exhaust tip */}
+      <mesh position={[0, -2.755, 0]} rotation={[Math.PI, 0, 0]}>
+        <cylinderGeometry args={[0.25, 0.25, 0.19, 12, 1, true]} />
 
         <meshBasicMaterial
           color="#22D3A6"
@@ -246,6 +245,7 @@ function EngineExhaust() {
     </group>
   );
 }
+
 function EngineFlame() {
   const flameRef = useRef<THREE.Group>(null);
 
@@ -258,16 +258,15 @@ function EngineFlame() {
 
     flameRef.current.scale.x = pulse;
     flameRef.current.scale.z = pulse;
-
     flameRef.current.scale.y = 1 + Math.sin(time * 13) * 0.1;
   });
 
   return (
-    <group ref={flameRef} position={[0, -3.15, 0]} rotation={[Math.PI, 0, 0]}>
+    <group ref={flameRef} position={[0, -3.5, 0]} rotation={[Math.PI, 0, 0]}>
       {/* Large outer flame */}
       <mesh>
-        <coneGeometry args={[0.52, 2.25, 12, 1, true]} />
-
+        // Smaller outer flame
+        <coneGeometry args={[0.4, 2.25, 12, 1, true]} />
         <meshBasicMaterial
           color="#7C3AED"
           transparent
@@ -279,7 +278,7 @@ function EngineFlame() {
 
       {/* Large inner flame */}
       <mesh position={[0, -0.12, 0]}>
-        <coneGeometry args={[0.34, 1.75, 10, 1, true]} />
+        <coneGeometry args={[0.27, 1.75, 10, 1, true]} />
 
         <meshBasicMaterial
           color="#A78BFA"
@@ -292,7 +291,7 @@ function EngineFlame() {
 
       {/* Bright core */}
       <mesh position={[0, -0.18, 0]}>
-        <coneGeometry args={[0.16, 1.25, 8, 1, true]} />
+        <coneGeometry args={[0.12, 1.25, 8, 1, true]} />
 
         <meshBasicMaterial
           color="#DDD6FE"
